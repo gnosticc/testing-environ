@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3 uid="uid://bm0j1mqfdi12k"]
+
+[ext_resource type="Script" uid="uid://bne1xvfyu24jb" path="res://Scripts/DataResources/EnemyData.gd" id="1_aferd"]
+
+[resource]
+script = ExtResource("1_aferd")
+id = &"slime_blue"
+display_name = "Confused Slime"
+scene_path = "res://Scenes/Enemies/slime_blue.tscn"
+min_DDS_to_spawn = 20.0
+max_DDS_to_spawn = 400.0
+spawn_weight = 50.0
+ideal_active_pool_slot_cost = 1
+base_health = 102
+base_contact_damage = 8
+base_speed = 36.0
+base_armor = 0
+base_exp_drop = 4
+exp_drop_scene_path = "res://Scenes/Pickups/exp_tier_1_medium.tscn"
+sprite_modulate_color = Color(1, 1, 1, 1)
+sprite_faces_left_by_default = false
+elite_types_available = Array[StringName]([&"brute", &"tank", &"swift", &"immovable", &"phaser"])
+min_DDS_for_elites_to_appear = 130.0
+phaser_cooldown = 3.0
+phaser_teleport_distance = 100.0
+summoner_interval = 1.0
+summoner_max_active_minions = 3
+shaman_heal_radius = 120.0
+shaman_heal_percent = 0.1
+shaman_heal_interval = 1.0
+time_warp_radius = 180.0
+time_warp_slow_percent = 0.25
+time_warp_linger_duration = 2.0
+threat_value_when_culled = 2
+metadata/_custom_type_script = "uid://bne1xvfyu24jb"

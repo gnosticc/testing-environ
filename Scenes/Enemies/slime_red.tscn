@@ -1,0 +1,100 @@
+[gd_scene load_steps=13 format=3 uid="uid://dw568ttd3u7rt"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_nm3h8"]
+[ext_resource type="Script" uid="uid://daogk4yvq2byj" path="res://Scripts/Enemies/slime_red.gd" id="2_tlpub"]
+[ext_resource type="Texture2D" uid="uid://cnyi38k21d23d" path="res://Assets/Enemy Animations/Red Slime Animations.png" id="3_tlpub"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dttn4"]
+atlas = ExtResource("3_tlpub")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_co3oa"]
+atlas = ExtResource("3_tlpub")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p0ry0"]
+atlas = ExtResource("3_tlpub")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yqnhc"]
+atlas = ExtResource("3_tlpub")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e7ggx"]
+atlas = ExtResource("3_tlpub")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5qrh0"]
+atlas = ExtResource("3_tlpub")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_047j0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dttn4")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_co3oa")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p0ry0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yqnhc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e7ggx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5qrh0")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4rivg"]
+radius = 46.1538
+height = 123.077
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xkgff"]
+radius = 23.0769
+height = 92.3077
+
+[node name="BaseEnemy" instance=ExtResource("1_nm3h8")]
+scale = Vector2(0.2, 0.2)
+script = ExtResource("2_tlpub")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_047j0")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.040788
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 15.3846)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_4rivg")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(-7.69231, 15.3846)
+rotation = -1.57079
+shape = SubResource("CapsuleShape2D_xkgff")
+
+[node name="HealthBar" parent="." index="4"]
+offset_top = -44.0
+offset_bottom = -27.0
+
+[node name="CollisionShape2D" parent="SeparationDetector" index="0"]
+position = Vector2(7.69231, 15.3846)

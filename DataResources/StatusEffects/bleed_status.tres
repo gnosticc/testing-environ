@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://djt762kw7gq2a"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_cfla1"]
+[ext_resource type="Resource" uid="uid://c0r3kogqdcvns" path="res://DataResources/StatusEffects/bleed_dot_effect.tres" id="2_dcy2i"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_r7ndk"]
+
+[resource]
+script = ExtResource("2_r7ndk")
+id = &"bleed"
+display_name = "Bleed"
+duration = 2.0
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.1
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_cfla1")]([ExtResource("2_dcy2i")])
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

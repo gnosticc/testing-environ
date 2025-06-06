@@ -1,0 +1,90 @@
+[gd_scene load_steps=13 format=3 uid="uid://6uoro2ckjca6"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_akvpe"]
+[ext_resource type="Script" uid="uid://dr6iqp0tyi2dl" path="res://Scripts/Enemies/slime_king.gd" id="2_nt008"]
+[ext_resource type="Texture2D" uid="uid://dy6hnocqaith0" path="res://Assets/Enemy Animations/Slime Boss Animation 2.png" id="3_akvpe"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nt008"]
+atlas = ExtResource("3_akvpe")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q4sm8"]
+atlas = ExtResource("3_akvpe")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u3dms"]
+atlas = ExtResource("3_akvpe")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p1kad"]
+atlas = ExtResource("3_akvpe")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pc0cn"]
+atlas = ExtResource("3_akvpe")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vx6xv"]
+atlas = ExtResource("3_akvpe")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1omo3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nt008")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q4sm8")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u3dms")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p1kad")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pc0cn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vx6xv")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1c5xl"]
+radius = 67.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pe0ab"]
+radius = 49.163
+
+[node name="BaseEnemy" instance=ExtResource("1_akvpe")]
+script = ExtResource("2_nt008")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_1omo3")
+animation = &"attack"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(-1, 3)
+shape = SubResource("CircleShape2D_1c5xl")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, 13)
+shape = SubResource("CircleShape2D_pe0ab")
+
+[node name="CollisionShape2D" parent="SeparationDetector" index="0"]
+position = Vector2(1.04904e-05, 16)

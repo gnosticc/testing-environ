@@ -1,0 +1,73 @@
+[gd_scene load_steps=10 format=3 uid="uid://d32yo3kvx4gy2"]
+
+[ext_resource type="Script" uid="uid://ds3ld4vrgqu5u" path="res://Scenes/Weapons/TorrentAttack.gd" id="1_ayg11"]
+[ext_resource type="Texture2D" uid="uid://dvyprtolug8vy" path="res://Assets/Weapons/Torrent Animation.png" id="1_gwbwu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ayg11"]
+atlas = ExtResource("1_gwbwu")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mrt03"]
+atlas = ExtResource("1_gwbwu")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ehaww"]
+atlas = ExtResource("1_gwbwu")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kobxq"]
+atlas = ExtResource("1_gwbwu")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mgxui"]
+atlas = ExtResource("1_gwbwu")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_o06hr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ayg11")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mrt03")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ehaww")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kobxq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mgxui")
+}],
+"loop": true,
+"name": &"erupt",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_vjoe0"]
+radius = 45.596
+
+[node name="TorrentAttack" type="Area2D"]
+collision_layer = 4
+collision_mask = 8
+script = ExtResource("1_ayg11")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(2.50379, -14.5161)
+scale = Vector2(0.460997, 0.50756)
+sprite_frames = SubResource("SpriteFrames_o06hr")
+animation = &"erupt"
+frame = 4
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, -9)
+scale = Vector2(0.460997, 0.50756)
+shape = SubResource("CircleShape2D_vjoe0")
+
+[node name="EffectLifetimeTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

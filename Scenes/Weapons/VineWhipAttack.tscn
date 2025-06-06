@@ -1,0 +1,74 @@
+[gd_scene load_steps=10 format=3 uid="uid://dxxeed4wbmrld"]
+
+[ext_resource type="Script" uid="uid://coof1whvxciaj" path="res://Scenes/Weapons/VineWhipAttack.gd" id="1_x4jnd"]
+[ext_resource type="Texture2D" uid="uid://djjlfs8jtnhwf" path="res://Assets/Weapons/Vine Whip Animation.png" id="1_ys0es"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x4jnd"]
+atlas = ExtResource("1_ys0es")
+region = Rect2(0, 0, 600, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3lj7w"]
+atlas = ExtResource("1_ys0es")
+region = Rect2(600, 0, 600, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_41skl"]
+atlas = ExtResource("1_ys0es")
+region = Rect2(1200, 0, 600, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5j7ug"]
+atlas = ExtResource("1_ys0es")
+region = Rect2(1800, 0, 600, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mt5tl"]
+atlas = ExtResource("1_ys0es")
+region = Rect2(2400, 0, 600, 300)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2v61d"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x4jnd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3lj7w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_41skl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5j7ug")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mt5tl")
+}],
+"loop": true,
+"name": &"whip",
+"speed": 12.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3lj7w"]
+size = Vector2(65, 10)
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_x4jnd")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(33.8358, 0.234278)
+scale = Vector2(0.136692, -0.0552764)
+sprite_frames = SubResource("SpriteFrames_2v61d")
+animation = &"whip"
+frame_progress = 0.107435
+
+[node name="DamageArea" type="Area2D" parent="."]
+position = Vector2(33.8358, 0.234278)
+scale = Vector2(1.35336, 1.58407)
+collision_layer = 4
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+position = Vector2(-1.5, 0)
+shape = SubResource("RectangleShape2D_3lj7w")
+
+[node name="DurationTimer" type="Timer" parent="."]
+
+[connection signal="body_entered" from="DamageArea" to="." method="_on_damage_area_body_entered"]

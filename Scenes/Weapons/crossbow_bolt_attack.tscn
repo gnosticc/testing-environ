@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3 uid="uid://bf8qkgjsfh4vs"]
+
+[ext_resource type="Script" uid="uid://ct2kx7k3hw4u2" path="res://Scripts/Weapons/CrossbowBoltAttack.gd" id="1_y44gb"]
+[ext_resource type="Texture2D" uid="uid://8i35v1dfn385" path="res://Assets/Weapons/Crossbow Animation.png" id="2_ama71"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tox6d"]
+atlas = ExtResource("2_ama71")
+region = Rect2(0, 0, 128, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dij0s"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tox6d")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_sjc5q"]
+size = Vector2(7.2, 4)
+
+[node name="CrossbowBoltAttack" type="Area2D"]
+scale = Vector2(3, 3)
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_y44gb")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.05, 0.05)
+sprite_frames = SubResource("SpriteFrames_dij0s")
+animation = &"fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-2.38419e-08, -3.97364e-08)
+shape = SubResource("RectangleShape2D_sjc5q")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 4.0
+one_shot = true
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="timeout" from="LifetimeTimer" to="." method="_on_lifetime_timer_timeout"]

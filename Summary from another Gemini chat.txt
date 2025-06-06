@@ -1,0 +1,171 @@
+# Project Maelstrom - Detailed Development Summary
+
+## 1\. Core Game Concept
+
+The game is a Vampire Survivors-like action roguelite where the player character automatically uses weapons, and the primary player agency involves movement to avoid enemies and collecting experience to level up and choose new weapons or upgrades.
+
+## 2\. Player System (`PlayerCharacter.gd`, `PlayerStats.gd`, `PlayerClassData.gd`)
+
+  * **Movement:** Standard CharacterBody2D movement, input-driven.
+  * **Classes:** A basic class system is implemented using `PlayerCharacter.BasicClass` enum (WARRIOR, KNIGHT, ROGUE, WIZARD, DRUID, CONJURER). Each class can have unique starting stats defined in `PlayerClassData.tres` files.
+      * `PlayerClassData.gd` (Resource): Defines base stats like `base_max_health`, `base_numerical_damage`, `base_attack_speed_multiplier`, etc.
+      * `PlayerStats.gd` (Node on Player): Manages all player statistics. It initializes from `PlayerClassData`, applies flat and percentage modifiers from upgrades, and recalculates `current_` stats (e.g., `current_base_numerical_damage`, `current_global_damage_multiplier`, `current_global_flat_damage_add`, `current_attack_speed_multiplier`, `current_luck`). It provides getters for these stats. The "Might" general upgrade correctly maps to `global_flat_damage_add`.
+  * **Health:** Player has `current_health` and `max_health`. A `heal(amount)` method exists in `PlayerCharacter.gd`.
+  * **Experience & Leveling:** Player collects EXP orbs. Upon leveling up, `game.gd` pauses and presents upgrade options.
+  * **Aiming:** A `MeleeAimingDot` node helps direct some melee attacks based on mouse position.
+  * **Signals:** `PlayerCharacter.gd` emits signals like `health_changed`, `experience_changed`, `player_level_up`, `player_has_died`, and `player_took_damage_from(attacker_node)`.
+
+## 3\. Weapon System (`WeaponManager.gd`, `game.gd`, Attack Scripts)
+
+  * **`WeaponManager.gd` (Node on Player):**
+      * Manages the player's active weapons, their individual stats, cooldowns, and triggering.
+      * `add_weapon()`: Adds a new weapon based on a blueprint from `game.gd`. Initializes weapon-specific stats.
+      * `upgrade_weapon()`: Applies effects from chosen upgrade cards to a weapon's `specific_stats` or player's global stats. Handles setting custom flags for acquired upgrades (e.g., `"scythe_wider_arc_acquired": true`).
+      * `_prepare_final_stats_for_attack()`: Collects player stats (from `PlayerStats.gd`) and weapon-specific stats, passing them to attack instances.
+      * `_on_generic_weapon_timer_timeout()`: Spawns instances of timed weapons. Correctly handles different weapon types (standard, multi-hit, orbital, managed shot, persistent summons).
+      * Correctly handles `is_persistent_summon` flag (summons only once, no repeating timer for re-spawning) and `max_summons_of_type`.
+      * Includes logic for Scythe's "Whirlwind Technique" (spawns a second attack instance via a short timer) and "Reaping Momentum" (tracks bonus damage based on hits from the previous Scythe attack cycle and applies it to the next).
+  * **Weapon Blueprints (`game.gd` - `_initialize_weapon_blueprints()`):**
+      * Each weapon is defined as a dictionary with `id`, `title`, `description`, `weapon_scene` (PackedScene), `cooldown`, `initial_stats` (e.g., `weapon_damage_percentage`, `inherent_visual_scale`, flags for acquired upgrades), `max_level`, `tags`, and an `upgrades` array.
+      * **Damage Calculation Model:** Weapon damage is calculated as:
+        `(player_base_numerical_damage * weapon_damage_percentage) * player_global_damage_multiplier + player_global_flat_damage_add`.
+  * **Attack Scripts (e.g., `ScytheAttack.gd`, `LesserSpiritProjectile.gd`, etc.):**
+      * Receive stats from `WeaponManager.gd` via `set_attack_properties` or `set_owner_stats`.
+      * Handle their own animation, collision, damage application, and cleanup (e.g., via `DurationTimer` or projectile lifetime).
+      * Scaling: Correctly use `inherent_visual_scale` (Vector2) from their stats and multiply it by the player's global size multipliers (`aoe_area_multiplier` or `projectile_size_multiplier`).
+  * **Scythe Weapon:**
+      * Considered functionally complete with its 9 unique upgrades.
+      * Animation looping is OFF in SpriteFrames; `DurationTimer` controls its lifetime.
+      * `queue_free()` confirmed working.
+      * Damage area confirmed working (requires enemies to be in "enemies" group).
+      * **Implemented Complex Upgrades:**
+          * Sharpened Edge I, II, III: Linear damage upgrades.
+          * Wider Arc: Increases AoE.
+          * Reaping Momentum: Damage bonus on next hit based on enemies hit in current swing (main + whirlwind).
+          * Serrated Blade (Bleed): Applies bleed status via `StatusEffectComponent`.
+          * Soul Siphon: 10% chance on Scythe kill to heal player (3 HP \* player\_luck). Proc logic is now immediate within `ScytheAttack.gd` upon detecting a kill.
+          * Cursed Edge (Vulnerable): Applies vulnerable status via `StatusEffectComponent`.
+          * Whirlwind Technique: Spawns a second Scythe attack.
+  * **Conjurer Summons (Lesser Spirit, Moth Golem):**
+      * Blueprints defined. Implemented as persistent summons.
+      * Lesser Spirit: Orbits player, fires projectiles.
+      * Moth Golem: Melee, pathfinding, target prioritization (including player's attacker), leash to player. Collision shape size and navigation parameters were key tuning points.
+
+## 4\. Upgrade System (`game.gd`, `WeaponManager.gd`, `LevelUpScreen.gd`)
+
+  * **Offering Logic (`game.gd` - `get_weapon_next_level_upgrades()`):**
+      * For a given weapon, it identifies all blueprint upgrades that:
+        1.  Haven't been acquired yet (checks `"[upgrade_id]_acquired"` flag in the weapon's `specific_stats`).
+        2.  Have their `prerequisites` met (checks corresponding acquired flags).
+      * The `level` key in the blueprint's upgrade definition is no longer the primary gate for offering general pool upgrades.
+  * **`_get_upgrade_options_for_player()` in `game.gd`:**
+      * Collects all valid upgrades from `get_weapon_next_level_upgrades()` for each active weapon.
+      * If a weapon has multiple valid upgrades, it randomly picks **one** to add to the overall pool for that level-up event.
+      * This pool is combined with general stat upgrades and new weapon offers, shuffled, and then 3 options are presented.
+  * **Tracking Acquired Upgrades:** When an upgrade is applied, `WeaponManager.gd` sets the corresponding `"[upgrade_id]_acquired"` flag and any other custom behavior flags (like `has_reaping_momentum`) in the weapon's `specific_stats`.
+
+## 5\. Status Effect System (`StatusEffectData.gd`, `StatusEffectComponent.gd`)
+
+  * **`StatusEffectData.gd` (Resource):**
+      * Defines properties: `effect_id`, `name`, `description`, `icon`, `is_buff`, `base_duration`, `tick_interval`, `effect_type` (enum: `DAMAGE_OVER_TIME`, `TIMED_STAT_MODIFIER`, etc.), `stat_modifiers` (Dictionary), `dot_damage_percent_of_source_hit`, etc.
+      * `.tres` files created for "ScytheBleed" and "ScytheVulnerable".
+      * Bleed: `total_damage_or_heal_percent_of_source_hit = 1.0` over `base_duration = 2.0s` with `tick_interval = 0.1s`. Duration scales with player's "Effect Duration Multiplier." Damage per tick is `max(1, int(ceil(calculated_tick_damage)))`.
+      * Vulnerable: `stat_modifiers: {"damage_taken_multiplier_add": 0.2}`.
+  * **`StatusEffectComponent.gd` (Node):**
+      * Attached to Player and BaseEnemy.
+      * Manages `active_statuses` (dictionary).
+      * `add_status()`: Calculates final duration, refreshes existing effects (if `refresh_on_reapply` is true), starts tick timers for DoTs, applies initial effects. Emits `status_effects_changed(owner_node)`.
+      * `_process()`: Handles duration countdowns.
+      * `_on_status_tick()`: Applies DoT damage (checks for valid `applier_node` before passing to `take_damage`).
+      * `get_sum_of_additive_modifiers()` and `get_product_of_multiplicative_modifiers()`: Used by entities to query their current stat modifications from active statuses.
+  * **Integration:**
+      * `ScytheAttack.gd` calls `enemy_status_component.add_status()` to apply Bleed and Vulnerable.
+      * `BaseEnemy.gd`'s `take_damage()` queries its `StatusEffectComponent` for `damage_taken_multiplier_add` to modify incoming damage. Its `StatusEffectComponent` calls its `take_damage()` for bleed ticks.
+      * `BaseEnemy.gd` has `on_status_effects_changed(_owner_node: Node)` which is correctly connected to the component's signal.
+
+## 6\. Enemy System (`BaseEnemy.gd`, `enemy_slime_green.gd`)
+
+  * `BaseEnemy.gd` has `class_name BaseEnemy`.
+  * Handles movement, health, taking damage (now considering Vulnerable status), contact damage (now continuous every 1 second while player is in `DamageArea`), EXP drops.
+  * Emits `killed_by_attacker(attacker_node, killed_enemy_node)` signal upon death.
+  * `enemy_slime_green.gd` extends `BaseEnemy`.
+  * Enemies must be in the "enemies" group to be damaged by abilities like the Scythe.
+
+## 7\. UI Systems
+
+  * **Level Up Screen (`LevelUpScreen.gd`, `UpgradeCard.gd`):** Displays 3 upgrade options to the player.
+  * **Debug Panel (`DebugPanel.gd`):**
+      * Allows adding any weapon blueprint to the player.
+      * Allows selecting an active weapon and applying any of its valid next-level upgrades (respecting prerequisites).
+      * Other tabs for player stats, enemy spawning, game state are placeholders.
+  * **Planned UI:** Display targeted enemy's name, health, and status effects in a corner of the screen.
+
+## 8\. Current State & Next Steps Discussed
+
+  * All 9 unique Scythe upgrades are considered mechanically functional.
+  * The Status Effect System foundation is in place and working for Bleed and Vulnerable as applied by the Scythe.
+  * The user's next intended step (before this summary request) was to either:
+      * Fully implement the remaining complex Scythe upgrade effects (if any were still pending beyond the core logic).
+      * Expand the Status Effect System by defining more `.tres` files for the listed effects (Poison, Burn, player buffs, enemy traits) and integrating their mechanics.
+      * Move to designing/implementing upgrade paths for other weapons.
+
+This summary should cover all the key systems and their current level of implementation.
+
+Okay, to ensure a new chat (or even our future selves!) can pick up exactly where we are with perfect clarity, here's a prompt you can use. Feeding this back to me or another AI should help generate a comprehensive summary of our project:
+
+Prompt for Generating a Detailed Project Summary:
+
+"Please provide a comprehensive and highly detailed summary of the current Godot game development project, which is a Vampire Survivors-like game. This summary must be exhaustive enough to allow a new AI assistant to understand the full context and continue development seamlessly. Ensure the summary covers the following key areas in detail, referencing specific script names, function names, and data structures where relevant:
+
+Overall Game Concept: Briefly describe the core gameplay loop and genre.
+
+Player System:
+
+Identify the main scripts involved (e.g., PlayerCharacter.gd, PlayerStats.gd, PlayerClassData.gd).
+Detail player mechanics: movement, implemented classes (Warrior, Knight, Rogue, Wizard, Druid, Conjurer), leveling system via experience orbs.
+Explain the current damage calculation model in detail, including how player base stats (e.g., base_numerical_damage from PlayerStats via PlayerClassData), weapon-specific multipliers (e.g., weapon_damage_percentage from a weapon's initial_stats), and player's global damage modifiers (e.g., global_damage_multiplier, global_flat_damage_add from PlayerStats) interact to determine final damage.
+List key signals emitted by PlayerCharacter.gd.
+Weapon System:
+
+Identify the main script (WeaponManager.gd) and its role.
+Explain how weapons are defined: blueprints in game.gd (within basic_class_weapon_blueprints), structure of initial_stats (including weapon_damage_percentage, inherent_visual_scale, and flags for tracking acquired upgrades or special behaviors like has_reaping_momentum, has_whirlwind), and the upgrades array structure within each blueprint.
+Detail how WeaponManager.gd handles:
+Adding new weapons (add_weapon, add_weapon_from_blueprint_id).
+Upgrading weapons (upgrade_weapon), including how upgrade effects are applied to a weapon's specific_stats or player's global stats. Specifically mention how "set_acquired_flag" and "set_custom_flag" effects are processed.
+Firing/instantiating weapons (_on_generic_weapon_timer_timeout, _spawn_standard_attack_instance), including differentiation for persistent summons (like Lesser Spirit, Moth Golem) vs. timed attacks.
+Summarize the status of key weapons implemented:
+Scythe: Note its 9 unique upgrades (Sharpened Edge chain, Wider Arc, Reaping Momentum, Serrated Blade, Soul Siphon, Cursed Edge, Whirlwind Technique) and confirm their core mechanics are considered functional.
+Lesser Spirit & Moth Golem: Describe their core functionality as persistent summons.
+Mention other weapons (Crossbow, Spark, etc.) and their general status (blueprints exist, upgrade paths may need detailing).
+Upgrade System & Leveling:
+
+Explain the logic in game.gd for offering upgrades (_get_upgrade_options_for_player, get_weapon_next_level_upgrades).
+Detail how upgrade prerequisites (e.g., Scythe's Sharpened Edge I -> II -> III via "prerequisites": ["flag_name"]) and "already acquired" status (via "[upgrade_id]_acquired" flags) are checked.
+Describe how the system allows for a mix of linear upgrade paths and a pool of general upgrades for a weapon, and how the level-up screen receives a selection of options.
+Confirm the "one upgrade per weapon type per level-up screen" rule is handled in _get_upgrade_options_for_player.
+Status Effect System:
+
+Describe the core components: StatusEffectData.gd (Resource for defining effects) and StatusEffectComponent.gd (Node for managing active effects on entities).
+Explain how specific status effects (like ScytheBleed.tres, ScytheVulnerable.tres) are defined as .tres files and configured (e.g., effect_id, effect_type, base_duration, tick_interval, stat_modifiers, total_damage_or_heal_percent_of_source_hit).
+Detail how StatusEffectComponent.gd handles add_status (including duration scaling by applier's "Effect Duration Multiplier" and refresh logic), _process (duration countdown), _on_status_tick (for DoTs like Bleed, including the max(1, int(ceil(tick_damage))) fix), and provides stat modifications (get_sum_of_additive_modifiers, get_product_of_multiplicative_modifiers).
+Explain how BaseEnemy.gd interacts with its StatusEffectComponent (e.g., in take_damage for Vulnerable, and how DoTs damage it).
+Mention the user's list of desired future status effects (Poison, Burn, Disease, Haste, Empower, etc.) and the intent for the player to also be susceptible to debuffs.
+Enemy System (BaseEnemy.gd):
+
+Current behaviors: movement, contact damage (continuous per second), health, take_damage logic (including vulnerability checks), EXP drops.
+Key signals: killed_by_attacker(attacker_node, killed_enemy_node) and its role in Soul Siphon.
+Mention that enemy_slime_green.gd extends BaseEnemy.gd.
+Confirm the fix for on_status_effects_changed signature.
+Confirm the fix for SceneTreeTimer process_mode error in _flash_on_hit.
+UI Systems:
+
+Briefly describe the LevelUpScreen.gd and UpgradeCard.gd functionality.
+Describe DebugPanel.gd functionality, especially for adding weapons and applying specific upgrades on demand. Confirm the "add weapon" button issue was resolved as a user interaction error.
+Note the future plan for UI to display targeted enemy's name, health, and status effects.
+Last Confirmed Working State & Next Steps Considered:
+
+What was the absolute last set of features confirmed to be working perfectly (e.g., "Scythe weapon's 9 unique upgrades are now functionally complete, including Soul Siphon, Bleed, and Vulnerable application and effects. Status Effect System foundation is in place.")?
+What were the immediate next steps being discussed or considered just before this summary request (e.g., "implementing more status effects from the provided list like Poison/Burn/Haste/Empower," or "defining upgrade paths for other weapons")?
+Please be exhaustive and specific. The goal is to provide a new AI assistant with all the necessary information to resume development without any loss of context or requiring extensive re-explanation of existing systems."
+
+This prompt should give you a very thorough summary. You can copy and paste it into a new chat if you choose to start one.

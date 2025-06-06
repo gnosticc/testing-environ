@@ -1,0 +1,85 @@
+[gd_scene load_steps=6 format=3 uid="uid://bb1rig3rge632"]
+
+[ext_resource type="Script" uid="uid://cd3iuxf8rv2a8" path="res://Scripts/GameUI.gd" id="1_tyage"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi5v6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gek4i"]
+bg_color = Color(0, 0.917647, 0.34902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tyage"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_37hul"]
+bg_color = Color(0, 0.629619, 0.980279, 1)
+
+[node name="GameUI" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_tyage")
+
+[node name="HUDLayer" type="CanvasLayer" parent="."]
+
+[node name="PlayerHealthBar" type="ProgressBar" parent="HUDLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -35.0
+offset_top = -44.0
+offset_right = 25.0
+offset_bottom = -34.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_xi5v6")
+theme_override_styles/fill = SubResource("StyleBoxFlat_gek4i")
+show_percentage = false
+
+[node name="GameplayTimerLabel" type="Label" parent="HUDLayer"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -36.0
+offset_right = 28.0
+offset_bottom = 23.0
+grow_horizontal = 2
+text = "00:00:00"
+
+[node name="OneSecondTickTimer" type="Timer" parent="HUDLayer"]
+autostart = true
+
+[node name="TempExpBar" type="ProgressBar" parent="HUDLayer"]
+visible = false
+offset_left = 538.0
+offset_top = 291.0
+offset_right = 618.0
+offset_bottom = 299.0
+theme_override_styles/background = SubResource("StyleBoxFlat_tyage")
+theme_override_styles/fill = SubResource("StyleBoxFlat_37hul")
+show_percentage = false
+
+[node name="TempExpBarVisibilityTimer" type="Timer" parent="HUDLayer"]
+one_shot = true
+
+[node name="DDSLabel" type="Label" parent="HUDLayer"]
+offset_left = 540.0
+offset_top = 26.0
+offset_right = 590.0
+offset_bottom = 49.0
+text = "DDS: 0"
+
+[node name="CulledEnemiesLabel" type="Label" parent="HUDLayer"]
+offset_left = 673.0
+offset_top = 2.0
+offset_right = 740.0
+offset_bottom = 25.0
+text = "Culled: 0"
+
+[node name="ThreatPoolLabel" type="Label" parent="HUDLayer"]
+offset_left = 673.0
+offset_top = 24.0
+offset_right = 742.0
+offset_bottom = 47.0
+text = "Threat: 0"

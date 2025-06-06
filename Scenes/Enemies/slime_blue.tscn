@@ -1,0 +1,103 @@
+[gd_scene load_steps=14 format=3 uid="uid://cgd0awfevuue1"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_wp0q5"]
+[ext_resource type="Script" uid="uid://2mgwrvn71kma" path="res://Scripts/Enemies/slime_blue.gd" id="2_wp0q5"]
+[ext_resource type="Texture2D" uid="uid://cdf45s0cmw4s1" path="res://Assets/Enemy Animations/Blue Slime Animation.png" id="3_wp0q5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wgo4f"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bulha"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(1152, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_60j4j"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_id5qn"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_awoka"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dsqsp"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ts06b"]
+atlas = ExtResource("3_wp0q5")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_rfp5d"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wgo4f")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bulha")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_60j4j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_id5qn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_awoka")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dsqsp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ts06b")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tlpub"]
+radius = 83.3333
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dttn4"]
+radius = 50.0
+
+[node name="slime_blue" instance=ExtResource("1_wp0q5")]
+scale = Vector2(0.18, 0.18)
+script = ExtResource("2_wp0q5")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_rfp5d")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_tlpub")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_dttn4")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -83.0
+offset_top = -102.0
+offset_right = 9.0
+offset_bottom = -85.0
+scale = Vector2(1.8, 1.8)
+
+[node name="CollisionShape2D" parent="SeparationDetector" index="0"]
+position = Vector2(7.62939e-06, 0)

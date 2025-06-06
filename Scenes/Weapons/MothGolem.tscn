@@ -1,0 +1,99 @@
+[gd_scene load_steps=12 format=3 uid="uid://7vxk6mtpfyup"]
+
+[ext_resource type="Script" uid="uid://cgtro22i5akue" path="res://Scripts/Weapons/MothGolem.gd" id="1_nd37c"]
+[ext_resource type="Texture2D" uid="uid://dpxqhwu642lum" path="res://Assets/Pets and Summons/Moth Golem Attack Animation.png" id="2_qa362"]
+[ext_resource type="Texture2D" uid="uid://cf1tweoyqgii1" path="res://Assets/Pets and Summons/Moth Golem Animation.png" id="3_w4not"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_22v6j"]
+atlas = ExtResource("2_qa362")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5he47"]
+atlas = ExtResource("2_qa362")
+region = Rect2(256, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_22jhq"]
+atlas = ExtResource("3_w4not")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jctgs"]
+atlas = ExtResource("3_w4not")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xg78q"]
+atlas = ExtResource("3_w4not")
+region = Rect2(256, 0, 256, 300)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vf4dy"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_22v6j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5he47")
+}],
+"loop": false,
+"name": &"attack_stagger",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_22jhq")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jctgs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xg78q")
+}],
+"loop": true,
+"name": &"move",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_771e2"]
+radius = 75.0
+height = 150.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ux4fk"]
+radius = 3876.21
+
+[node name="MothGolem" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 128
+script = ExtResource("1_nd37c")
+
+[node name="Visual" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.06, 0.06)
+sprite_frames = SubResource("SpriteFrames_vf4dy")
+animation = &"attack_stagger"
+frame = 1
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1)
+scale = Vector2(0.04, 0.04)
+shape = SubResource("CapsuleShape2D_771e2")
+
+[node name="NavigationAgent" type="NavigationAgent2D" parent="."]
+
+[node name="AttackRangeArea" type="Area2D" parent="."]
+scale = Vector2(0.04, 0.04)
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackRangeArea"]
+position = Vector2(0, 25)
+scale = Vector2(0.04, 0.04)
+shape = SubResource("CircleShape2D_ux4fk")
+
+[node name="AttackTimer" type="Timer" parent="."]
+
+[node name="LeashCheckTimer" type="Timer" parent="."]
+autostart = true

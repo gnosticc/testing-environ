@@ -1,0 +1,112 @@
+[gd_scene load_steps=16 format=3 uid="uid://byd28ph0dd8dr"]
+
+[ext_resource type="Script" uid="uid://cbvud11dfiaab" path="res://Scripts/scythe_attack.gd" id="1_1fbax"]
+[ext_resource type="Texture2D" uid="uid://dhb326y5k81q3" path="res://Assets/Weapons/Scythe Effects Complete Animation 2.png" id="2_kmys0"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x1yv5"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fu3qg"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_476go"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fmuxd"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n1qno"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kj5bs"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_upvk4"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w738p"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(1024, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xlwbm"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(1152, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ikcs1"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(1280, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_maand"]
+atlas = ExtResource("2_kmys0")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_xlwbm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x1yv5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fu3qg")
+}, {
+"duration": 0.6,
+"texture": SubResource("AtlasTexture_476go")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fmuxd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n1qno")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kj5bs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_upvk4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w738p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xlwbm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ikcs1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_maand")
+}],
+"loop": true,
+"name": &"slash",
+"speed": 30.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_x1yv5"]
+radius = 58.0086
+
+[node name="ScytheAttack" type="Node2D"]
+script = ExtResource("1_1fbax")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_xlwbm")
+animation = &"slash"
+frame = 1
+frame_progress = 0.528847
+
+[node name="DamageArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+shape = SubResource("CircleShape2D_x1yv5")
+
+[node name="DurationTimer" type="Timer" parent="."]
+
+[connection signal="body_entered" from="DamageArea" to="." method="_on_damage_area_body_entered"]

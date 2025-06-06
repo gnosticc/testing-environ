@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3 uid="uid://100tkv62pmv4"]
+
+[ext_resource type="Script" uid="uid://bne1xvfyu24jb" path="res://Scripts/DataResources/EnemyData.gd" id="1_xqyms"]
+
+[resource]
+script = ExtResource("1_xqyms")
+id = &"slime_light_blue"
+display_name = "Hungry Slime"
+scene_path = "res://Scenes/Enemies/slime_tall_light_blue.tscn"
+min_DDS_to_spawn = 320.0
+max_DDS_to_spawn = 800.0
+spawn_weight = 50.0
+ideal_active_pool_slot_cost = 1
+base_health = 512
+base_contact_damage = 15
+base_speed = 40.0
+base_armor = 5
+base_exp_drop = 12
+exp_drop_scene_path = "res://Scenes/Pickups/exp_tier_2_small.tscn"
+sprite_modulate_color = Color(1, 1, 1, 1)
+sprite_faces_left_by_default = false
+elite_types_available = Array[StringName]([&"brute", &"tank", &"swift", &"summoner", &"immovable"])
+min_DDS_for_elites_to_appear = 50.0
+phaser_cooldown = 5.0
+phaser_teleport_distance = 150.0
+summoner_interval = 1.0
+summoner_max_active_minions = 6
+shaman_heal_radius = 120.0
+shaman_heal_percent = 0.1
+shaman_heal_interval = 1.0
+time_warp_radius = 180.0
+time_warp_slow_percent = 0.25
+time_warp_linger_duration = 2.0
+threat_value_when_culled = 1
+metadata/_custom_type_script = "uid://bne1xvfyu24jb"

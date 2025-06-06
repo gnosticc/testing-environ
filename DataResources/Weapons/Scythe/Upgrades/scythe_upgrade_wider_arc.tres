@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://dh6ylhvy6lkdq"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_wevd1"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_akfia"]
+[ext_resource type="Resource" uid="uid://cwjfen2pmmhox" path="res://DataResources/Weapons/Scythe/Effects/scythe_wider_arc_aoe_effect.tres" id="2_es6qy"]
+[ext_resource type="Resource" uid="uid://cqoiuj7c6lo0w" path="res://DataResources/Weapons/Scythe/Effects/scythe_wider_arc_acquired_flag_effect.tres" id="3_x5s7h"]
+[ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="4_34txu"]
+
+[resource]
+script = ExtResource("2_akfia")
+upgrade_id = &"scythe_wider_arc"
+title = "Wider Arc"
+description = "Sweep Area +30%"
+icon = ExtResource("4_34txu")
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_wevd1")]([ExtResource("2_es6qy"), ExtResource("3_x5s7h")])
+set_acquired_flag_on_weapon = &"scythe_wider_arc_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

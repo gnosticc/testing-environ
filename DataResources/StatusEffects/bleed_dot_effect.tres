@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://c0r3kogqdcvns"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_g4ov4"]
+
+[resource]
+script = ExtResource("1_g4ov4")
+target_scope = &"enemy_stats"
+stat_key = &"health"
+modification_type = &"flat_add"
+value = -1.0
+effect_type_id = &"stat_mod"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

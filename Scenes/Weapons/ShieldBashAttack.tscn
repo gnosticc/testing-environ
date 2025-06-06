@@ -1,0 +1,66 @@
+[gd_scene load_steps=8 format=3 uid="uid://lqt6ivh044gn"]
+
+[ext_resource type="Script" uid="uid://d33riv0p3vt2h" path="res://Scripts/Weapons/ShieldBashAttack.gd" id="1_0vt6x"]
+[ext_resource type="Texture2D" uid="uid://dqd5102sgdtj6" path="res://Assets/Weapons/Shield Bash Animation.png" id="2_41alt"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ndsp"]
+atlas = ExtResource("2_41alt")
+region = Rect2(384, 0, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m83sn"]
+atlas = ExtResource("2_41alt")
+region = Rect2(256, 0, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iiuje"]
+atlas = ExtResource("2_41alt")
+region = Rect2(128, 0, 128, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4s18h"]
+atlas = ExtResource("2_41alt")
+region = Rect2(0, 0, 128, 256)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_h1xe8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ndsp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m83sn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iiuje")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4s18h")
+}],
+"loop": false,
+"name": &"bash",
+"speed": 20.0
+}]
+
+[node name="Node2D" type="Node2D"]
+rotation = -0.126996
+scale = Vector2(0.45, 0.45)
+script = ExtResource("1_0vt6x")
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(-25.9644, -4.76532)
+scale = Vector2(0.45, 0.45)
+sprite_frames = SubResource("SpriteFrames_h1xe8")
+animation = &"bash"
+frame = 3
+frame_progress = 1.0
+
+[node name="DamageArea" type="Area2D" parent="."]
+position = Vector2(-25.9644, -4.76532)
+scale = Vector2(0.45, 0.45)
+collision_layer = 4
+collision_mask = 136
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="DamageArea"]
+polygon = PackedVector2Array(-32, -126, 61, -20, 52, 43, -52, 123, -61, 80, -59, 7, -51, -59, -41, -104)
+
+[node name="DurationTimer" type="Timer" parent="."]
+
+[connection signal="body_entered" from="DamageArea" to="." method="_on_damage_area_body_entered"]

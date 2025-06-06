@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://b61cokdldirn3"]
+
+[ext_resource type="Script" uid="uid://bwat8ks6yp56o" path="res://Scenes/MeleeAimingDot.gd" id="1_8nnd5"]
+[ext_resource type="Texture2D" uid="uid://ccbl0mtkxtnkt" path="res://Assets/Targeting Dot for Melee.png" id="2_aq82y"]
+
+[node name="MeleeAimingDot" type="Node2D"]
+script = ExtResource("1_8nnd5")
+
+[node name="DotVisual" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_aq82y")

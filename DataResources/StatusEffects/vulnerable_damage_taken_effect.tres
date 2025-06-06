@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://du6njeo686a2f"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_ty8v2"]
+
+[resource]
+script = ExtResource("1_ty8v2")
+stat_key = &"damage_taken_multiplier"
+modification_type = &"percent_add_to_base"
+value_type = 0
+value_float = 0.2
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"enemy_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

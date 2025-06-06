@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwu3a6bg3dhq7"]
+
+[ext_resource type="Script" uid="uid://whv67jud4ii7" path="res://Scripts/DebugPanel.gd" id="1_vrwrv"]
+
+[node name="DebugPanel" type="CanvasLayer"]
+script = ExtResource("1_vrwrv")
+
+[node name="MainPanel" type="Panel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2

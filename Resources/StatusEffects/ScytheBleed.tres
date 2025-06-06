@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://dm5xsorfqgnlq"]
+
+[ext_resource type="Script" uid="uid://d1833b5khg75b" path="res://Scripts/StatusEffects/StatusEffectData.gd" id="1_3q0wr"]
+
+[resource]
+script = ExtResource("1_3q0wr")
+effect_id = &"scythe_bleed"
+effect_name = "Bleeding (Scythe)"
+description = "Target bleeds from the scythe's deep cut, suffering damage equal to the afflicting hit over 2 seconds."
+effect_type = 0
+is_buff = false
+base_duration = 2.0
+tick_interval = 0.1
+refresh_on_reapply = true
+total_damage_or_heal_percent_of_source_hit = 1.0
+flat_damage_or_heal_per_tick = 0.0
+dot_damage_type = &"bleed"
+stat_modifiers = {}
+control_effect_type = &""
+special_logic_params = {}
+metadata/_custom_type_script = "uid://d1833b5khg75b"

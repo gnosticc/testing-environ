@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3 uid="uid://u8411dkuuwsc"]
+
+[ext_resource type="Script" uid="uid://bne1xvfyu24jb" path="res://Scripts/DataResources/EnemyData.gd" id="1_2tki6"]
+
+[resource]
+script = ExtResource("1_2tki6")
+id = &"slime_king"
+display_name = "Slime King Pickle"
+scene_path = "res://Scenes/Bosses/slime_king.tscn"
+min_DDS_to_spawn = 0.0
+max_DDS_to_spawn = -1.0
+spawn_weight = 100.0
+ideal_active_pool_slot_cost = 1
+base_health = 2800
+base_contact_damage = 14
+base_speed = 52.0
+base_armor = 7
+base_exp_drop = 350
+exp_drop_scene_path = "res://Scenes/Pickups/exp_tier_6_special.tscn"
+sprite_modulate_color = Color(1, 1, 1, 1)
+sprite_faces_left_by_default = false
+elite_types_available = Array[StringName]([])
+min_DDS_for_elites_to_appear = 50.0
+phaser_cooldown = 5.0
+phaser_teleport_distance = 150.0
+summoner_interval = 1.0
+summoner_max_active_minions = 3
+shaman_heal_radius = 120.0
+shaman_heal_percent = 0.1
+shaman_heal_interval = 1.0
+time_warp_radius = 180.0
+time_warp_slow_percent = 0.25
+time_warp_linger_duration = 2.0
+threat_value_when_culled = 1
+metadata/_custom_type_script = "uid://bne1xvfyu24jb"

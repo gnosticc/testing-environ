@@ -1,0 +1,96 @@
+[gd_scene load_steps=13 format=3 uid="uid://bvachsijc2aea"]
+
+[ext_resource type="Script" uid="uid://dtfipf543e47p" path="res://Scripts/player.gd" id="1_cvnsp"]
+[ext_resource type="Texture2D" uid="uid://4gwemat1ky05" path="res://Assets/Characters/Warrior Class Animation 2.png" id="2_cvnsp"]
+[ext_resource type="PackedScene" uid="uid://b61cokdldirn3" path="res://Scenes/Player/MeleeAimingDot.tscn" id="3_6t5aa"]
+[ext_resource type="PackedScene" uid="uid://cjnf0osd35xn1" path="res://Scenes/Player/Components/WeaponManager.tscn" id="4_vgqql"]
+[ext_resource type="Script" uid="uid://cpmacn0v2x1kd" path="res://Scripts/PlayerStats.gd" id="5_fkybt"]
+[ext_resource type="Script" uid="uid://beexf6tvvofb5" path="res://Scripts/StatusEffects/StatusEffectComponent.gd" id="6_x3wgy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cvnsp"]
+atlas = ExtResource("2_cvnsp")
+region = Rect2(170, 0, 170, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6t5aa"]
+atlas = ExtResource("2_cvnsp")
+region = Rect2(0, 0, 170, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vgqql"]
+atlas = ExtResource("2_cvnsp")
+region = Rect2(170, 0, 170, 256)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_x3wgy"]
+resource_name = "warrior_frames"
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cvnsp")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6t5aa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vgqql")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_v0iea"]
+size = Vector2(3.64585, 7.54717)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_cvnsp"]
+radius = 5.09902
+
+[node name="Player" type="CharacterBody2D" groups=["player_char_group"]]
+z_index = 6
+collision_layer = 3
+collision_mask = 17
+script = ExtResource("1_cvnsp")
+sprite_flip_x_compensation = -40.0
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.14, 0.154)
+sprite_frames = SubResource("SpriteFrames_x3wgy")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="Camera2D" type="Camera2D" parent="AnimatedSprite2D"]
+zoom = Vector2(2, 2)
+
+[node name="UIAnchor" type="Marker2D" parent="AnimatedSprite2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-3, 1)
+scale = Vector2(1.91999, 2.12)
+shape = SubResource("RectangleShape2D_v0iea")
+
+[node name="ScytheAttackTimer" type="Timer" parent="."]
+wait_time = 3.0
+autostart = true
+
+[node name="ExperienceCollectorArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 64
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ExperienceCollectorArea"]
+position = Vector2(-3, 0)
+shape = SubResource("CircleShape2D_cvnsp")
+
+[node name="MeleeAimingDot" parent="." instance=ExtResource("3_6t5aa")]
+oval_radius_x = 25.0
+oval_radius_y = 35.0
+
+[node name="WeaponManager" parent="." instance=ExtResource("4_vgqql")]
+
+[node name="PlayerStats" type="Node" parent="."]
+script = ExtResource("5_fkybt")
+
+[node name="StatusEffectComponent" type="Node" parent="."]
+script = ExtResource("6_x3wgy")

@@ -1,0 +1,81 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwu3a6bg3dhq7"]
+
+[ext_resource type="Script" uid="uid://whv67jud4ii7" path="res://Scripts/UI/DebugPanel.gd" id="1_vrwrv"]
+
+[node name="DebugPanel" type="CanvasLayer"]
+script = ExtResource("1_vrwrv")
+
+[node name="MainPanel" type="Panel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = -263.0
+offset_right = 237.0
+offset_bottom = 289.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TabContainer" type="TabContainer" parent="MainPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+visible = false
+offset_top = 243.0
+offset_right = 154.0
+offset_bottom = 243.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="CurrentDDSLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "DDS: 0"
+
+[node name="ElapsedTimeLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Time: 00:00:00"
+
+[node name="HardcoreStatusLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Hardcore: No"
+
+[node name="SpawnIntervalLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Spawn Int: 0.0s"
+
+[node name="TargetEnemyCountLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Target Enemies: 0"
+
+[node name="ActiveEnemyCountLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Avtive Enemies: 0"
+
+[node name="ThreatPoolLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Threat Pool: 0"
+
+[node name="ActivePoolLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Active Pool: [empty]"
+
+[node name="PlayerLevelLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Player Lvl: 1"
+
+[node name="SetDDSLineEdit" type="LineEdit" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+placeholder_text = "Enter DDS"
+
+[node name="SetDDSButton" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Set
+"

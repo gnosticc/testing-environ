@@ -1,0 +1,24 @@
+[gd_scene load_steps=4 format=3 uid="uid://clkiyut3512hv"]
+
+[ext_resource type="Script" uid="uid://bu2l05s10uh8b" path="res://Scripts/exp_drop.gd" id="1_cdad7"]
+[ext_resource type="Texture2D" uid="uid://cj02lxxfgnk8e" path="res://Assets/Drops/Experience/Exp Tier 2 Blue.png" id="2_hklmq"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fmbg5"]
+size = Vector2(2, 2)
+
+[node name="ExpDrop" type="Area2D"]
+collision_layer = 64
+collision_mask = 0
+script = ExtResource("1_cdad7")
+experience_value = 16
+magnet_speed = 100.0
+magnet_activation_distance = 50.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(0.171875, 1, 0, 1)
+position = Vector2(0, -3.8147e-06)
+scale = Vector2(0.18, 0.129)
+texture = ExtResource("2_hklmq")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_fmbg5")

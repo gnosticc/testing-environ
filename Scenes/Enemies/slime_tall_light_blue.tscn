@@ -1,0 +1,86 @@
+[gd_scene load_steps=12 format=3 uid="uid://dbxmf5av5r4dy"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_xha8g"]
+[ext_resource type="Script" uid="uid://doxx0lbfyivsm" path="res://Scripts/Enemies/slime_tall_light_blue.gd" id="2_vpvde"]
+[ext_resource type="Texture2D" uid="uid://dfg4r8c5a15qc" path="res://Assets/Enemy Animations/Tall Light Blue Slime Animation.png" id="3_pd3n3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vpvde"]
+atlas = ExtResource("3_pd3n3")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tqmco"]
+atlas = ExtResource("3_pd3n3")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxjny"]
+atlas = ExtResource("3_pd3n3")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_btr4i"]
+atlas = ExtResource("3_pd3n3")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lhw7u"]
+atlas = ExtResource("3_pd3n3")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_37anh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vpvde")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tqmco")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxjny")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_btr4i")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lhw7u")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_6ok8a"]
+radius = 65.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_jnhlo"]
+radius = 30.0
+height = 80.0
+
+[node name="BaseEnemy" instance=ExtResource("1_xha8g")]
+scale = Vector2(0.22, 0.22)
+script = ExtResource("2_vpvde")
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+sprite_frames = SubResource("SpriteFrames_37anh")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_6ok8a")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CapsuleShape2D_jnhlo")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -32.6667
+offset_top = -76.6667
+offset_right = 40.3333
+offset_bottom = -59.6667

@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=7 format=3 uid="uid://jg4h6uusoufn"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_updq1"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_md7hp"]
+[ext_resource type="Resource" uid="uid://ca7h0ore3khnb" path="res://DataResources/Weapons/Scythe/Effects/scythe_cursed_apply_vulnerable_effect.tres" id="2_neb08"]
+[ext_resource type="Resource" uid="uid://vxp25qyvcw65" path="res://DataResources/Weapons/Scythe/Effects/scythe_cursed_behavior_flag_effect.tres" id="3_pdyiy"]
+[ext_resource type="Resource" uid="uid://2xur0uelho5o" path="res://DataResources/Weapons/Scythe/Effects/scythe_cursed_acquired_flag_effect.tres" id="4_xedgp"]
+[ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="5_db42k"]
+
+[resource]
+script = ExtResource("2_md7hp")
+upgrade_id = &"scythe_curse"
+title = "Cursed Edge"
+description = "Hits make enemies Vulnerable (+20% dmg)"
+icon = ExtResource("5_db42k")
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_updq1")]([ExtResource("2_neb08"), ExtResource("3_pdyiy"), ExtResource("4_xedgp")])
+set_acquired_flag_on_weapon = &"scythe_cursed_edge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

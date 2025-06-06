@@ -1,0 +1,13 @@
+# Godot-specific generated files
+.godot/
+.mono/
+*.import
+export_presets.cfg
+
+# VSCode/Editor specific (uncomment if you use them)
+#.vscode/
+#.idea/
+
+# OS-specific files
+.DS_Store
+Thumbs.db

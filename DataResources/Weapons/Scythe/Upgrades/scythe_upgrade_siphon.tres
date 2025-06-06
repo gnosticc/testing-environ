@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://dv4gsg5sr8q1h"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_infqa"]
+[ext_resource type="Resource" uid="uid://c65tp86stjvp8" path="res://DataResources/Weapons/Scythe/Effects/scythe_soul_siphon_behavior_flag_effect.tres" id="2_i84rq"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_miahx"]
+[ext_resource type="Resource" uid="uid://d0kyn7duip0sj" path="res://DataResources/Weapons/Scythe/Effects/scythe_soul_siphon_acquired_flag_effect.tres" id="3_6lnr7"]
+[ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="4_fb6as"]
+
+[resource]
+script = ExtResource("2_miahx")
+upgrade_id = &"scythe_siphon"
+title = "Soul Siphon"
+description = "10% chance on kill to heal 3HP for each point invested in Luck"
+icon = ExtResource("4_fb6as")
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_infqa")]([ExtResource("2_i84rq"), ExtResource("3_6lnr7")])
+set_acquired_flag_on_weapon = &"scythe_soul_siphon_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

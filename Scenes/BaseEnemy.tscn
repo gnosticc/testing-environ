@@ -1,0 +1,74 @@
+[gd_scene load_steps=7 format=3 uid="uid://dxa4b1piqkc7i"]
+
+[ext_resource type="Script" uid="uid://d3jpya6xyhtsw" path="res://Scripts/BaseEnemy.gd" id="1_qu00n"]
+[ext_resource type="Script" uid="uid://beexf6tvvofb5" path="res://Scripts/StatusEffects/StatusEffectComponent.gd" id="2_6epgf"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qu00n"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qu00n"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6epgf"]
+bg_color = Color(0.855745, 0.0366383, 0.247622, 1)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qu00n"]
+radius = 23.0769
+
+[node name="BaseEnemy" type="CharacterBody2D" groups=["enemies"]]
+collision_layer = 8
+collision_mask = 136
+script = ExtResource("1_qu00n")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_qu00n")
+animation = &"idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="DamageArea" type="Area2D" parent="."]
+collision_layer = 32
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+
+[node name="ContactDamageTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="HealthBar" type="ProgressBar" parent="."]
+visible = false
+offset_left = -36.0
+offset_top = -40.0
+offset_right = 37.0
+offset_bottom = -23.0
+theme_override_styles/background = SubResource("StyleBoxFlat_qu00n")
+theme_override_styles/fill = SubResource("StyleBoxFlat_6epgf")
+show_percentage = false
+
+[node name="SeparationDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SeparationDetector"]
+position = Vector2(1.04904e-05, 0)
+shape = SubResource("CircleShape2D_qu00n")
+
+[node name="SlowEffectTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="KnockbackRecoveryTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="StatusEffectComponent" type="Node" parent="."]
+script = ExtResource("2_6epgf")
+
+[connection signal="timeout" from="SlowEffectTimer" to="." method="_on_slow_effect_timer_timeout"]

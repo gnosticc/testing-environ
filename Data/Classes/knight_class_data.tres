@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PlayerClassData" load_steps=2 format=3 uid="uid://dug04vm4n5uw1"]
+
+[ext_resource type="Script" uid="uid://bk3kcyvjws6fh" path="res://Data/Classes/PlayerClassData.gd" id="1_dopf7"]
+
+[resource]
+script = ExtResource("1_dopf7")
+base_max_health = 100
+base_health_regeneration = 0.0
+base_damage_multiplier = 1.0
+base_attack_speed_multiplier = 1.0
+base_armor = 0
+base_armor_penetration = 0.0
+base_movement_speed = 60.0
+base_magnet_range = 40.0
+base_experience_gain_multiplier = 1.0
+base_aoe_area_multiplier = 1.0
+base_projectile_size_multiplier = 1.0
+base_projectile_speed_multiplier = 1.0
+base_effect_duration_multiplier = 1.0
+base_crit_chance = 0.05
+base_crit_damage_multiplier = 1.5
+base_luck = 0
+class_description = "Description of this class."
+metadata/_custom_type_script = "uid://bk3kcyvjws6fh"

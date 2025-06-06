@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3 uid="uid://4vccedttmvdl"]
+
+[ext_resource type="Script" uid="uid://bne1xvfyu24jb" path="res://Scripts/DataResources/EnemyData.gd" id="1_0ncb5"]
+
+[resource]
+script = ExtResource("1_0ncb5")
+id = &"slime_green"
+display_name = "Irritated Slime"
+scene_path = "res://Scenes/enemy_slime_green.tscn"
+min_DDS_to_spawn = 0.0
+max_DDS_to_spawn = 250.0
+spawn_weight = 100.0
+ideal_active_pool_slot_cost = 1
+base_health = 22
+base_contact_damage = 5
+base_speed = 40.0
+base_armor = 0
+base_exp_drop = 2
+exp_drop_scene_path = "res://Scenes/Pickups/exp_tier_1_small.tscn"
+sprite_modulate_color = Color(1, 1, 1, 1)
+sprite_faces_left_by_default = true
+elite_types_available = Array[StringName]([&"swift", &"phaser", &"brute", &"tank"])
+min_DDS_for_elites_to_appear = 50.0
+phaser_cooldown = 2.5
+phaser_teleport_distance = 100.0
+summoner_interval = 1.0
+summoner_max_active_minions = 3
+shaman_heal_radius = 120.0
+shaman_heal_percent = 0.1
+shaman_heal_interval = 1.0
+time_warp_radius = 180.0
+time_warp_slow_percent = 0.25
+time_warp_linger_duration = 2.0
+threat_value_when_culled = 1
+metadata/_custom_type_script = "uid://bne1xvfyu24jb"

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=2 format=3 uid="uid://b1behm0ulw3eg"]
+
+[ext_resource type="Script" uid="uid://d1833b5khg75b" path="res://Scripts/StatusEffects/StatusEffectData.gd" id="1_cknfr"]
+
+[resource]
+script = ExtResource("1_cknfr")
+effect_id = &"scythe_vulnerable"
+effect_name = "Vulnerable (Scythe)"
+description = "Target takes 20% increased damage from all sources for 3 seconds."
+effect_type = 1
+is_buff = false
+base_duration = 3.0
+tick_interval = 1.0
+refresh_on_reapply = true
+total_damage_or_heal_percent_of_source_hit = 0.0
+flat_damage_or_heal_per_tick = 0.0
+dot_damage_type = &"physical_dot"
+stat_modifiers = {
+"damage_taken_multiplier_add": 0.2
+}
+control_effect_type = &""
+special_logic_params = {}
+metadata/_custom_type_script = "uid://d1833b5khg75b"
