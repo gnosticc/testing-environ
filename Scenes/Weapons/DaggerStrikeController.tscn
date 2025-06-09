@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://b5tus7fojeofy"]
 
 [ext_resource type="Script" uid="uid://wqrrurqyxrrr" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/DaggerStrikeController.gd" id="1_ndqid"]
-[ext_resource type="PackedScene" uid="uid://t14sqn4xkiln" path="res://Scenes/Weapons/DaggerHitbox.tscn" id="2_1sdj8"]
+[ext_resource type="PackedScene" uid="uid://byqjo2laxv1oh" path="res://Scenes/Weapons/DaggerStrikeAttacK.tscn" id="2_1sdj8"]
 [ext_resource type="Texture2D" uid="uid://bisow2wldljxc" path="res://Assets/Weapons/Dagger Animation.png" id="3_1sdj8"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_jxjxr"]
@@ -26,11 +26,12 @@ animations = [{
 "speed": 12.0
 }]
 
-[node name="Node2D" type="Node2D"]
+[node name="DaggerStrikeController" type="Node2D"]
 script = ExtResource("1_ndqid")
 hitbox_scene = ExtResource("2_1sdj8")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+visible = false
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_jrcvm")
 animation = &"slash"

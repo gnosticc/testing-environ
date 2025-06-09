@@ -2,6 +2,8 @@
 # Path: res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd
 # Extends Resource to define general player upgrades that are not specific to a single weapon.
 # Examples: "Might" (global damage up), "Swiftness" (movement speed up), "Vitality" (max health up).
+# Updated error reporting, added editor validation, and a new getter for effects.
+
 class_name GeneralUpgradeCardData
 extends Resource
 
@@ -26,7 +28,7 @@ extends Resource
 @export var class_tag_filter: Array[PlayerCharacter.BasicClass] = []
 
 @export_group("Effects & Offering")
-## An array of EffectData resources (StatModificationEffectData, CustomFlagEffectData, 
+## An array of EffectData resources (StatModificationEffectData, CustomFlagEffectData,
 ## TriggerAbilityEffectData, StatusEffectApplicationData) that define what this upgrade actually does.
 ## Most general upgrades will likely use StatModificationEffectData targeting "player_stats".
 @export var effects: Array[EffectData] = []
@@ -42,36 +44,62 @@ extends Resource
 ## An array of StringName IDs of other GeneralUpgradeCardData (or potentially WeaponUpgradeData IDs
 ## or even specific weapon level achievements like "weapon_scythe_level_5")
 ## that must be acquired/achieved before this upgrade can be offered or taken.
-@export var prerequisites: Array[StringName] = [] 
+@export var prerequisites: Array[StringName] = []
 # Example for prerequisites: [&"gen_might_1"] (to unlock "gen_might_2")
 # Or for a more complex one: [&"weapon_any_melee_level_3", &"player_level_10"] (conceptual)
 
 
 func _init():
-	# developer_note = "Defines a general player upgrade card."
 	pass
 
-# Example of how this might be used:
-# When a player levels up, the system gathers all available GeneralUpgradeCardData.tres files.
-# It filters them based on:
-# 1. class_tag_filter (if player's current class matches).
-# 2. prerequisites (if player has already acquired the required upgrade IDs).
-# 3. max_stacks (if player hasn't already taken this upgrade max_stacks times).
-# Then, it uses 'weight' to select a few options to present to the player.
-#
-# When chosen, PlayerCharacter.gd's apply_upgrade method would iterate through this card's 'effects' array:
-# func apply_upgrade(upgrade_resource: Resource):
-#   if upgrade_resource is GeneralUpgradeCardData:
-#       var general_card_data = upgrade_resource as GeneralUpgradeCardData
-#       # Record that this general upgrade (general_card_data.id) has been acquired/stacked.
-#       # Then apply its effects:
-#       for effect_res in general_card_data.effects:
-#           if effect_res is StatModificationEffectData:
-#               var stat_mod = effect_res as StatModificationEffectData
-#               if stat_mod.target_scope == &"player_stats" and is_instance_valid(player_stats_node):
-#                   # This part needs to call a method on player_stats_node
-#                   # that correctly applies the stat_key, modification_type, and value
-#                   # to the player's base_stats or modifier dictionaries.
-#                   player_stats_node.apply_stat_modification_effect(stat_mod) # Hypothetical method
-#           # ... handle other effect types like CustomFlagEffectData for player_behavior ...
-#       player_stats_node.recalculate_all_stats() # Assuming PlayerStats has this
+# Optional: Add a validation method for use in the editor.
+# This method runs when the resource is saved or modified in the editor,
+# providing warnings for common setup issues and data integrity.
+func _validate_property(property: Dictionary):
+	# Validate 'id'
+	if property.name == "id" and (property.get("value", &"") == &""):
+		push_warning("GeneralUpgradeCardData: 'id' cannot be empty for resource: ", resource_path)
+	
+	# Validate 'effects' array
+	if property.name == "effects":
+		var current_effects_array = property.get("value", [])
+		for i in range(current_effects_array.size()):
+			var effect = current_effects_array[i]
+			if not is_instance_valid(effect):
+				push_warning("GeneralUpgradeCardData: Effect in 'effects' at index ", i, " is invalid (null).")
+				continue
+			if not effect is EffectData:
+				push_warning("GeneralUpgradeCardData: Effect in 'effects' at index ", i, " is not an EffectData resource or its subclass (type: ", effect.get_class(), ").")
+				continue
+			
+			if effect is StatModificationEffectData:
+				var stat_mod = effect as StatModificationEffectData
+				if stat_mod.stat_key == &"":
+					push_warning("GeneralUpgradeCardData: StatModificationEffectData in 'effects' at index ", i, " has an empty 'stat_key'.")
+				# If targeting player stats, ensure the key is recognized
+				if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("GameStatConstants"):
+					if not GameStatConstants.KEY_NAMES.values().has(stat_mod.stat_key):
+						push_warning("GeneralUpgradeCardData: Player stat key '", stat_mod.stat_key, "' in effect at index ", i, " is not a recognized key in GameStatConstants.KEY_NAMES.")
+			elif effect is CustomFlagEffectData:
+				var flag_mod = effect as CustomFlagEffectData
+				if flag_mod.flag_key == &"":
+					push_warning("GeneralUpgradeCardData: CustomFlagEffectData in 'effects' at index ", i, " has an empty 'flag_key'.")
+			# Add validation for other EffectData subclasses in 'effects' if applicable
+
+	# Validate 'prerequisites' array
+	if property.name == "prerequisites":
+		var current_prereqs_array = property.get("value", [])
+		for i in range(current_prereqs_array.size()):
+			var prereq_id = current_prereqs_array[i]
+			if not prereq_id is StringName or prereq_id == &"":
+				push_warning("GeneralUpgradeCardData: Prerequisite ID at index ", i, " is empty or not a StringName.")
+
+
+# New helper function to return the effects array.
+# This will be called by PlayerCharacter.gd to apply the upgrade's effects.
+func get_effects_to_apply() -> Array[EffectData]:
+	return effects
+
+# The commented-out example usage from PlayerCharacter.gd shows the intended data flow.
+# When a player chooses this card, PlayerCharacter.gd will iterate through the
+# 'effects' array and apply each effect using PlayerStats.gd's methods.

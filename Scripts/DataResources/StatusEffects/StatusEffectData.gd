@@ -1,7 +1,9 @@
 # StatusEffectData.gd
 # Path: res://Scripts/DataResources/StatusEffects/StatusEffectData.gd
 # Extends Resource to define the properties and behaviors of a status effect (buff or debuff).
-# ADDED: `next_status_effect_on_expire` to chain effects (e.g., Freeze -> Slow).
+# ADDED: `next_status_effect_on_expire` to chain effects (e.g., Chill -> Freeze).
+# Updated error reporting and added editor validation.
+
 class_name StatusEffectData
 extends Resource
 
@@ -15,10 +17,10 @@ extends Resource
 ## Optional: Path to an icon texture for this status effect.
 @export var icon: Texture2D = null
 
-## Default duration of the status effect in seconds. 
+## Default duration of the status effect in seconds.
 ## A duration of 0 or less might indicate a permanent toggle (if not stackable) or an instant effect.
 ## Can be overridden by StatusEffectApplicationData.
-@export var duration: float = 5.0 
+@export var duration: float = 5.0
 
 ## How many times this status effect can stack on a single target.
 ## 0 or 1: No stacking (re-application might just refresh duration).
@@ -29,9 +31,9 @@ extends Resource
 @export var refresh_duration_on_reapply: bool = true
 
 @export_group("Tick-Based Effects (for DoTs, HoTs, etc.)")
-## Interval in seconds for tick-based effects (e.g., damage over time). 
+## Interval in seconds for tick-based effects (e.g., damage over time).
 ## If 0, this is not a tick-based effect by default (or effects are instant).
-@export var tick_interval: float = 0.0 
+@export var tick_interval: float = 0.0
 ## If true, the first tick happens immediately upon application, then subsequent ticks follow the interval.
 @export var tick_on_application: bool = false
 
@@ -47,15 +49,27 @@ extends Resource
 
 
 func _init():
-	# developer_note = "Defines a status effect like Burn, Chill, Haste, etc."
 	pass
 
-
-# Potential helper methods could be added here if needed, e.g.,
-# func get_modifier_for_stat(stat_key_to_find: StringName) -> StatModificationEffectData:
-# 	for effect in effects_while_active:
-# 		if effect is StatModificationEffectData:
-# 			var stat_mod_effect = effect as StatModificationEffectData
-# 			if stat_mod_effect.stat_key == stat_key_to_find:
-# 				return stat_mod_effect
-# 	return null
+# Optional: Add a validation method for use in the editor.
+# This method runs when the resource is saved or modified in the editor,
+# providing warnings if key properties are empty or effects are invalid.
+func _validate_property(property: Dictionary):
+	if property.name == "id" and (property.get("value", &"") == &""):
+		push_warning("StatusEffectData: 'id' cannot be empty for resource: ", resource_path)
+	
+	if property.name == "effects_while_active":
+		var current_effects_array = property.get("value", [])
+		for i in range(current_effects_array.size()):
+			var effect = current_effects_array[i]
+			if not is_instance_valid(effect):
+				push_warning("StatusEffectData: Effect in 'effects_while_active' at index ", i, " is invalid (null).")
+			elif not effect is EffectData:
+				push_warning("StatusEffectData: Effect in 'effects_while_active' at index ", i, " is not an EffectData resource or its subclass.")
+			# You can add more specific validation for StatModificationEffectData's stat_key here if needed
+			# similar to what was done in WeaponUpgradeData.gd validation.
+	
+	if property.name == "next_status_effect_on_expire" and (property.get("value", &"") != &""):
+		# You could add more robust validation here, e.g., checking if the resource actually exists
+		# However, checking ResourceLoader.exists() in _validate_property can be slow for many resources.
+		pass

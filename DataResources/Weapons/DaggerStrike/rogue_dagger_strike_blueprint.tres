@@ -10,7 +10,7 @@ id = &"rogue_dagger_strike"
 title = "Dagger Strike"
 description = "A quick series of slashes with a dagger."
 weapon_scene = ExtResource("3_atqco")
-tags = Array[String](["melee", "physical"])
+tags = Array[StringName]([&"melee", &"physical"])
 class_tag_restrictions = Array[int]([3])
 cooldown = 1.1
 max_level = 10
@@ -19,7 +19,7 @@ spawn_as_child = false
 requires_direction = true
 targeting_type = "mouse"
 initial_specific_stats = {
-"attack_area_scale": 0.3,
+"attack_area_scale": 1.0,
 "attack_sequence": [{
 "damage_multiplier": 1.0,
 "delay": 0.0,
@@ -29,8 +29,9 @@ initial_specific_stats = {
 "delay": 0.1,
 "rotation_offset": 15.0
 }],
-"inherent_visual_scale_x": 0.3,
-"inherent_visual_scale_y": 0.3,
+"base_attack_duration": 0.25,
+"inherent_visual_scale_x": 1.0,
+"inherent_visual_scale_y": 1.0,
 "pierce_count": 0,
 "projectile_speed": 200.0,
 "weapon_damage_percentage": 0.7

@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 TestStartSettings="*res://Scripts/Singletons/TestStartSettings.gd"
 DebugPanelGlobal="*res://Scenes/UI/DebugPanel.tscn"
+GameStatConstants="*res://Scripts/Singletons/player_stat_keys.gd"
 
 [dotnet]
 

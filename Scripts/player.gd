@@ -1,24 +1,32 @@
 # player.gd
-class_name PlayerCharacter
+# This script manages the player's core behavior, input, health, experience,
+# and acts as the central hub for interacting with PlayerStats and WeaponManager.
+# It now fully integrates with the standardized stat system using GameStatConstants.
+#
+# UPDATED: Re-added player walk/idle animation logic.
+# UPDATED: Implemented UI anchoring logic for health/exp bars using GameUI's public methods.
+# FIXED: Declared 'is_dead_flag' variable.
+
 extends CharacterBody2D
+class_name PlayerCharacter
 
 # --- Visual Adjustment of Character Sprite ---
 @export var sprite_flip_x_compensation: float = 0.0
 
-# --- Player Core Stats ---
-@export var max_health: int = 100
-var current_health: int
-@export var speed: float = 60.0
-@export var pickup_magnet_base_radius: float = 10.0
+# --- Player Core Variables (now primarily derived from PlayerStats) ---
+# These variables hold the CURRENT state of health and magnet radius,
+# which are updated based on the calculations in PlayerStats.gd.
+var current_health: float
 var current_pickup_magnet_radius: float
+var is_dead_flag: bool = false # FIXED: Declared is_dead_flag here
 
 # --- Component References ---
 @onready var weapon_manager: WeaponManager = $WeaponManager
-@onready var player_stats: PlayerStats = $PlayerStats
-@onready var attacks_container: Node2D
+@onready var player_stats: PlayerStats = $PlayerStats # Reference to the PlayerStats child node
+@onready var attacks_container: Node2D # Container for spawned attacks (e.g., projectiles)
 @onready var experience_collector_area: Area2D = $ExperienceCollectorArea
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var ui_anchor: Marker2D = $AnimatedSprite2D/UIAnchor
+@onready var ui_anchor: Marker2D = $AnimatedSprite2D/UIAnchor # Anchor point for UI elements above player
 @onready var melee_aiming_dot: Node2D = $MeleeAimingDot
 
 # --- Signals ---
@@ -57,169 +65,171 @@ var prefer_current_sprite_after_first_advanced: bool = false
 var _initial_chosen_class_enum: PlayerCharacter.BasicClass = PlayerCharacter.BasicClass.NONE
 var _initial_chosen_weapon_id: StringName = &""
 var _initial_weapon_equipped: bool = false
-var game_node_ref: Node
+var game_node_ref: Node # Reference to the global Game node (e.g., Main scene's root)
+
 
 func _ready():
+	# Critical: Ensure PlayerStats and WeaponManager are valid before proceeding.
 	if not is_instance_valid(player_stats) or not is_instance_valid(weapon_manager):
-		print_debug("CRITICAL ERROR (PlayerCharacter): PlayerStats or WeaponManager node missing!"); return
+		push_error("CRITICAL ERROR (PlayerCharacter): PlayerStats or WeaponManager node missing!"); return
 
+	# Get reference to the global Game node. It might not be ready yet.
+	game_node_ref = get_tree().root.get_node_or_null("Game")
 
-	if TestStartSettings != null and TestStartSettings.are_test_settings_available() and not TestStartSettings.were_settings_applied_this_run():
-		var chosen_class = TestStartSettings.get_chosen_basic_class()
-		var chosen_weapon_str = TestStartSettings.get_chosen_weapon_id()
-		setup_with_chosen_class_and_weapon(chosen_class, StringName(chosen_weapon_str))
-		TestStartSettings.mark_settings_as_applied()
+	# Connect to the game node's 'weapon_blueprints_ready' signal to ensure
+	# weapon blueprints are loaded before attempting to equip the initial weapon.
+	if is_instance_valid(game_node_ref) and game_node_ref.has_signal("weapon_blueprints_ready"):
+		game_node_ref.weapon_blueprints_ready.connect(Callable(self, "_on_game_weapon_blueprints_ready"), CONNECT_ONE_SHOT)
 	else:
-		setup_with_chosen_class_and_weapon(BasicClass.WARRIOR, &"warrior_scythe")
+		push_warning("PlayerCharacter: Game node or 'weapon_blueprints_ready' signal not found. Proceeding with default setup.")
+		_on_game_weapon_blueprints_ready() # Call directly for immediate setup
 
+	# Connect to experience collection area
 	if experience_collector_area:
 		if not experience_collector_area.is_connected("area_entered", Callable(self, "_on_experience_collector_area_entered")):
 			experience_collector_area.area_entered.connect(Callable(self, "_on_experience_collector_area_entered"))
 	
+	# Initial experience calculation for level 1
 	experience_to_next_level = calculate_exp_for_next_level(current_level)
 	
-	if is_instance_valid(player_stats) and player_stats.has_signal("stats_recalculated"):
+	# Connect to player_stats' 'stats_recalculated' signal.
+	# This signal will trigger when player stats change (e.g., from upgrades),
+	# allowing PlayerCharacter to update its derived properties like current_health.
+	if is_instance_valid(player_stats):
 		if not player_stats.is_connected("stats_recalculated", Callable(self, "_on_player_stats_recalculated")):
 			player_stats.stats_recalculated.connect(Callable(self, "_on_player_stats_recalculated"))
-	
-	# Connect to the game node's ready signal FIRST
-	game_node_ref = get_tree().root.get_node_or_null("Game")
-	if is_instance_valid(game_node_ref) and game_node_ref.has_signal("weapon_blueprints_ready"):
-		game_node_ref.weapon_blueprints_ready.connect(self._on_game_ready_to_equip_weapon, CONNECT_ONE_SHOT)
-		game_node_ref.weapon_blueprints_ready.connect(Callable(self, "_on_game_weapon_blueprints_ready"))
-
-		if game_node_ref.has_method("get_all_weapon_blueprints_for_debug") and \
-		   not game_node_ref.get_all_weapon_blueprints_for_debug().is_empty():
-			call_deferred("_on_game_weapon_blueprints_ready")
 	else:
-		# Fallback if the game node isn't found immediately
-		call_deferred("_on_game_ready_to_equip_weapon")
+		push_error("PlayerCharacter: PlayerStats node is invalid in _ready().")
 
-func _on_game_ready_to_equip_weapon():
-	# This function now runs AFTER game.gd has loaded all blueprints.
-	if TestStartSettings != null and TestStartSettings.are_test_settings_available():
-		var chosen_class = TestStartSettings.get_chosen_basic_class()
-		var chosen_weapon_id = TestStartSettings.get_chosen_weapon_id()
-		setup_with_chosen_class_and_weapon(chosen_class, chosen_weapon_id)
+
+# This function is called when 'game.gd' signals that weapon blueprints are ready.
+# It then proceeds with the initial player and weapon setup.
+func _on_game_weapon_blueprints_ready():
+	# Determine initial class and weapon based on test settings or defaults.
+	if TestStartSettings != null and TestStartSettings.are_test_settings_available() and not TestStartSettings.were_settings_applied_this_run():
+		_initial_chosen_class_enum = TestStartSettings.get_chosen_basic_class()
+		_initial_chosen_weapon_id = TestStartSettings.get_chosen_weapon_id() # Returns StringName
 		TestStartSettings.mark_settings_as_applied()
 	else:
-		# Default fallback if no test settings are found
-		setup_with_chosen_class_and_weapon(BasicClass.WARRIOR, &"warrior_scythe")
+		# Default fallback if no test settings are found or already applied.
+		_initial_chosen_class_enum = BasicClass.WARRIOR
+		_initial_chosen_weapon_id = &"warrior_scythe"
 
-func setup_with_chosen_class_and_weapon(class_enum: PlayerCharacter.BasicClass, weapon_id: StringName):
-	_initial_chosen_class_enum = class_enum
-	_initial_chosen_weapon_id = weapon_id
-	_initialize_player_class_and_stats(class_enum)
+	# Initialize player class and stats first.
+	_initialize_player_class_and_stats(_initial_chosen_class_enum)
 	
-	if not is_instance_valid(game_node_ref):
-		game_node_ref = get_tree().root.get_node_or_null("Game")
-	
-	if is_instance_valid(game_node_ref) and weapon_id != &"":
-		# Get the full blueprint resource from the game node
-		var weapon_blueprint = game_node_ref.get_weapon_blueprint_by_id(weapon_id)
-		if is_instance_valid(weapon_blueprint):
-			# Pass the entire resource to the WeaponManager
-			var success = weapon_manager.add_weapon(weapon_blueprint)
-			if success and not weapon_blueprint.class_tag_restrictions.is_empty():
-				increment_basic_class_level(weapon_blueprint.class_tag_restrictions[0])
-	_initial_weapon_equipped = false
-	current_basic_class_enum_val = _initial_chosen_class_enum
+	# Then attempt to equip the initial weapon.
+	_try_equip_initial_weapon()
 
-	_initialize_player_class_and_stats(class_enum)
-
-	call_deferred("_on_player_stats_recalculated")
+	# Emit initial experience signal (health_changed will be emitted by _on_player_stats_recalculated)
 	emit_signal("experience_changed", current_experience, experience_to_next_level, current_level)
 
 
-func _on_game_weapon_blueprints_ready():
-	_try_equip_initial_weapon()
-
-func _try_equip_initial_weapon_fallback():
-	if not is_instance_valid(game_node_ref):
-		game_node_ref = get_tree().root.get_node_or_null("Game")
-	_try_equip_initial_weapon()
-
-func _try_equip_initial_weapon():
-	if _initial_weapon_equipped: return
-	if _initial_chosen_weapon_id == &"": _initial_weapon_equipped = true; return
-	if not is_instance_valid(weapon_manager) or not weapon_manager.has_method("add_weapon_from_blueprint_id"): 
-		_initial_weapon_equipped = true; return
-
-	var success = weapon_manager.add_weapon_from_blueprint_id(_initial_chosen_weapon_id)
-	
-	if success:
-		var starting_weapon_bp = game_node_ref.get_weapon_blueprint_by_id(_initial_chosen_weapon_id)
-		if is_instance_valid(starting_weapon_bp) and not starting_weapon_bp.class_tag_restrictions.is_empty():
-			var class_enum_to_increment = starting_weapon_bp.class_tag_restrictions[0]
-			increment_basic_class_level(class_enum_to_increment)
-	
-	_initial_weapon_equipped = true
-
-
-func _initialize_player_class_and_stats(p_class_enum: BasicClass = BasicClass.WARRIOR):
+# Initializes the player's class and sets up their base stats via PlayerStats.gd.
+func _initialize_player_class_and_stats(p_class_enum: BasicClass):
 	if not is_instance_valid(player_stats):
-		_fallback_initialize_stats_directly()
-		return
-
-	if not player_stats.has_method("initialize_with_class_data"):
-		_fallback_initialize_stats_directly()
-		return
+		push_error("PlayerCharacter: PlayerStats node is not valid for initialization!"); return
 
 	current_basic_class_enum_val = p_class_enum
 	var class_name_str = BasicClass.keys()[p_class_enum].to_lower()
 
 	var class_data_path = "res://DataResources/Classes/" + class_name_str + "_class_data.tres"
 
+	var class_data_res: PlayerClassData = null
 	if ResourceLoader.exists(class_data_path):
-		var class_data_res = load(class_data_path) as PlayerClassData
-		if is_instance_valid(class_data_res):
-			player_stats.initialize_with_class_data(class_data_res)
-			current_health = player_stats.get_max_health()
-		else:
-			_fallback_initialize_stats_directly()
+		class_data_res = load(class_data_path) as PlayerClassData
+	
+	if is_instance_valid(class_data_res):
+		player_stats.initialize_base_stats(class_data_res)
+		# Set current_health based on the newly initialized max health from PlayerStats
+		current_health = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
 	else:
+		push_error("PlayerCharacter: Failed to load PlayerClassData at '", class_data_path, "'. Initializing with fallback stats.")
 		_fallback_initialize_stats_directly()
 	
-	if is_instance_valid(player_stats) and not player_stats.is_connected("stats_recalculated", Callable(self, "_on_player_stats_recalculated")):
-		player_stats.recalculate_all_stats()
-	elif not is_instance_valid(player_stats):
-		_on_player_stats_recalculated()
+	# Recalculation will be triggered by player_stats.stats_recalculated signal,
+	# which we connected in _ready().
 
-
+# Fallback function to initialize player stats with hardcoded values
+# if PlayerClassData cannot be loaded.
 func _fallback_initialize_stats_directly():
-	if is_instance_valid(player_stats) and player_stats.has_method("initialize_with_raw_stats"):
-		var raw_stats = {
-			"base_max_health": 100, "base_health_regeneration": 0.1, "base_numerical_damage": 10,
-			"base_global_damage_multiplier": 1.0, "base_global_flat_damage_add": 0.0,
-			"base_attack_speed_multiplier": 1.0, "base_armor": 1, "base_armor_penetration": 0.0,
-			"base_movement_speed": 70.0, "base_magnet_range": 50.0, "base_experience_gain_multiplier": 1.0,
-			"base_aoe_area_multiplier": 1.0, "base_projectile_size_multiplier": 1.0,
-			"base_projectile_speed_multiplier": 1.0, "base_effect_duration_multiplier": 1.0,
-			"base_crit_chance": 0.05, "base_crit_damage_multiplier": 1.5, "base_luck": 0
-		}
-		player_stats.initialize_with_raw_stats(raw_stats)
-		current_health = player_stats.get_max_health()
+	if not is_instance_valid(player_stats):
+		push_error("PlayerCharacter: Cannot fallback initialize stats, PlayerStats node is invalid!"); return
+
+	# Use standardized keys for fallback stats
+	var raw_stats = {
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MAX_HEALTH]: 100.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.HEALTH_REGENERATION]: 0.1,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.NUMERICAL_DAMAGE]: 10.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.GLOBAL_DAMAGE_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION]: 0.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MOVEMENT_SPEED]: 70.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MAGNET_RANGE]: 50.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.EXPERIENCE_GAIN_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.AOE_AREA_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.PROJECTILE_SIZE_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.PROJECTILE_SPEED_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.EFFECT_DURATION_MULTIPLIER]: 1.0,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.CRIT_CHANCE]: 0.05,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.CRIT_DAMAGE_MULTIPLIER]: 1.5,
+		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.LUCK]: 0.0
+	}
+	# Pass these raw stats to PlayerStats for initialization
+	player_stats.initialize_base_stats_with_raw_dict(raw_stats)
+	current_health = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+	push_warning("PlayerCharacter: Fallback stats applied. Ensure PlayerStats has 'initialize_base_stats_with_raw_dict' method.")
+
+
+# Attempts to equip the initial weapon set during setup.
+# This should run after weapon blueprints are confirmed loaded.
+func _try_equip_initial_weapon():
+	if _initial_weapon_equipped: return # Prevent double equipping
+
+	# No initial weapon chosen, or WeaponManager isn't valid
+	if _initial_chosen_weapon_id == &"" or not is_instance_valid(weapon_manager):
+		_initial_weapon_equipped = true; return
+
+	# Get the full blueprint resource from the game node
+	if not is_instance_valid(game_node_ref):
+		game_node_ref = get_tree().root.get_node_or_null("Game")
+		if not is_instance_valid(game_node_ref):
+			push_error("PlayerCharacter: Game node is not valid, cannot get weapon blueprint!"); return
+
+	var weapon_blueprint = game_node_ref.get_weapon_blueprint_by_id(_initial_chosen_weapon_id)
+	
+	if is_instance_valid(weapon_blueprint):
+		var success = weapon_manager.add_weapon(weapon_blueprint)
+		if success and not weapon_blueprint.class_tag_restrictions.is_empty():
+			increment_basic_class_level(weapon_blueprint.class_tag_restrictions[0])
 	else:
-		current_health = max_health
-		current_pickup_magnet_radius = pickup_magnet_base_radius
-		update_experience_collector_radius()
-		emit_signal("health_changed", current_health, max_health)
+		push_error("PlayerCharacter: Failed to get weapon blueprint for ID: ", _initial_chosen_weapon_id)
+	
+	_initial_weapon_equipped = true
 
 
+# This function is triggered by PlayerStats.gd whenever its stats are recalculated.
+# PlayerCharacter updates its own derived properties here.
 func _on_player_stats_recalculated():
 	if not is_instance_valid(player_stats): return
 
-	var new_max_health = player_stats.get_max_health()
-	var health_percentage = 1.0
-	if max_health > 0 : health_percentage = float(current_health) / float(max_health)
-	else: health_percentage = 1.0 if new_max_health > 0 else 0.0
-
-	max_health = new_max_health
-	current_health = clamp(int(round(new_max_health * health_percentage)), 0, new_max_health)
-	if new_max_health > 0 and current_health == 0 and health_percentage > 0:
-		current_health = 1
+	var new_max_health = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
 	
-	var new_magnet_range = player_stats.get_magnet_range()
+	# Calculate health percentage before updating max health, to maintain relative health
+	var health_percentage = 1.0
+	var old_max_health = get_max_health_value() # Get current max health value for accurate percentage
+	if old_max_health > 0:
+		health_percentage = current_health / old_max_health
+	
+	current_health = clampf(new_max_health * health_percentage, 0, new_max_health)
+	
+	# Ensure current_health doesn't become 0 from percentage if it was >0 before
+	if new_max_health > 0 and current_health < 1.0 and health_percentage > 0: # Check for <1.0 for floats
+		current_health = 1.0
+	
+	# Update pickup magnet radius
+	var new_magnet_range = player_stats.get_final_stat(GameStatConstants.Keys.MAGNET_RANGE)
 	if current_pickup_magnet_radius != new_magnet_range:
 		current_pickup_magnet_radius = new_magnet_range
 		update_experience_collector_radius()
@@ -234,47 +244,58 @@ func _physics_process(delta: float):
 	if Input.is_action_pressed("move_down"): input_direction.y += 1
 	if Input.is_action_pressed("move_up"): input_direction.y -= 1
 
-	var current_move_speed = speed
-	if is_instance_valid(player_stats) and player_stats.has_method("get_movement_speed"):
-		current_move_speed = player_stats.get_movement_speed()
+	# Get current movement speed from PlayerStats
+	var current_move_speed = player_stats.get_final_stat(GameStatConstants.Keys.MOVEMENT_SPEED)
 	
 	if input_direction.length_squared() > 0:
 		velocity = input_direction.normalized() * current_move_speed
+		# Animated Sprite flipping logic
+		if animated_sprite:
+			if velocity.x < -0.01:
+				animated_sprite.flip_h = true
+				animated_sprite.offset.x = sprite_flip_x_compensation
+			elif velocity.x > 0.01: # Check for positive velocity to ensure it's moving right
+				animated_sprite.flip_h = false
+				animated_sprite.offset.x = 0.0
+			# Play walk animation
+			# UPDATED: Use StringName for animation name
+			if animated_sprite.animation != &"walk":
+				animated_sprite.play(&"walk")
 	else:
 		velocity = Vector2.ZERO
+		# Play idle animation if not moving
+		if animated_sprite and animated_sprite.animation != &"idle":
+			animated_sprite.play(&"idle") # UPDATED: Use StringName for animation name
 	
-	if animated_sprite:
-		if velocity.x < -0.01:
-			animated_sprite.flip_h = true
-			animated_sprite.offset.x = sprite_flip_x_compensation
-		elif velocity.x > 0.1:
-			animated_sprite.flip_h = false
-			animated_sprite.offset.x = 0.0
 	move_and_slide()
 	
+	# Health Regeneration
 	if is_instance_valid(player_stats):
-		var regen = player_stats.get_health_regeneration()
-		var current_max_hp = player_stats.get_max_health()
+		var regen = player_stats.get_final_stat(GameStatConstants.Keys.HEALTH_REGENERATION)
+		var current_max_hp = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
 		if regen > 0.0 and current_health < current_max_hp:
 			current_health += regen * delta
-			current_health = min(current_health, current_max_hp)
+			current_health = clampf(current_health, 0, current_max_hp) # Use clampf for floats
 			emit_signal("health_changed", current_health, current_max_hp)
+
 
 func _on_experience_collector_area_entered(area: Area2D):
 	if area.is_in_group("exp_drops") and area.has_method("collected"):
-		# CORRECTED: Safely access the property instead of using the wrong .get() method.
 		var exp_value: int = 0
-		if "experience_value" in area:
+		if area.has_method("get_experience_value"): # Prefer method if exists
+			exp_value = area.get_experience_value()
+		elif "experience_value" in area: # Fallback to property if method doesn't exist
 			exp_value = area.experience_value
 			
-		var exp_gain_mod = 1.0
-		if is_instance_valid(player_stats) and player_stats.has_method("get_experience_gain_multiplier"):
-			exp_gain_mod = player_stats.get_experience_gain_multiplier()
+		# Get experience gain multiplier from PlayerStats
+		var exp_gain_mod = player_stats.get_final_stat(GameStatConstants.Keys.EXPERIENCE_GAIN_MULTIPLIER)
 		var modified_exp_value = int(round(float(exp_value) * exp_gain_mod))
+		
 		current_experience += modified_exp_value
 		area.collected()
 		check_level_up()
 		emit_signal("experience_changed", current_experience, experience_to_next_level, current_level)
+
 
 func check_level_up():
 	while current_experience >= experience_to_next_level:
@@ -284,6 +305,7 @@ func check_level_up():
 		experience_to_next_level = calculate_exp_for_next_level(current_level)
 		emit_signal("player_level_up", current_level)
 
+
 func calculate_exp_for_next_level(player_curr_level: int) -> int:
 	if player_curr_level < 1:
 		return LINEAR_FACTOR_PER_LEVEL + int(BASE_FOR_EXPONENTIAL_PART * pow(EXPONENTIAL_SCALING_FACTOR, 0.0))
@@ -291,61 +313,117 @@ func calculate_exp_for_next_level(player_curr_level: int) -> int:
 	var exponential_part = BASE_FOR_EXPONENTIAL_PART * pow(EXPONENTIAL_SCALING_FACTOR, float(player_curr_level - 1))
 	return linear_part + int(exponential_part)
 	
-func take_damage(amount: int, attacker: Node2D = null):
-	var current_defense = 0
-	if is_instance_valid(player_stats) and player_stats.has_method("get_armor"):
-		current_defense = player_stats.get_armor()
-	var actual_damage = max(0, amount - current_defense)
-	current_health = max(0, current_health - actual_damage)
+func take_damage(amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}): # Changed amount to float for consistency
+	if current_health <= 0 or is_dead_flag: return # Do not take damage if dead or already dying
 	
-	var current_max_hp = 100
-	if is_instance_valid(player_stats) and player_stats.has_method("get_max_health"):
-		current_max_hp = player_stats.get_max_health()
+	var current_armor = player_stats.get_final_stat(GameStatConstants.Keys.ARMOR)
+	var armor_penetration_value = float(p_attack_stats.get(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION], 0.0)) # Get penetration from incoming attack
+
+	# Calculate effective armor after penetration
+	var effective_armor = maxf(0.0, current_armor - armor_penetration_value)
+	
+	# Basic damage reduction: raw damage - effective armor
+	var actual_damage = maxf(0.0, amount - effective_armor)
+
+	# Apply DAMAGE_REDUCTION_MULTIPLIER (from player's own buffs or debuffs)
+	var damage_reduction_mult_val = player_stats.get_final_stat(GameStatConstants.Keys.DAMAGE_REDUCTION_MULTIPLIER)
+	actual_damage *= (1.0 - damage_reduction_mult_val) # Assuming this is a reduction, so (1.0 - value)
+	actual_damage = maxf(0.0, actual_damage) # Ensure damage doesn't go negative after reduction
+
+	current_health = maxf(0.0, current_health - actual_damage)
+	
+	var current_max_hp = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
 	emit_signal("health_changed", current_health, current_max_hp)
 	
 	if is_instance_valid(attacker):
 		emit_signal("player_took_damage_from", attacker)
-		emit_signal("attacked_by_enemy", attacker) # EMIT THE NEW SIGNAL HERE
+		emit_signal("attacked_by_enemy", attacker)
 		
 	if current_health <= 0: die()
 
+
 func die():
+	if is_dead_flag: return # Prevent double death
+	is_dead_flag = true
 	emit_signal("player_has_died")
-	set_physics_process(false); hide()
-	var mc = get_node_or_null("CollisionShape2D"); if mc: mc.disabled = true
+	set_physics_process(false) # Stop player movement/physics
+	visible = false # Hide player sprite
+	var mc = get_node_or_null("CollisionShape2D"); if is_instance_valid(mc): mc.disabled = true
 	
 func apply_upgrade(upgrade_data_wrapper: Dictionary):
 	if not upgrade_data_wrapper is Dictionary:
-		print_debug("ERROR (PlayerCharacter): apply_upgrade did not receive a dictionary.")
+		push_error("ERROR (PlayerCharacter): apply_upgrade did not receive a dictionary.")
 		return
 	
 	var upgrade_type = upgrade_data_wrapper.get("type", "")
-	var resource = upgrade_data_wrapper.get("resource_data") # This is now guaranteed to exist
+	var resource = upgrade_data_wrapper.get("resource_data")
 
 	if not is_instance_valid(resource):
-		print_debug("ERROR (PlayerCharacter): apply_upgrade received wrapper with invalid or missing resource_data.")
+		push_error("ERROR (PlayerCharacter): apply_upgrade received wrapper with invalid or missing resource_data. Type: ", upgrade_type)
 		return
 
-	if upgrade_type == "new_weapon" and resource is WeaponBlueprintData:
-		if is_instance_valid(weapon_manager) and weapon_manager.has_method("add_weapon"):
-			# Pass the resource directly
-			var success = weapon_manager.add_weapon(resource)
-			if success and not resource.class_tag_restrictions.is_empty():
-				# Increment class level for the newly acquired weapon (level 1)
-				increment_basic_class_level(resource.class_tag_restrictions[0])
-			
-	elif upgrade_type == "weapon_upgrade" and resource is WeaponUpgradeData:
-		var weapon_id_to_upgrade = upgrade_data_wrapper.get("weapon_id_to_upgrade", &"")
-		if weapon_id_to_upgrade != &"" and is_instance_valid(weapon_manager) and weapon_manager.has_method("apply_weapon_upgrade"):
-			weapon_manager.apply_weapon_upgrade(StringName(weapon_id_to_upgrade), resource)
-			
-	elif upgrade_type == "general_upgrade" and resource is GeneralUpgradeCardData:
-		if is_instance_valid(player_stats) and player_stats.has_method("apply_effects_from_card"):
-			player_stats.apply_effects_from_card(resource)
+	match upgrade_type:
+		"new_weapon":
+			if resource is WeaponBlueprintData:
+				if is_instance_valid(weapon_manager) and weapon_manager.has_method("add_weapon"):
+					var success = weapon_manager.add_weapon(resource)
+					if success and not resource.class_tag_restrictions.is_empty():
+						increment_basic_class_level(resource.class_tag_restrictions[0])
+			else:
+				push_error("PlayerCharacter: 'new_weapon' upgrade_type received non-WeaponBlueprintData resource: ", resource)
+		"weapon_upgrade":
+			if resource is WeaponUpgradeData:
+				var weapon_id_to_upgrade = upgrade_data_wrapper.get("weapon_id_to_upgrade", &"")
+				if weapon_id_to_upgrade != &"" and is_instance_valid(weapon_manager) and weapon_manager.has_method("apply_weapon_upgrade"):
+					weapon_manager.apply_weapon_upgrade(StringName(weapon_id_to_upgrade), resource)
+				else:
+					push_error("PlayerCharacter: 'weapon_upgrade' missing weapon_id_to_upgrade or invalid manager.")
+			else:
+				push_error("PlayerCharacter: 'weapon_upgrade' upgrade_type received non-WeaponUpgradeData resource: ", resource)
+		"general_upgrade":
+			if resource is GeneralUpgradeCardData:
+				# GeneralUpgradeCardData should contain an array of EffectData.
+				# We now iterate over its effects and apply them individually.
+				# This requires GeneralUpgradeCardData to have a 'get_effects_to_apply' method.
+				if is_instance_valid(player_stats) and resource.has_method("get_effects_to_apply"):
+					var effects_to_apply = resource.get_effects_to_apply()
+					for effect in effects_to_apply:
+						if not is_instance_valid(effect):
+							push_warning("PlayerCharacter: General upgrade contains invalid (null) effect.")
+							continue
+
+						if effect is StatModificationEffectData:
+							player_stats.apply_stat_modification(effect)
+						elif effect is CustomFlagEffectData:
+							player_stats.apply_custom_flag(effect)
+						elif effect is TriggerAbilityEffectData:
+							push_warning("PlayerCharacter: TriggerAbilityEffectData in GeneralUpgradeCardData is not yet fully implemented for direct application by PlayerCharacter.")
+							# Implement handling for TriggerAbilityEffectData here (e.g., call a method on PlayerCharacter)
+						elif effect is StatusEffectApplicationData:
+							# For GeneralUpgrades, status effects usually apply to the player.
+							if is_instance_valid(player_stats) and is_instance_valid(get_node_or_null("StatusEffectComponent")):
+								var status_comp = get_node("StatusEffectComponent") as StatusEffectComponent
+								var app_data = effect as StatusEffectApplicationData
+								if is_instance_valid(status_comp) and is_instance_valid(app_data) and randf() < app_data.application_chance:
+									status_comp.apply_effect(
+										load(app_data.status_effect_resource_path) as StatusEffectData,
+										self, # Source is player
+										{}, # No weapon stats for scaling
+										app_data.duration_override,
+										app_data.potency_override
+									)
+							else:
+								push_warning("PlayerCharacter: StatusEffectComponent not found for applying general upgrade status effect.")
+						else:
+							push_warning("PlayerCharacter: General upgrade contains unhandled effect type: ", effect.get_class())
+				else:
+					push_error("PlayerCharacter: GeneralUpgradeCardData missing 'get_effects_to_apply' method or player_stats invalid.")
+			else:
+				push_error("PlayerCharacter: 'general_upgrade' upgrade_type received non-GeneralUpgradeCardData resource: ", resource)
+		_:
+			push_error("PlayerCharacter: apply_upgrade received unknown upgrade type: '", upgrade_type, "'. Resource: ", resource)
 	
-	else:
-		print_debug("PlayerCharacter: apply_upgrade received unknown upgrade type or invalid resource. Type: '", upgrade_type, "', Resource: ", resource)
-	
+	# After applying upgrades, signal PlayerStats to recalculate all its derived stats.
 	if is_instance_valid(player_stats) and player_stats.has_method("recalculate_all_stats"):
 		player_stats.recalculate_all_stats()
 
@@ -353,9 +431,9 @@ func apply_upgrade(upgrade_data_wrapper: Dictionary):
 func increment_basic_class_level(class_enum: BasicClass):
 	if basic_class_levels.has(class_enum):
 		basic_class_levels[class_enum] += 1
-		print_debug("Class Level Up! %s is now level %d" % [BasicClass.keys()[class_enum], basic_class_levels[class_enum]])
+		print("Class Level Up! %s is now level %d" % [BasicClass.keys()[class_enum], basic_class_levels[class_enum]])
 	else:
-		print_debug("WARNING (PlayerCharacter): Tried to increment unknown class enum: ", class_enum)
+		push_warning("WARNING (PlayerCharacter): Tried to increment unknown class enum: ", class_enum)
 
 # --- Existing Helper & Getter Functions ---
 func update_experience_collector_radius():
@@ -363,6 +441,10 @@ func update_experience_collector_radius():
 		var cs = experience_collector_area.get_child(0) as CollisionShape2D
 		if is_instance_valid(cs) and cs.shape is CircleShape2D:
 			cs.shape.radius = current_pickup_magnet_radius
+		else:
+			push_warning("PlayerCharacter: ExperienceCollectorArea's first child is not a valid CollisionShape2D with a CircleShape2D.")
+	else:
+		push_warning("PlayerCharacter: ExperienceCollectorArea is invalid or has no children.")
 
 
 func check_for_advanced_class_unlocks() -> Array[Dictionary]:
@@ -379,11 +461,11 @@ func change_player_sprite_for_class(class_id_or_default: String): current_sprite
 func get_current_experience() -> int: return current_experience
 func get_experience_to_next_level() -> int: return experience_to_next_level
 func get_current_level() -> int: return current_level
-func get_current_health() -> int: return current_health
-func get_max_health() -> int:
-	if is_instance_valid(player_stats) and player_stats.has_method("get_max_health"):
-		return player_stats.get_max_health()
-	return 100
+func get_current_health_value() -> float: return current_health
+func get_max_health_value() -> float:
+	if is_instance_valid(player_stats):
+		return player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+	return 0.0
 
 func get_ui_anchor_global_position() -> Vector2:
 	if is_instance_valid(ui_anchor): return ui_anchor.global_position
@@ -415,10 +497,8 @@ func get_acquired_advanced_classes_for_level_up() -> Array[StringName]:
 func get_current_basic_class_enum() -> PlayerCharacter.BasicClass:
 	return current_basic_class_enum_val
 
-func heal(amount: int):
+func heal(amount: float):
 	if current_health <= 0: return
-	var actual_max_health = max_health
-	if is_instance_valid(player_stats) and player_stats.has_method("get_max_health"):
-		actual_max_health = player_stats.get_max_health()
-	current_health = clamp(current_health + amount, 0, actual_max_health)
+	var actual_max_health = get_max_health_value()
+	current_health = clampf(current_health + amount, 0, actual_max_health)
 	emit_signal("health_changed", current_health, actual_max_health)
