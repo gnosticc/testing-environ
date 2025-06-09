@@ -1,0 +1,34 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://21pfpd0y71ba"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_7fley"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_q2bjc"]
+[ext_resource type="PackedScene" uid="uid://7vxk6mtpfyup" path="res://Scenes/Weapons/Summons/MothGolem.tscn" id="3_q2bjc"]
+
+[resource]
+script = ExtResource("2_q2bjc")
+id = &"conjurer_moth_golem"
+title = "Moth Golem"
+description = "Summons a loyal golem that seeks out and attacks enemies."
+weapon_scene = ExtResource("3_q2bjc")
+tags = Array[String](["summon", "physical", "melee"])
+class_tag_restrictions = Array[int]([6])
+cooldown = 0.0
+max_level = 10
+base_lifetime = -1.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = "none"
+initial_specific_stats = {
+"attack_cooldown": 1.8,
+"attack_range": 10.0,
+"base_visual_scale": 1.0,
+"follow_distance": 250.0,
+"max_summons_of_type": 1.0,
+"movement_speed": 80.0,
+"pierce_count": 0,
+"projectile_speed": 200.0,
+"scale_increase_per_level": 0.05,
+"weapon_damage_percentage": 1.8
+}
+available_upgrades = Array[ExtResource("1_7fley")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

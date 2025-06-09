@@ -1,6 +1,7 @@
 # StatusEffectData.gd
 # Path: res://Scripts/DataResources/StatusEffects/StatusEffectData.gd
 # Extends Resource to define the properties and behaviors of a status effect (buff or debuff).
+# ADDED: `next_status_effect_on_expire` to chain effects (e.g., Freeze -> Slow).
 class_name StatusEffectData
 extends Resource
 
@@ -27,10 +28,6 @@ extends Resource
 ## If true, re-applying the effect to a target that already has it will refresh its duration.
 @export var refresh_duration_on_reapply: bool = true
 
-## If true, the 'effects_while_active' are re-evaluated and re-applied each time a stack is added.
-## If false, they are applied once when the first stack is applied and removed when all stacks expire.
-# @export var reapply_effects_on_stack: bool = true # Consider if needed, adds complexity
-
 @export_group("Tick-Based Effects (for DoTs, HoTs, etc.)")
 ## Interval in seconds for tick-based effects (e.g., damage over time). 
 ## If 0, this is not a tick-based effect by default (or effects are instant).
@@ -45,19 +42,14 @@ extends Resource
 ## For "chill", one might be a StatModificationEffectData that reduces "movement_speed".
 @export var effects_while_active: Array[EffectData] = []
 
-## Optional: Effects to apply *once* when the status effect is first applied.
-# @export var effects_on_application: Array[EffectData] = []
-
-## Optional: Effects to apply *once* when the status effect expires or is removed.
-# @export var effects_on_expiration: Array[EffectData] = []
-
-## Optional: StringName ID of another StatusEffectData to apply when this one expires (e.g., Chill -> Freeze)
-# @export var next_status_effect_on_expire: StringName = &""
+## NEW: Optional: StringName ID of another StatusEffectData to apply when this one expires (e.g., Chill -> Freeze)
+@export var next_status_effect_on_expire: StringName = &""
 
 
 func _init():
 	# developer_note = "Defines a status effect like Burn, Chill, Haste, etc."
 	pass
+
 
 # Potential helper methods could be added here if needed, e.g.,
 # func get_modifier_for_stat(stat_key_to_find: StringName) -> StatModificationEffectData:

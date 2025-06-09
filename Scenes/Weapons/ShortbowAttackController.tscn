@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dpu7dcscl3gqn"]
+
+[ext_resource type="Script" uid="uid://bcrp2gkwl54ts" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/ShortbowAttackController.gd" id="1_jpxb0"]
+[ext_resource type="PackedScene" uid="uid://df8rkxp6uqu5g" path="res://Scenes/Weapons/Projectiles/ShortbowArrowAttack.tscn" id="2_nkywy"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_jpxb0")
+arrow_scene = ExtResource("2_nkywy")

@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://klr2k75t6302"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_q0ri4"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_xbeby"]
+[ext_resource type="PackedScene" uid="uid://lqt6ivh044gn" path="res://Scenes/Weapons/ShieldBashAttack.tscn" id="3_xbeby"]
+
+[resource]
+script = ExtResource("2_xbeby")
+id = &"knight_shield_bash"
+title = "Shield Bash"
+description = "A quick bash that knocks enemies back."
+weapon_scene = ExtResource("3_xbeby")
+tags = Array[String](["melee", "knockback", "physical"])
+class_tag_restrictions = Array[int]([2])
+cooldown = 2.5
+max_level = 10
+base_lifetime = 0.2
+spawn_as_child = true
+requires_direction = true
+targeting_type = "mouse"
+initial_specific_stats = {
+"pierce_count": 0,
+"projectile_speed": 200.0,
+"weapon_damage_percentage": 1.2
+}
+available_upgrades = Array[ExtResource("1_q0ri4")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

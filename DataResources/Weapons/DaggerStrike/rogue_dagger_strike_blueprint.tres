@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://decefa1ksr1hc"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_6w2lo"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_atqco"]
+[ext_resource type="PackedScene" uid="uid://b5tus7fojeofy" path="res://Scenes/Weapons/DaggerStrikeController.tscn" id="3_atqco"]
+
+[resource]
+script = ExtResource("2_atqco")
+id = &"rogue_dagger_strike"
+title = "Dagger Strike"
+description = "A quick series of slashes with a dagger."
+weapon_scene = ExtResource("3_atqco")
+tags = Array[String](["melee", "physical"])
+class_tag_restrictions = Array[int]([3])
+cooldown = 1.1
+max_level = 10
+base_lifetime = 0.3
+spawn_as_child = false
+requires_direction = true
+targeting_type = "mouse"
+initial_specific_stats = {
+"attack_area_scale": 0.3,
+"attack_sequence": [{
+"damage_multiplier": 1.0,
+"delay": 0.0,
+"rotation_offset": 0.0
+}, {
+"damage_multiplier": 1.0,
+"delay": 0.1,
+"rotation_offset": 15.0
+}],
+"inherent_visual_scale_x": 0.3,
+"inherent_visual_scale_y": 0.3,
+"pierce_count": 0,
+"projectile_speed": 200.0,
+"weapon_damage_percentage": 0.7
+}
+available_upgrades = Array[ExtResource("1_6w2lo")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

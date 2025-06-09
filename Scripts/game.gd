@@ -22,9 +22,6 @@ var player_node: PlayerCharacter
 @export var spawn_margin: float = 100.0
 @export var player_movement_threshold: float = 20.0 
 @export var forward_spawn_bias_chance: float = 0.75 
-var base_spawn_interval: float = 3.5 
-var min_spawn_interval: float = 0.25 
-var current_spawn_interval: float
 var enemies_per_batch: int = 3 
 
 const ORIGINAL_SPAWN_MARGIN: float = 100.0
@@ -34,11 +31,21 @@ const ORIGINAL_BASE_SPAWN_INTERVAL: float = 3.5
 const ORIGINAL_MIN_SPAWN_INTERVAL: float = 0.25
 const ORIGINAL_ENEMIES_PER_BATCH: int = 3
 
+# --- Spawn Interval Scaling (Tunable) ---
+var base_spawn_interval: float = 3.5
+var min_spawn_interval: float = 0.25
+var current_spawn_interval: float
+
+# --- NEW: Spawn Batch Size Scaling (Tunable) ---
+@export var base_enemies_per_batch: int = 3
+@export var max_enemies_per_batch: int = 30
+@export var dds_for_max_batch_size: float = 3000.0 # DDS at which the max batch size is reached
+
 # --- DDS & Difficulty Scaling (Tunable) ---
 var current_dds: float = 0.0
 var is_currently_hardcore_phase: bool = false
-var dds_spawn_rate_factor: float = 0.0020 
-var hardcore_spawn_rate_multiplier: float = 1.75 
+var dds_spawn_rate_factor: float = 0.0020
+var hardcore_spawn_rate_multiplier: float = 1.75
 
 const ORIGINAL_DDS_SPAWN_RATE_FACTOR: float = 0.0020
 const ORIGINAL_HARDCORE_SPAWN_RATE_MULTIPLIER: float = 1.75
@@ -52,19 +59,19 @@ const ORIGINAL_HARDCORE_SPAWN_RATE_MULTIPLIER: float = 1.75
 ]
 var loaded_enemy_definitions: Array[EnemyData] = []
 
-var max_active_enemy_types: int = 7 
+var max_active_enemy_types: int = 7
 var current_active_enemy_pool: Array[EnemyData] = []
-var last_active_pool_refresh_dds: float = -200.0 
-var active_pool_refresh_dds_interval: float = 20.0 
+var last_active_pool_refresh_dds: float = -200.0
+var active_pool_refresh_dds_interval: float = 20.0
 
 const ORIGINAL_MAX_ACTIVE_ENEMY_TYPES: int = 7
 const ORIGINAL_ACTIVE_POOL_REFRESH_DDS_INTERVAL: float = 20.0
 
 # --- Enemy Count Management (Tunable) ---
 var current_active_enemy_count: int = 0
-var target_on_screen_enemies: int = 15 
-var enemy_count_update_dds_interval: float = 35.0 
-var last_enemy_count_update_dds: float = -100.0 
+var target_on_screen_enemies: int = 15
+var enemy_count_update_dds_interval: float = 35.0
+var last_enemy_count_update_dds: float = -100.0
 var debug_override_target_enemies: bool = false
 var debug_target_enemies_value: int = 15
 
@@ -72,9 +79,9 @@ const ORIGINAL_ENEMY_COUNT_UPDATE_DDS_INTERVAL: float = 35.0
 
 # --- Global Threat Pool (Tunable) ---
 var global_unspent_threat_pool: int = 0
-var threat_pool_spawn_threshold: int = 25 
-var threat_pool_batch_multiplier: float = 1.5 
-var culling_check_timer: Timer 
+var threat_pool_spawn_threshold: int = 6
+var threat_pool_batch_multiplier: float = 2.0
+var culling_check_timer: Timer
 var culling_timer_wait_time: float = 3.0
 
 const ORIGINAL_THREAT_POOL_SPAWN_THRESHOLD: int = 25
@@ -105,8 +112,20 @@ const ORIGINAL_RANDOM_EVENT_CHECK_INTERVAL: float = 35.0
 
 # --- Weapon Blueprint Loading (NEW SYSTEM) ---
 @export var weapon_blueprint_files: Array[String] = [
-	"res://DataResources/Weapons/Scythe/scythe_blueprint.tres" 
+	"res://DataResources/Weapons/Scythe/warrior_scythe_blueprint.tres",
+	"res://DataResources/Weapons/Crossbow/warrior_crossbow_blueprint.tres",
+	"res://DataResources/Weapons/Longsword/knight_longsword_blueprint.tres",
+	"res://DataResources/Weapons/ShieldBash/knight_shield_bash_blueprint.tres",
+	"res://DataResources/Weapons/Shortbow/rogue_shortbow_blueprint.tres",
+	"res://DataResources/Weapons/DaggerStrike/rogue_dagger_strike_blueprint.tres",
+	"res://DataResources/Weapons/Spark/wizard_spark_blueprint.tres",
+	"res://DataResources/Weapons/FrozenTerritory/wizard_frozen_territory_blueprint.tres",
+	"res://DataResources/Weapons/VineWhip/druid_vine_whip_blueprint.tres",
+	"res://DataResources/Weapons/Torrent/druid_torrent_blueprint.tres",
+	"res://DataResources/Weapons/LesserSpirit/conjurer_lesser_spirit_blueprint.tres",
+	"res://DataResources/Weapons/MothGolem/conjurer_moth_golem_blueprint.tres"
 ]
+
 var all_loaded_weapon_blueprints: Array[WeaponBlueprintData] = [] 
 var weapon_blueprints_by_id: Dictionary = {} 
 
@@ -128,7 +147,7 @@ func _ready():
 	_load_all_general_upgrades()
 	emit_signal("weapon_blueprints_ready") 
 
-	current_spawn_interval = base_spawn_interval 
+	current_spawn_interval = base_spawn_interval
 	camera = get_viewport().get_camera_2d()
 
 	for path in enemy_data_files:
@@ -148,8 +167,6 @@ func _ready():
 		
 		_update_target_on_screen_enemies(); last_enemy_count_update_dds = current_dds
 		_refresh_active_enemy_pool(); last_active_pool_refresh_dds = current_dds
-		if game_ui_node.has_method("update_culled_enemies_display"): game_ui_node.update_culled_enemies_display(current_active_enemy_count)
-		if game_ui_node.has_method("update_threat_pool_display"): game_ui_node.update_threat_pool_display(global_unspent_threat_pool)
 	else: print("ERROR (game.gd): GameUI node not found.")
 
 	if not is_instance_valid(camera):
@@ -166,12 +183,11 @@ func _ready():
 		player_node = players[0] as PlayerCharacter
 		if player_node.has_signal("player_has_died"): player_node.player_has_died.connect(Callable(self, "_on_player_has_died"))
 		if player_node.has_signal("player_level_up"): player_node.player_level_up.connect(Callable(self, "_on_player_level_up"))
-		if player_node.has_signal("player_class_tier_upgraded"): player_node.player_class_tier_upgraded.connect(Callable(self, "_on_player_class_tier_upgraded"))
 	
 	_update_spawn_interval_from_dds()
 
 	culling_check_timer = Timer.new(); culling_check_timer.name = "EnemyCullingTimer"
-	culling_check_timer.wait_time = culling_timer_wait_time 
+	culling_check_timer.wait_time = culling_timer_wait_time
 	culling_check_timer.one_shot = false
 	culling_check_timer.timeout.connect(Callable(self, "_on_culling_check_timer_timeout"))
 	add_child(culling_check_timer); culling_check_timer.start()
@@ -280,37 +296,59 @@ func add_to_global_threat_pool(amount: int):
 		game_ui_node.update_threat_pool_display(global_unspent_threat_pool)
 
 func _on_dds_changed(new_dds_score: float):
-	var previous_dds_for_bucketing = current_dds 
-	current_dds = new_dds_score 
+	var previous_dds_for_bucketing = current_dds
+	current_dds = new_dds_score
 	if is_instance_valid(game_ui_node) and game_ui_node.has_method("is_in_hardcore_phase"):
 		is_currently_hardcore_phase = game_ui_node.is_in_hardcore_phase()
 	_update_spawn_interval_from_dds()
 	var old_enemy_count_bucket = floor(previous_dds_for_bucketing / enemy_count_update_dds_interval)
 	var new_enemy_count_bucket = floor(new_dds_score / enemy_count_update_dds_interval)
-	if new_enemy_count_bucket > old_enemy_count_bucket or last_enemy_count_update_dds < 0: 
+	if new_enemy_count_bucket > old_enemy_count_bucket or last_enemy_count_update_dds < 0:
 		_update_target_on_screen_enemies(); last_enemy_count_update_dds = new_dds_score
 	var old_dds_bucket_pool = floor(previous_dds_for_bucketing / active_pool_refresh_dds_interval)
 	var new_dds_bucket_pool = floor(new_dds_score / active_pool_refresh_dds_interval)
-	if new_dds_bucket_pool > old_dds_bucket_pool or last_active_pool_refresh_dds < 0: 
+	if new_dds_bucket_pool > old_dds_bucket_pool or last_active_pool_refresh_dds < 0:
 		_refresh_active_enemy_pool(); last_active_pool_refresh_dds = new_dds_score
 
+# _update_target_on_screen_enemies
+# This function calculates the desired number of enemies on screen based on game progression.
+# REFACTORED to shorten the initial time-based phase and implement a more robust,
+# scalable DDS-based system with doubled enemy caps.
 func _update_target_on_screen_enemies():
 	if debug_override_target_enemies:
 		target_on_screen_enemies = debug_target_enemies_value
-		return 
+		return
+
 	var time_elapsed_minutes = 0.0
 	if is_instance_valid(game_ui_node) and game_ui_node.has_method("get_elapsed_seconds"):
 		time_elapsed_minutes = float(game_ui_node.get_elapsed_seconds()) / 60.0
+
 	var calculated_target: int
-	if time_elapsed_minutes < 6.0: calculated_target = int(lerpf(10.0, 30.0, time_elapsed_minutes / 6.0))
-	elif time_elapsed_minutes < 8.0: calculated_target = int(lerpf(30.0, 40.0, (time_elapsed_minutes - 6.0) / 2.0))
-	elif current_dds < 800: calculated_target = int(lerpf(40.0, 80.0, current_dds / 800.0))
-	elif current_dds < 2500: calculated_target = int(lerpf(80.0, 150.0, (current_dds - 800.0) / 1700.0))
-	elif current_dds < 4000: calculated_target = int(lerpf(150.0, 200.0, (current_dds - 2500.0) / 1500.0))
-	else: calculated_target = 200
+	
+	# Initial "Training Wheels" Phase (Now 3 minutes)
+	# Smoothly scales the enemy cap from 10 to 30 over the first 3 minutes.
+	if time_elapsed_minutes < 3.0:
+		calculated_target = int(lerpf(10.0, 30.0, time_elapsed_minutes / 3.0))
+	else:
+		# Main Game Phase (DDS-based scaling)
+		# Smoothly scales the enemy cap from 30 up to 400 as DDS goes from 0 to 4000.
+		# This is a cleaner, more scalable approach than multiple 'elif' statements.
+		var start_enemies = 30.0
+		var end_enemies = 400.0 # This is 2x the previous cap of 200
+		var start_dds = 0.0
+		var end_dds = 4000.0
+		
+		# Remap the current DDS value from the DDS range to the enemy count range.
+		# The clamp ensures we don't go below the minimum or above the maximum.
+		calculated_target = int(remap(current_dds, start_dds, end_dds, start_enemies, end_enemies))
+		calculated_target = clamp(calculated_target, int(start_enemies), int(end_enemies))
+
+	# Apply the hardcore phase multiplier
 	if is_currently_hardcore_phase:
-		target_on_screen_enemies = int(calculated_target * 1.35); target_on_screen_enemies = min(target_on_screen_enemies, 275)
-	else: target_on_screen_enemies = clamp(calculated_target, 10, 200)
+		target_on_screen_enemies = int(calculated_target * 1.35)
+		target_on_screen_enemies = min(target_on_screen_enemies, 550) # Increased hardcore cap
+	else:
+		target_on_screen_enemies = calculated_target
 
 func _update_spawn_interval_from_dds():
 	if is_instance_valid(enemy_spawn_timer):
@@ -324,23 +362,20 @@ func _update_spawn_interval_from_dds():
 
 func _refresh_active_enemy_pool():
 	if loaded_enemy_definitions.is_empty(): return
-	print_debug("--- Refreshing Active Enemy Pool (DDS: %.1f) ---" % current_dds)
 	var dds_eligible_enemies: Array[EnemyData] = []
 	for enemy_data_res in loaded_enemy_definitions:
-		if not is_instance_valid(enemy_data_res): continue 
+		if not is_instance_valid(enemy_data_res): continue
 		var max_dds = enemy_data_res.max_DDS_to_spawn
 		if current_dds >= enemy_data_res.min_DDS_to_spawn and \
-		   (current_dds < max_dds or max_dds < 0.0): 
+		   (current_dds < max_dds or max_dds < 0.0):
 			dds_eligible_enemies.append(enemy_data_res)
 	current_active_enemy_pool.clear()
-	if dds_eligible_enemies.is_empty(): 
-		print_debug("No DDS eligible enemies found for active pool.")
-		print_debug("---------------------------------------------------")
-		return
-	dds_eligible_enemies.sort_custom(func(a,b): 
+	if dds_eligible_enemies.is_empty(): return
+	
+	dds_eligible_enemies.sort_custom(func(a,b):
 		var relevance_a = abs(current_dds - a.min_DDS_to_spawn)
 		var relevance_b = abs(current_dds - b.min_DDS_to_spawn)
-		if abs(relevance_a - relevance_b) < 0.01 : return a.spawn_weight > b.spawn_weight 
+		if abs(relevance_a - relevance_b) < 0.01 : return a.spawn_weight > b.spawn_weight
 		return relevance_a < relevance_b
 	)
 	var temp_pool: Array[EnemyData] = []; var current_slot_cost_filled = 0
@@ -377,7 +412,7 @@ func _calculate_spawn_position_for_enemy(near_player: bool = false, offset_vecto
 	if not is_instance_valid(camera) or not is_instance_valid(player_node): return Vector2.ZERO
 	if near_player:
 		var random_angle = randf_range(0, TAU)
-		var random_distance = randf_range(75, 125) 
+		var random_distance = randf_range(75, 125)
 		return player_node.global_position + Vector2.RIGHT.rotated(random_angle) * random_distance + offset_vector
 	var spawn_position = Vector2.ZERO
 	var viewport_pixel_size = get_viewport().get_visible_rect().size; var camera_current_zoom = camera.zoom
@@ -399,69 +434,77 @@ func _calculate_spawn_position_for_enemy(near_player: bool = false, offset_vecto
 	return spawn_position + offset_vector
 
 func _spawn_actual_enemy(enemy_data: EnemyData, position: Vector2, force_elite_type: StringName = &""):
-	if not is_instance_valid(enemy_data) or enemy_data.scene_path.is_empty(): 
-		print_debug("ERROR (_spawn_actual_enemy): Invalid enemy_data or empty scene_path for ID: ", enemy_data.id if is_instance_valid(enemy_data) else "UNKNOWN")
-		return
+	if not is_instance_valid(enemy_data) or enemy_data.scene_path.is_empty(): return
 	var enemy_scene = load(enemy_data.scene_path) as PackedScene
-	if not enemy_scene: print_debug("ERROR (_spawn_actual_enemy): Could not load scene: ", enemy_data.scene_path); return
+	if not enemy_scene: return
 	
 	var enemy_instance = enemy_scene.instantiate() as BaseEnemy
-	if not is_instance_valid(enemy_instance): 
-		print_debug("ERROR (_spawn_actual_enemy): Failed to instance: ", enemy_data.scene_path)
-		return
+	if not is_instance_valid(enemy_instance): return
 
 	enemy_instance.global_position = position
-	enemies_container.add_child(enemy_instance) 
+	enemies_container.add_child(enemy_instance)
 
-	if enemy_instance.has_method("initialize_from_data"): 
+	if enemy_instance.has_method("initialize_from_data"):
 		enemy_instance.initialize_from_data(enemy_data)
 	
 	var dds_contrib_elite = current_dds - enemy_data.min_DDS_to_spawn
 	
-	if force_elite_type != &"": 
+	if force_elite_type != &"":
 		var can_be_this_elite = enemy_data.elite_types_available.has(force_elite_type)
 		if can_be_this_elite or force_elite_type == &"debug_generic_elite":
 			if enemy_instance.has_method("make_elite"):
 				enemy_instance.make_elite(force_elite_type, dds_contrib_elite, enemy_data)
-	else: 
+	else:
 		var elite_c = 0.0
 		if current_dds >= enemy_data.min_DDS_for_elites_to_appear:
 			elite_c = 0.05 + (dds_contrib_elite * 0.0002); elite_c = clamp(elite_c, 0.0, 0.60)
 		if is_currently_hardcore_phase: elite_c = min(0.85, elite_c * 1.5)
 		if randf() < elite_c and not enemy_data.elite_types_available.is_empty():
 			var chosen_tag = enemy_data.elite_types_available.pick_random()
-			if enemy_instance.has_method("make_elite"): 
+			if enemy_instance.has_method("make_elite"):
 				enemy_instance.make_elite(chosen_tag, dds_contrib_elite, enemy_data)
 	
 	if not enemy_instance.is_elite and "experience_to_drop" in enemy_instance:
 		enemy_instance.experience_to_drop = enemy_data.base_exp_drop
+
+# --- NEW HELPER FUNCTION ---
+# Calculates how many enemies should be in a single spawn batch based on DDS.
+func _get_current_enemies_per_batch() -> int:
+	# Remap the current DDS value to the desired batch size range.
+	var batch_size = remap(current_dds, 0.0, dds_for_max_batch_size, base_enemies_per_batch, max_enemies_per_batch)
+	# Clamp the result to ensure it doesn't go below the base or above the max.
+	return int(clamp(batch_size, base_enemies_per_batch, max_enemies_per_batch))
 	
+# --- Main Game Loop & Spawning Logic ---
 func _on_enemy_spawn_timer_timeout():
 	if not is_instance_valid(camera) or not is_instance_valid(player_node): return
-	if current_boss_active or current_event_active: return
+	if current_boss_active: return
+
+	var current_enemies_per_batch = _get_current_enemies_per_batch()
 	var spawned_from_threat = false
+
 	if global_unspent_threat_pool >= threat_pool_spawn_threshold:
-		var num_threat_spawn = int(ceil(enemies_per_batch * threat_pool_batch_multiplier))
+		var num_threat_spawn = int(ceil(current_enemies_per_batch * threat_pool_batch_multiplier))
 		for _i in range(num_threat_spawn):
-			if current_active_enemy_count >= target_on_screen_enemies + enemies_per_batch: break
+			if current_active_enemy_count >= target_on_screen_enemies + current_enemies_per_batch: break
 			var enemy_data = _select_enemy_from_active_pool()
 			if is_instance_valid(enemy_data): _spawn_actual_enemy(enemy_data, _calculate_spawn_position_for_enemy())
 		global_unspent_threat_pool = max(0, global_unspent_threat_pool - threat_pool_spawn_threshold)
-		if is_instance_valid(game_ui_node) and game_ui_node.has_method("update_threat_pool_display"):
-			game_ui_node.update_threat_pool_display(global_unspent_threat_pool)
 		spawned_from_threat = true
+
 	if current_active_enemy_count < target_on_screen_enemies or spawned_from_threat:
-		var num_regular_spawn = enemies_per_batch
-		if spawned_from_threat and enemies_per_batch > 1 : num_regular_spawn = max(1, enemies_per_batch / 2)
+		var num_regular_spawn = current_enemies_per_batch
+		if spawned_from_threat and current_enemies_per_batch > 1:
+			num_regular_spawn = max(1, current_enemies_per_batch / 2)
 		for _i in range(num_regular_spawn):
-			if current_active_enemy_count >= target_on_screen_enemies + (enemies_per_batch / 2): break
+			if current_active_enemy_count >= target_on_screen_enemies + (current_enemies_per_batch / 2): break
 			var enemy_data = _select_enemy_from_active_pool()
 			if is_instance_valid(enemy_data): _spawn_actual_enemy(enemy_data, _calculate_spawn_position_for_enemy())
 
 func _on_culling_check_timer_timeout():
 	if not is_instance_valid(player_node) or not is_instance_valid(camera): return
-	if current_boss_active or current_event_active: return
-	var cull_dist_sq = pow(get_viewport().get_visible_rect().size.length() * 1.75, 2)
+	if current_boss_active: return
+	var cull_dist_sq = pow(get_viewport().get_visible_rect().size.length() * 1.25, 2)
 	for child_node in enemies_container.get_children().duplicate():
 		if child_node is BaseEnemy:
 			var enemy = child_node as BaseEnemy
@@ -482,17 +525,11 @@ func get_all_weapon_blueprints_for_debug() -> Array[WeaponBlueprintData]:
 func get_weapon_blueprint_by_id(weapon_id_to_find: StringName) -> WeaponBlueprintData:
 	if weapon_blueprints_by_id.has(weapon_id_to_find):
 		return weapon_blueprints_by_id[weapon_id_to_find]
-	for bp_data in all_loaded_weapon_blueprints:
-		if is_instance_valid(bp_data) and bp_data.id == weapon_id_to_find:
-			return bp_data
-	print_debug("WARNING (game.gd): get_weapon_blueprint_by_id: Blueprint '", weapon_id_to_find, "' not found.")
 	return null
 
 func get_weapon_next_level_upgrades(weapon_id_str: String, current_weapon_instance_data: Dictionary) -> Array[WeaponUpgradeData]: 
 	var weapon_bp = get_weapon_blueprint_by_id(StringName(weapon_id_str))
-	if not is_instance_valid(weapon_bp): 
-		print_debug("get_weapon_next_level_upgrades: Blueprint not found for ID: ", weapon_id_str)
-		return []
+	if not is_instance_valid(weapon_bp): return []
 	var current_level = current_weapon_instance_data.get("weapon_level", 0)
 	var specific_stats = current_weapon_instance_data.get("specific_stats", {})
 	if current_level >= weapon_bp.max_level: return []
@@ -518,38 +555,29 @@ func get_weapon_next_level_upgrades(weapon_id_str: String, current_weapon_instan
 		valid_next_upgrades.append(upgrade_data)
 	return valid_next_upgrades
 
-func _on_player_level_up(new_level: int): 
+# --- Level Up Logic ---
+func _on_player_level_up(_new_level: int): 
 	if not is_instance_valid(player_node): get_tree().paused = false; return
 	get_tree().paused = true
 	if is_instance_valid(level_up_screen_instance): level_up_screen_instance.queue_free(); level_up_screen_instance = null
 	
 	if not is_instance_valid(LEVEL_UP_SCREEN_SCENE): 
-		get_tree().paused = false; 
-		print_debug("ERROR (game.gd): LEVEL_UP_SCREEN_SCENE is not a valid scene. Check path.")
-		return
+		get_tree().paused = false; return
 	
 	level_up_screen_instance = LEVEL_UP_SCREEN_SCENE.instantiate()
 	if not is_instance_valid(level_up_screen_instance): 
-		get_tree().paused = false; 
-		print_debug("ERROR (game.gd): Failed to instance LevelUpScreen scene.")
-		return
+		get_tree().paused = false; return
 	
 	var chosen_options: Array = _get_upgrade_options_for_player() 
 	
-	print_debug("game.gd: _on_player_level_up - chosen_options to display: ", chosen_options) 
-	
 	if chosen_options.is_empty():
 		if is_instance_valid(level_up_screen_instance): level_up_screen_instance.queue_free()
-		get_tree().paused = false; print_debug("No upgrade options available for level up."); return
+		get_tree().paused = false; return
 		
 	if level_up_screen_instance.has_method("display_options"):
-		# Using call_deferred again, as the "Array to Array" issue was likely a type hint problem
-		# which we solved by changing the signature in NewLevelUpScreen.gd
 		level_up_screen_instance.call_deferred("display_options", chosen_options) 
 	else: 
-		get_tree().paused = false; 
-		print_debug("ERROR (game.gd): The new LevelUpScreen instance is missing the 'display_options' method.")
-		return
+		get_tree().paused = false; return
 	
 	add_child(level_up_screen_instance)
 	if level_up_screen_instance.has_signal("upgrade_chosen"):
@@ -557,109 +585,87 @@ func _on_player_level_up(new_level: int):
 			level_up_screen_instance.upgrade_chosen.connect(Callable(self, "_on_upgrade_chosen"))
 	level_up_screen_instance.process_mode = Node.PROCESS_MODE_ALWAYS
 
-# The key function to modify is _get_upgrade_options_for_player
+# REFACTORED: This function now ensures duplicate upgrade options are not presented in the same level up.
 func _get_upgrade_options_for_player() -> Array: 
-	print_debug("--- Getting Upgrade Options (With Full Resource Data) ---")
 	var options_pool: Array = [] 
 
-	# 1. Get General Upgrades (from loaded .tres files)
+	# 1. Get General Upgrades
 	for card_res in loaded_general_upgrades: 
 		if is_instance_valid(card_res):
-			# TODO: Add prerequisite and stack limit checks for general upgrades
 			var card_presentation = {
 				"id_for_card_selection": str(card_res.id),
 				"title": card_res.title, "description": card_res.description,
 				"icon_path": card_res.icon.resource_path if is_instance_valid(card_res.icon) else "",
 				"type": "general_upgrade", 
-				"resource_data": card_res # RESTORED
+				"resource_data": card_res
 			}
 			options_pool.append(card_presentation)
-	# Fallback to old general upgrades if new system is empty (temporary during transition)
-	if loaded_general_upgrades.is_empty() and not _temp_old_general_stat_upgrades.is_empty(): 
-		for old_gen_upgrade_dict in _temp_old_general_stat_upgrades:
-			var temp_card_dict = old_gen_upgrade_dict.duplicate(true)
-			temp_card_dict["type"] = "general_stat_upgrade_OLD" 
-			temp_card_dict["id_for_card_selection"] = old_gen_upgrade_dict.id
-			options_pool.append(temp_card_dict)
 
 	# 2. Get Weapon Upgrades
 	if is_instance_valid(player_node) and player_node.has_method("get_active_weapons_data_for_level_up"):
-		var player_active_weapons_instance_data: Array[Dictionary] = player_node.get_active_weapons_data_for_level_up()
-		var offered_weapon_ids_for_upgrade_this_round : Array[StringName] = []
-		for active_weapon_dict in player_active_weapons_instance_data:
+		var player_active_weapons: Array[Dictionary] = player_node.get_active_weapons_data_for_level_up()
+		for active_weapon_dict in player_active_weapons:
 			var weapon_id_sname = active_weapon_dict.get("id") as StringName
-			if weapon_id_sname == null or weapon_id_sname == &"": continue
-			var next_upgrades_for_this_weapon: Array[WeaponUpgradeData] = get_weapon_next_level_upgrades(str(weapon_id_sname), active_weapon_dict)
-			if not next_upgrades_for_this_weapon.is_empty():
-				var chosen_upgrade_res = next_upgrades_for_this_weapon.pick_random()
+			if weapon_id_sname == &"": continue
+			
+			var next_upgrades: Array[WeaponUpgradeData] = get_weapon_next_level_upgrades(str(weapon_id_sname), active_weapon_dict)
+			for upgrade_res in next_upgrades:
 				var upgrade_card_presentation = {
-					"id_for_card_selection": str(weapon_id_sname) + "_" + str(chosen_upgrade_res.upgrade_id),
-					"title": chosen_upgrade_res.title, "description": chosen_upgrade_res.description,
-					"icon_path": chosen_upgrade_res.icon.resource_path if is_instance_valid(chosen_upgrade_res.icon) else "",
+					"id_for_card_selection": str(weapon_id_sname) + "_" + str(upgrade_res.upgrade_id),
+					"title": upgrade_res.title, "description": upgrade_res.description,
+					"icon_path": upgrade_res.icon.resource_path if is_instance_valid(upgrade_res.icon) else "",
 					"type": "weapon_upgrade", "weapon_id_to_upgrade": str(weapon_id_sname), 
-					"resource_data": chosen_upgrade_res # RESTORED
+					"resource_data": upgrade_res
 				}
 				options_pool.append(upgrade_card_presentation)
-				offered_weapon_ids_for_upgrade_this_round.append(weapon_id_sname)
 
-	# 3. Offer New Weapons
+	# 3. Get New Weapons if slots are available
 	if is_instance_valid(player_node) and player_node.has_method("get_active_weapons_data_for_level_up"):
-		var current_player_active_weapons = player_node.get_active_weapons_data_for_level_up()
-		if current_player_active_weapons.size() < 6: 
+		var current_player_weapons = player_node.get_active_weapons_data_for_level_up()
+		# CORRECTED: Access weapon_manager through player_node
+		if current_player_weapons.size() < player_node.weapon_manager.max_weapons: 
 			var potential_new_weapons_pool : Array = []
 			for bp_data in all_loaded_weapon_blueprints:
 				if not is_instance_valid(bp_data): continue
 				var bp_id_sname = bp_data.id; var already_have_it = false
-				for p_wep_dict in current_player_active_weapons:
+				for p_wep_dict in current_player_weapons:
 					if p_wep_dict.get("id") == bp_id_sname: already_have_it = true; break
-				if not already_have_it: 
-					var can_offer_to_class = true
-					if not bp_data.class_tag_restrictions.is_empty():
-						if is_instance_valid(player_node) and player_node.has_method("get_current_basic_class_enum"):
-							var player_class_enum = player_node.get_current_basic_class_enum()
-							if not player_class_enum in bp_data.class_tag_restrictions: can_offer_to_class = false
-						else: can_offer_to_class = false 
-					if can_offer_to_class:
-						var new_weapon_offer_presentation = {
-							"id_for_card_selection": str(bp_id_sname), "type": "new_weapon", 
-							"title": bp_data.title, "description": bp_data.description,
-							"icon_path": bp_data.icon.resource_path if is_instance_valid(bp_data.icon) else "",
-							"resource_data": bp_data # RESTORED
-						}
-						potential_new_weapons_pool.append(new_weapon_offer_presentation)
+				if not already_have_it:
+					var new_weapon_offer_presentation = {
+						"id_for_card_selection": str(bp_id_sname), "type": "new_weapon", 
+						"title": bp_data.title, "description": bp_data.description,
+						"icon_path": bp_data.icon.resource_path if is_instance_valid(bp_data.icon) else "",
+						"resource_data": bp_data
+					}
+					potential_new_weapons_pool.append(new_weapon_offer_presentation)
 			if not potential_new_weapons_pool.is_empty():
-				potential_new_weapons_pool.shuffle(); options_pool.append(potential_new_weapons_pool[0])
+				options_pool.append(potential_new_weapons_pool.pick_random())
 
-	options_pool.shuffle(); var final_chosen_options: Array = []; var offered_ids_this_selection: Array[StringName] = [] 
+	# --- Final Selection Logic with Duplicate Prevention ---
+	options_pool.shuffle()
+	var final_chosen_options: Array = []
+	var offered_ids_this_selection: Array = []
+	
 	for option_data_dict in options_pool:
 		if final_chosen_options.size() >= 3: break
-		var current_card_id_raw = option_data_dict.get("id_for_card_selection", option_data_dict.get("id"))
-		var current_card_id = StringName(str(current_card_id_raw)) if current_card_id_raw != null else StringName(str(randi()))
-		if not offered_ids_this_selection.has(current_card_id):
-			final_chosen_options.append(option_data_dict); offered_ids_this_selection.append(current_card_id)
-	if final_chosen_options.is_empty() and not _temp_old_general_stat_upgrades.is_empty(): 
-		var fallback_option = _temp_old_general_stat_upgrades.pick_random().duplicate(true)
-		fallback_option["id_for_card_selection"] = fallback_option.get("id") 
-		fallback_option["type"] = "general_stat_upgrade_OLD"
-		final_chosen_options.append(fallback_option)
+		
+		var current_card_id = option_data_dict.get("id_for_card_selection")
+		if current_card_id != null and not offered_ids_this_selection.has(current_card_id):
+			final_chosen_options.append(option_data_dict)
+			offered_ids_this_selection.append(current_card_id)
+			
 	if final_chosen_options.is_empty():
-		final_chosen_options.append({"title": "Continue", "description": "No new upgrades this level.", "type": "skip", "id_for_card_selection": "skip_level"})
+		final_chosen_options.append({"title": "Continue", "description": "No new upgrades this level.", "type": "skip"})
+	
 	return final_chosen_options
-
 
 func _on_upgrade_chosen(chosen_upgrade_data_wrapper: Dictionary): 
 	if not is_instance_valid(player_node) or not player_node.has_method("apply_upgrade"):
-		print_debug("ERROR: Player node or apply_upgrade method missing.")
-		if is_instance_valid(level_up_screen_instance): level_up_screen_instance.queue_free(); level_up_screen_instance = null
 		get_tree().paused = false; return
 	
-	# For this test, PlayerCharacter.apply_upgrade will need to know how to handle these simplified dicts
-	# OR we restore resource_data if the simple dicts pass the call_deferred test.
-	# var data_to_apply = chosen_upgrade_data_wrapper.get("resource_data", chosen_upgrade_data_wrapper) 
-	var data_to_apply = chosen_upgrade_data_wrapper # Passing the simplified dictionary for now
-
 	if chosen_upgrade_data_wrapper.get("type") != "skip": 
-		player_node.apply_upgrade(data_to_apply) 
+		player_node.apply_upgrade(chosen_upgrade_data_wrapper) 
+		
 	if is_instance_valid(level_up_screen_instance):
 		level_up_screen_instance.queue_free(); level_up_screen_instance = null
 	get_tree().paused = false
@@ -679,12 +685,14 @@ func _on_player_has_died():
 				game_over_screen_instance.restart_game_requested.connect(Callable(self, "_on_restart_game_requested"))
 		if game_over_screen_instance.has_method("set_process_mode"): game_over_screen_instance.process_mode = Node.PROCESS_MODE_ALWAYS
 		get_tree().paused = true
+
 func _on_restart_game_requested(): 
 	if game_over_screen_instance and is_instance_valid(game_over_screen_instance):
 		game_over_screen_instance.queue_free()
 	get_tree().paused = false
 	var error_code = get_tree().reload_current_scene()
 	if error_code != OK: print("ERROR (Level): Failed to reload scene. Code: ", error_code)
+
 func _on_player_class_tier_upgraded(new_class_id: String, _contributing_basic_classes: Array): 
 	print("Level: Player class tier upgraded to ", new_class_id)
 	pass

@@ -18,8 +18,8 @@ var class_weapon_options: Dictionary = {
 		{"id": "knight_shield_bash", "title": "Shield Bash"},
 	],
 	PlayerCharacter.BasicClass.ROGUE: [ 
-		{"id": "rogue_bow", "title": "Shortbow"},
-		{"id": "rogue_dagger", "title": "Dagger Strike"},
+		{"id": "rogue_shortbow", "title": "Shortbow"},
+		{"id": "rogue_dagger_strike", "title": "Dagger Strike"},
 	],
 	PlayerCharacter.BasicClass.WIZARD: [
 		{"id": "wizard_spark", "title": "Spark"},

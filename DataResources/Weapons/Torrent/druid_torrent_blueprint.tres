@@ -1,0 +1,32 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://cgriyt25goeal"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_g88c3"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ah2d8"]
+[ext_resource type="PackedScene" uid="uid://d32yo3kvx4gy2" path="res://Scenes/Weapons/TorrentAttack.tscn" id="3_ah2d8"]
+
+[resource]
+script = ExtResource("2_ah2d8")
+id = &"druid_torrent"
+title = "Torrent"
+description = "Summons a pool of volatile water at a location."
+weapon_scene = ExtResource("3_ah2d8")
+tags = Array[String](["aoe", "magical", "water"])
+class_tag_restrictions = Array[int]([5])
+cooldown = 4.5
+max_level = 10
+base_lifetime = 2.0
+spawn_as_child = false
+requires_direction = true
+targeting_type = "mouse_location"
+initial_specific_stats = {
+"area_scale": 1.0,
+"damage_tick_interval": 0.5,
+"inherent_visual_scale_x": 0.46,
+"inherent_visual_scale_y": 0.51,
+"max_cast_range": 150.0,
+"pierce_count": 0,
+"projectile_speed": 200.0,
+"weapon_damage_percentage": 0.6
+}
+available_upgrades = Array[ExtResource("1_g88c3")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

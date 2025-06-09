@@ -1,0 +1,79 @@
+[gd_scene load_steps=11 format=3 uid="uid://blj6u880sernr"]
+
+[ext_resource type="Script" uid="uid://j2dweybyn1fj" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/SparkProjectile.gd" id="1_ju8p5"]
+[ext_resource type="Texture2D" uid="uid://c63lk6v6id3sl" path="res://Assets/Weapons/Unstable Heat Animation.png" id="2_hm0id"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vfvrx"]
+atlas = ExtResource("2_hm0id")
+region = Rect2(0, 0, 128, 154)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8nife"]
+atlas = ExtResource("2_hm0id")
+region = Rect2(128, 0, 128, 154)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1hp83"]
+atlas = ExtResource("2_hm0id")
+region = Rect2(256, 0, 128, 154)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cg2tk"]
+atlas = ExtResource("2_hm0id")
+region = Rect2(384, 0, 128, 154)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ehopq"]
+atlas = ExtResource("2_hm0id")
+region = Rect2(512, 0, 128, 154)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w5h3o"]
+atlas = ExtResource("2_hm0id")
+region = Rect2(640, 0, 128, 154)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_jqf3h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vfvrx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8nife")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1hp83")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cg2tk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ehopq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w5h3o")
+}],
+"loop": true,
+"name": &"spark_attack_frames",
+"speed": 16.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5naj1"]
+radius = 20.0825
+
+[node name="Area2D" type="Area2D"]
+scale = Vector2(0.55, 0.55)
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_ju8p5")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(-2, -3)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_jqf3h")
+animation = &"spark_attack_frames"
+autoplay = "spark_attack_frames"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_5naj1")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]

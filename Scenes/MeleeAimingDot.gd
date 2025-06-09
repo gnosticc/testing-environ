@@ -5,8 +5,8 @@
 extends Node2D
 
 # Adjust these in the Inspector for the MeleeAimingDot node in player.tscn
-@export var oval_radius_x: float = 30.0 # Horizontal radius of the oval path
-@export var oval_radius_y: float = 20.0 # Vertical radius of the oval path
+@export var oval_radius_x: float = 20.0 # Horizontal radius of the oval path
+@export var oval_radius_y: float = 15.0 # Vertical radius of the oval path
 
 # Optional: Visual representation of the dot itself
 @onready var dot_visual: Sprite2D = $DotVisual # Assuming a child Sprite2D named DotVisual

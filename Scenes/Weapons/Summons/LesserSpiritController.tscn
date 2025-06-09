@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://cmd15djjk8ikl"]
+
+[ext_resource type="Script" uid="uid://405khcncffbc" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/LesserSpiritController.gd" id="1_nke4s"]
+[ext_resource type="PackedScene" uid="uid://d03ksk6g73uw8" path="res://Scenes/Weapons/Summons/LesserSpiritInstance.tscn" id="2_y1cre"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_nke4s")
+instance_scene = ExtResource("2_y1cre")

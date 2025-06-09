@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://uywgfxjqbhae"]
+
+[ext_resource type="Script" uid="uid://cch7byq6dy2ji" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/FrozenTerritoryController.gd" id="1_85m2f"]
+[ext_resource type="PackedScene" uid="uid://xk4tacgmap5" path="res://Scenes/Weapons/FrozenTerritoryInstance.tscn" id="2_aqdu5"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_85m2f")
+instance_scene = ExtResource("2_aqdu5")

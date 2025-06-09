@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://xk4tacgmap5"]
+
+[ext_resource type="Script" uid="uid://bjn846tlbs617" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/FrozenTerritoryInstance.gd" id="1_3vvvu"]
+[ext_resource type="Texture2D" uid="uid://cmosmboy0jya7" path="res://Assets/Weapons/Frozen Territory Animation.png" id="1_vbbhc"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7wmhh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_vbbhc")
+}],
+"loop": true,
+"name": &"frozen_territory_attack_frames",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2bew8"]
+size = Vector2(14, 18)
+
+[node name="Area2D" type="Area2D"]
+scale = Vector2(1.3, 1.3)
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_3vvvu")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.25, 0.25)
+sprite_frames = SubResource("SpriteFrames_7wmhh")
+animation = &"frozen_territory_attack_frames"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_2bew8")

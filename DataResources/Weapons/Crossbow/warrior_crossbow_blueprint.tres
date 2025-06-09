@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://y8aq4kbte7a0"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_a1lgw"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_2we4c"]
+[ext_resource type="PackedScene" uid="uid://bf8qkgjsfh4vs" path="res://Scenes/Weapons/crossbow_bolt_attack.tscn" id="3_2we4c"]
+
+[resource]
+script = ExtResource("2_2we4c")
+id = &"warrior_crossbow"
+title = "Crossbow"
+description = "Fires a heavy bolt that can pass through enemies."
+weapon_scene = ExtResource("3_2we4c")
+tags = Array[String](["projectile", "physical", "piercing", "warrior weapon"])
+class_tag_restrictions = Array[int]([1])
+cooldown = 2.5
+max_level = 10
+base_lifetime = 2.0
+spawn_as_child = false
+requires_direction = true
+targeting_type = "nearest_enemy"
+initial_specific_stats = {
+"damage": 18,
+"inherent_visual_scale_x": 0.05,
+"inherent_visual_scale_y": 0.05,
+"pierce_count": 1,
+"player_damage_scale_percent": 1.0,
+"projectile_speed": 220.0,
+"weapon_damage_percentage": 2.2
+}
+available_upgrades = Array[ExtResource("1_a1lgw")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

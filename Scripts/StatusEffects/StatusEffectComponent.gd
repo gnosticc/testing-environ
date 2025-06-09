@@ -1,11 +1,11 @@
 # StatusEffectComponent.gd
-# Updated to handle ticking damage-over-time (DoT) effects like Bleed.
+# ADDED: Logic in _on_effect_expired to handle the `next_status_effect_on_expire` feature.
+# UPDATED: The path logic to match the user's file structure.
 class_name StatusEffectComponent
 extends Node
 
 signal status_effects_changed(owner_node: Node) 
 
-# active_effects will now store a "tick_timer" as well
 var active_effects: Dictionary = {} 
 var current_stat_modifiers: Dictionary = {}
 
@@ -32,25 +32,19 @@ func apply_effect(
 
 	var final_duration = duration_override if duration_override >= 0.0 else effect_data.duration
 	
-	# Check if the effect already exists
 	if active_effects.has(effect_id):
 		var existing_effect_entry = active_effects[effect_id]
 		
-		# --- Handle Refreshing Existing Effect ---
 		if effect_data.refresh_duration_on_reapply:
-			print_debug("StatusEffectComponent: REFRESHING existing status '", effect_id, "' on ", get_parent().name)
-			
-			# Update basic properties for refresh
 			existing_effect_entry.source = source_node
 			existing_effect_entry.weapon_stats = p_weapon_stats_for_scaling.duplicate(true)
 			existing_effect_entry.potency_override = potency_override
 			
-			# Reset duration timer if it exists, or create if it should now have one
 			if final_duration > 0:
 				if is_instance_valid(existing_effect_entry.duration_timer):
 					existing_effect_entry.duration_timer.wait_time = final_duration
-					existing_effect_entry.duration_timer.start() # Restart to refresh duration
-				else: # Effect was previously permanent or without duration, now has one
+					existing_effect_entry.duration_timer.start()
+				else: 
 					var duration_timer_node = Timer.new()
 					duration_timer_node.name = "DurationTimer_" + str(effect_id)
 					duration_timer_node.wait_time = final_duration
@@ -59,18 +53,17 @@ func apply_effect(
 					duration_timer_node.timeout.connect(Callable(self, "_on_effect_expired").bind(effect_id, duration_timer_node))
 					duration_timer_node.start()
 					existing_effect_entry.duration_timer = duration_timer_node
-			else: # If final_duration is <= 0, but it had a timer, remove it (e.g., changed to permanent)
+			else: 
 				if is_instance_valid(existing_effect_entry.duration_timer):
 					existing_effect_entry.duration_timer.stop()
 					existing_effect_entry.duration_timer.queue_free()
 					existing_effect_entry.duration_timer = null
 
-			# Restart tick timer if effect is tick-based
 			if effect_data.tick_interval > 0:
 				if is_instance_valid(existing_effect_entry.tick_timer):
 					existing_effect_entry.tick_timer.wait_time = effect_data.tick_interval
-					existing_effect_entry.tick_timer.start() # Restart to reset tick cycle
-				else: # New tick timer needed for existing effect
+					existing_effect_entry.tick_timer.start()
+				else: 
 					var tick_timer_node = Timer.new()
 					tick_timer_node.name = "TickTimer_" + str(effect_id)
 					tick_timer_node.wait_time = effect_data.tick_interval
@@ -80,31 +73,28 @@ func apply_effect(
 					tick_timer_node.start()
 					existing_effect_entry.tick_timer = tick_timer_node
 				
-				if effect_data.tick_on_application: # Trigger first tick immediately
+				if effect_data.tick_on_application:
 					_on_status_effect_tick(effect_id)
-			else: # If it was ticking but is no longer tick-based
+			else:
 				if is_instance_valid(existing_effect_entry.tick_timer):
 					existing_effect_entry.tick_timer.stop()
 					existing_effect_entry.tick_timer.queue_free()
 					existing_effect_entry.tick_timer = null
 
-		else: # Effect exists, but refresh_duration_on_reapply is FALSE (and not stackable)
-			print_debug("StatusEffectComponent: Not refreshing existing status '", effect_id, "' on ", get_parent().name, " (refresh_duration_on_reapply is false or not stackable).")
-			return # Do nothing if not refreshing and not stacking
+		else: 
+			return
 
-	else: # --- This is a brand new application (effect_id not in active_effects) ---
-		print_debug("StatusEffectComponent: APPLYING NEW status '", effect_id, "' on ", get_parent().name)
+	else: 
 		var new_effect_entry: Dictionary = {
 			"data": effect_data,
 			"duration_timer": null, 
-			"tick_timer": null, # For DoT/HoT effects
-			"stacks": 1, # Start with 1 stack for new application
+			"tick_timer": null,
+			"stacks": 1,
 			"source": source_node,
 			"weapon_stats": p_weapon_stats_for_scaling.duplicate(true),
 			"potency_override": potency_override 
 		}
 		
-		# --- DURATION TIMER (for how long the status lasts) ---
 		if final_duration > 0: 
 			var duration_timer_node = Timer.new()
 			duration_timer_node.name = "DurationTimer_" + str(effect_id)
@@ -115,18 +105,17 @@ func apply_effect(
 			duration_timer_node.start()
 			new_effect_entry.duration_timer = duration_timer_node
 		
-		# --- TICK TIMER (for damage/heal over time) ---
 		if effect_data.tick_interval > 0:
 			var tick_timer_node = Timer.new()
 			tick_timer_node.name = "TickTimer_" + str(effect_id)
 			tick_timer_node.wait_time = effect_data.tick_interval
-			tick_timer_node.one_shot = false # It's a recurring tick
+			tick_timer_node.one_shot = false
 			add_child(tick_timer_node)
 			tick_timer_node.timeout.connect(Callable(self, "_on_status_effect_tick").bind(effect_id))
 			tick_timer_node.start()
 			new_effect_entry.tick_timer = tick_timer_node
 			if effect_data.tick_on_application:
-				_on_status_effect_tick(effect_id) # Trigger the first tick immediately
+				_on_status_effect_tick(effect_id)
 
 		active_effects[effect_id] = new_effect_entry
 	
@@ -138,7 +127,7 @@ func _on_status_effect_tick(effect_id: StringName):
 	if not active_effects.has(effect_id): return
 	
 	var owner = get_parent()
-	if not is_instance_valid(owner) or not owner.has_method("take_damage"): return # Added has_method("take_damage") check
+	if not is_instance_valid(owner) or not owner.has_method("take_damage"): return
 
 	var effect_entry = active_effects[effect_id]
 	var status_data = effect_entry.data as StatusEffectData
@@ -147,47 +136,44 @@ func _on_status_effect_tick(effect_id: StringName):
 		if effect is StatModificationEffectData:
 			var stat_mod = effect as StatModificationEffectData
 			
-			# If this is a damage modification (e.g., for DoT)
-			if stat_mod.stat_key == &"health" and stat_mod.modification_type == &"flat_add": # Check for "health" stat and "flat_add" mod type
-				var damage_per_tick = stat_mod.get_value() # Should be a negative number for damage
-				
-				# Apply potency override if active
+			if stat_mod.stat_key == &"health" and stat_mod.modification_type == &"flat_add":
+				var damage_per_tick = stat_mod.get_value()
 				var actual_potency = effect_entry.get("potency_override", 1.0)
-				if actual_potency >= 0.0: # Only apply if a valid override is present
-					damage_per_tick *= actual_potency
-				
-				# Damage is always negative for damage over time, convert to positive for take_damage
+				if actual_potency >= 0.0: damage_per_tick *= actual_potency
 				var final_tick_damage = abs(damage_per_tick) 
-				
-				# Ensure at least 1 damage for fractional values > 0
 				final_tick_damage = max(1, int(ceil(final_tick_damage))) 
-
-				print_debug(owner.name, " is taking ", final_tick_damage, " damage from '", effect_id, "' tick (raw value: ", damage_per_tick, ").")
 				owner.take_damage(final_tick_damage, effect_entry.source)
-			# Add logic for other stat mods if needed for ticks (e.g., resource drain per tick)
-			
-		# Other effect types (CustomFlagEffectData, TriggerAbilityEffectData) are typically applied once
-		# or managed by _recalculate_and_apply_stat_modifiers, not necessarily on each tick.
-		# However, if you have any effects that *should* trigger on each tick, add their logic here.
-
 
 func _on_effect_expired(effect_id_expired: StringName, duration_timer_ref: Timer): 
 	if active_effects.has(effect_id_expired):
 		var effect_entry = active_effects[effect_id_expired]
-		# Stop any associated tick timer
+		var status_data_to_check = effect_entry.data as StatusEffectData
+		
 		var tick_timer = effect_entry.get("tick_timer") as Timer
 		if is_instance_valid(tick_timer):
-			tick_timer.stop()
-			tick_timer.queue_free()
+			tick_timer.stop(); tick_timer.queue_free()
 
 		active_effects.erase(effect_id_expired)
 		_recalculate_and_apply_stat_modifiers()
 		emit_signal("status_effects_changed", get_parent()) 
+		
+		# NEW: Check if this effect should trigger another
+		if is_instance_valid(status_data_to_check) and status_data_to_check.next_status_effect_on_expire != &"":
+			var next_effect_id = status_data_to_check.next_status_effect_on_expire
+			
+			# UPDATED PATH: This now matches your file structure and naming convention.
+			var next_effect_path = "res://DataResources/StatusEffects/" + str(next_effect_id) + "_status.tres"
+			
+			if ResourceLoader.exists(next_effect_path):
+				var next_effect_data = load(next_effect_path) as StatusEffectData
+				if is_instance_valid(next_effect_data):
+					apply_effect(next_effect_data, effect_entry.source, effect_entry.weapon_stats)
+			else:
+				print_debug("WARNING (StatusEffectComponent): Could not find next status effect resource at: " + next_effect_path)
 	
 	if is_instance_valid(duration_timer_ref):
 		duration_timer_ref.queue_free()
-
-
+		
 func remove_effect(effect_id_to_remove: StringName):
 	if active_effects.has(effect_id_to_remove):
 		var effect_entry = active_effects[effect_id_to_remove]
@@ -224,8 +210,6 @@ func _recalculate_and_apply_stat_modifiers():
 					var key_to_mod = stat_mod_effect.stat_key
 					var mod_type = stat_mod_effect.modification_type
 
-					# Apply stat modifications unless it's a "health" stat mod that's meant for ticking damage/healing
-					# The "health" stat with "flat_add" is now handled in _on_status_effect_tick explicitly.
 					if not (key_to_mod == &"health" and mod_type == &"flat_add"):
 						if mod_type == &"percent_add_to_base": 
 							current_stat_modifiers[key_to_mod] = current_stat_modifiers.get(key_to_mod, 0.0) + mod_value

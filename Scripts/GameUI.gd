@@ -21,8 +21,8 @@ signal hardcore_phase_activated()
 # --- Gameplay Timer & Legacy Difficulty Variables ---
 var elapsed_seconds: int = 0
 var current_difficulty_tier: int = 0
-var next_difficulty_increase_time: int = 30
-const DIFFICULTY_INTERVAL: int = 30 # Original interval for legacy tier
+var next_difficulty_increase_time: int = 20
+const DIFFICULTY_INTERVAL: int = 20 # Original interval for legacy tier
 const MAX_DIFFICULTY_TIERS_FOR_SPAWN_RATE: int = 20 
 
 # --- Player Reference ---
@@ -129,7 +129,7 @@ func _on_one_second_tick_timer_timeout():
 	elapsed_seconds += 1
 	if gameplay_timer_label: gameplay_timer_label.text = format_time(elapsed_seconds)
 	var dds_increment_this_tick: float = 0.0
-	if elapsed_seconds > 0 and elapsed_seconds % 30 == 0:
+	if elapsed_seconds > 0 and elapsed_seconds % 20 == 0:
 		dds_increment_this_tick += base_dds_per_30_sec_tick # Use variable
 	if not is_hardcore_phase and elapsed_seconds >= HARDCORE_MODE_START_SECONDS:
 		is_hardcore_phase = true

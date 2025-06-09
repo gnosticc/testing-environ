@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bf8qkgjsfh4vs"]
 
-[ext_resource type="Script" uid="uid://ct2kx7k3hw4u2" path="res://Scripts/Weapons/CrossbowBoltAttack.gd" id="1_y44gb"]
+[ext_resource type="Script" uid="uid://xr7jfbdv0m0s" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/CrossbowBolt.gd" id="1_y44gb"]
 [ext_resource type="Texture2D" uid="uid://8i35v1dfn385" path="res://Assets/Weapons/Crossbow Animation.png" id="2_ama71"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_tox6d"]
@@ -27,7 +27,7 @@ collision_layer = 4
 collision_mask = 136
 script = ExtResource("1_y44gb")
 
-[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="." groups=["enemies"]]
 scale = Vector2(0.05, 0.05)
 sprite_frames = SubResource("SpriteFrames_dij0s")
 animation = &"fly"
@@ -41,4 +41,3 @@ wait_time = 4.0
 one_shot = true
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
-[connection signal="timeout" from="LifetimeTimer" to="." method="_on_lifetime_timer_timeout"]

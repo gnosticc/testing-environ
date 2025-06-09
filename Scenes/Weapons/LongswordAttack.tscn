@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://snbqkv5o3phl"]
 
-[ext_resource type="Script" uid="uid://phkeqjoa4j1b" path="res://Scripts/Weapons/LongswordAttack.gd" id="1_wsuho"]
+[ext_resource type="Script" uid="uid://phkeqjoa4j1b" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/LongswordAttack.gd" id="1_wsuho"]
 [ext_resource type="Texture2D" uid="uid://cfg47y1eojlv" path="res://Assets/Weapons/Longsword Animation.png" id="2_a401v"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_h0wsy"]
@@ -43,9 +43,8 @@ animations = [{
 scale = Vector2(0.6, 0.6)
 script = ExtResource("1_wsuho")
 
-[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
-position = Vector2(-16.7722, 0.228758)
-rotation = -0.449063
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+rotation = 2.66853
 scale = Vector2(0.6, 0.6)
 sprite_frames = SubResource("SpriteFrames_akcy4")
 animation = &"slash"
@@ -53,8 +52,7 @@ frame = 3
 frame_progress = 1.0
 
 [node name="DamageArea" type="Area2D" parent="."]
-position = Vector2(-16.7722, 0.228758)
-rotation = -0.449063
+rotation = 2.66853
 scale = Vector2(0.6, 0.6)
 collision_layer = 4
 collision_mask = 8
@@ -64,5 +62,3 @@ polygon = PackedVector2Array(53, -59, 40, -67, 11, -35, -27, 30, -32, 73, -8, 78
 
 [node name="DurationTimer" type="Timer" parent="."]
 one_shot = true
-
-[connection signal="body_entered" from="DamageArea" to="." method="_on_damage_area_body_entered"]

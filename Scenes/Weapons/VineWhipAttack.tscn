@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://dxxeed4wbmrld"]
 
-[ext_resource type="Script" uid="uid://coof1whvxciaj" path="res://Scenes/Weapons/VineWhipAttack.gd" id="1_x4jnd"]
+[ext_resource type="Script" uid="uid://coof1whvxciaj" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/VineWhipAttack.gd" id="1_x4jnd"]
 [ext_resource type="Texture2D" uid="uid://djjlfs8jtnhwf" path="res://Assets/Weapons/Vine Whip Animation.png" id="1_ys0es"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_x4jnd"]
@@ -52,7 +52,7 @@ size = Vector2(65, 10)
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_x4jnd")
 
-[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(33.8358, 0.234278)
 scale = Vector2(0.136692, -0.0552764)
 sprite_frames = SubResource("SpriteFrames_2v61d")
@@ -70,5 +70,3 @@ position = Vector2(-1.5, 0)
 shape = SubResource("RectangleShape2D_3lj7w")
 
 [node name="DurationTimer" type="Timer" parent="."]
-
-[connection signal="body_entered" from="DamageArea" to="." method="_on_damage_area_body_entered"]

@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://ddbs7d3prtk3y"]
+
+[ext_resource type="Script" uid="uid://cmwp228mx2p3u" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/SpiritBolt.gd" id="1_3pnmf"]
+[ext_resource type="Texture2D" uid="uid://be625j4xar4ss" path="res://Assets/Pets and Summons/Lesser Spirit Projectile.png" id="2_6uqle"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vg2sr"]
+atlas = ExtResource("2_6uqle")
+region = Rect2(0, 0, 45, 40)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8cvlq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vg2sr")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ppjx5"]
+size = Vector2(2, 2)
+
+[node name="Area2D" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_3pnmf")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.05, 0.05)
+sprite_frames = SubResource("SpriteFrames_8cvlq")
+animation = &"fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_ppjx5")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true

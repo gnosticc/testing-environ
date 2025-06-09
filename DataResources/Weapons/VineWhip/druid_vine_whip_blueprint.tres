@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://1sm1rqt4ktpw"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_yf6fc"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_fi54i"]
+[ext_resource type="PackedScene" uid="uid://dxxeed4wbmrld" path="res://Scenes/Weapons/VineWhipAttack.tscn" id="3_fi54i"]
+
+[resource]
+script = ExtResource("2_fi54i")
+id = &"druid_vine_whip"
+title = "Vine Whip"
+description = "Lash out with a thorny vine in front of you."
+weapon_scene = ExtResource("3_fi54i")
+tags = Array[String](["melee", "physical", "nature"])
+class_tag_restrictions = Array[int]([5])
+cooldown = 1.5
+max_level = 10
+base_lifetime = 0.3
+spawn_as_child = false
+requires_direction = true
+targeting_type = "mouse"
+initial_specific_stats = {
+"base_attack_duration": 0.3,
+"inherent_visual_scale_x": 1.2,
+"inherent_visual_scale_y": 1.0,
+"pierce_count": 0,
+"projectile_speed": 200.0,
+"weapon_damage_percentage": 1.1
+}
+available_upgrades = Array[ExtResource("1_yf6fc")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

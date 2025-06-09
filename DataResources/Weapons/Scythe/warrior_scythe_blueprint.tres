@@ -1,0 +1,71 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=14 format=3 uid="uid://dphisf30pgh82"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_krmoi"]
+[ext_resource type="Resource" uid="uid://b4t62np8alhs3" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_se1.tres" id="2_rakci"]
+[ext_resource type="Resource" uid="uid://c7st0teimfm4b" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_se2.tres" id="3_v5dlj"]
+[ext_resource type="Resource" uid="uid://lflgujtymu6v" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_se3.tres" id="4_vbko4"]
+[ext_resource type="Resource" uid="uid://jg4h6uusoufn" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_cursed.tres" id="5_8nhpv"]
+[ext_resource type="Resource" uid="uid://ciudur0lyq3nq" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_reaping.tres" id="6_w5vti"]
+[ext_resource type="Resource" uid="uid://dwe6rkim1i5ou" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_serrated.tres" id="7_ajc1l"]
+[ext_resource type="Resource" uid="uid://dv4gsg5sr8q1h" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_siphon.tres" id="8_m2fk0"]
+[ext_resource type="Resource" uid="uid://c7ab3kmkaqgmr" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_whirlwind.tres" id="9_ifw1o"]
+[ext_resource type="Resource" uid="uid://dh6ylhvy6lkdq" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_wider_arc.tres" id="10_uktk8"]
+[ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="11_e8rf4"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="12_dcvdt"]
+[ext_resource type="PackedScene" uid="uid://byd28ph0dd8dr" path="res://Scenes/Weapons/scythe_attack.tscn" id="13_abgv2"]
+
+[resource]
+script = ExtResource("12_dcvdt")
+id = &"warrior_scythe"
+title = "Scythe"
+description = "A terrifying modified agricultural tool."
+weapon_scene = ExtResource("13_abgv2")
+icon = ExtResource("11_e8rf4")
+tags = Array[String](["centered_melee", "aoe", "warrior weapon", "Melee"])
+class_tag_restrictions = Array[int]([1])
+cooldown = 2.0
+max_level = 10
+base_lifetime = 0.0
+spawn_as_child = true
+requires_direction = false
+targeting_type = "mouse"
+initial_specific_stats = {
+&"applies_bleed": false,
+&"applies_vulnerable": false,
+&"base_attack_duration": 0.5,
+&"bleed_details ": {
+"damage_percent_of_hit": 1.0,
+"duration": 2.0,
+"tick_interval": 0.1
+},
+&"has_reaping_momentum": false,
+&"has_soul_siphon": false,
+&"has_whirlwind": false,
+&"inherent_visual_scale_x": 0.7,
+&"inherent_visual_scale_y": 0.7,
+"player_damage_scale_percent": 1.0,
+&"reaping_momentum_bonus": 1,
+"reaping_momentum_bonus_to_apply": 1,
+"reaping_momentum_dmg_per_hit": 1,
+&"scythe_cursed_edge_acquired": false,
+&"scythe_reaping_momentum_acquired": false,
+&"scythe_serrated_blade_acquired": false,
+&"scythe_sharpened_edge_1_acquired": false,
+&"scythe_sharpened_edge_2_acquired": false,
+&"scythe_sharpened_edge_3_acquired": false,
+&"scythe_soul_siphon_acquired": false,
+&"scythe_whirlwind_technique_acquired": false,
+&"scythe_wider_arc_acquired": false,
+&"soul_siphon_details": {
+"base_heal": 3,
+"chance": 0.1
+},
+&"vulnerable_details": {
+"damage_increased_percent": 0.2,
+"duration": 3.0
+},
+&"weapon_damage_percentage": 1.5,
+&"whirlwind_delay": 0.1
+}
+available_upgrades = Array[ExtResource("1_krmoi")]([ExtResource("2_rakci"), ExtResource("3_v5dlj"), ExtResource("4_vbko4"), ExtResource("5_8nhpv"), ExtResource("6_w5vti"), ExtResource("7_ajc1l"), ExtResource("8_m2fk0"), ExtResource("9_ifw1o"), ExtResource("10_uktk8")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

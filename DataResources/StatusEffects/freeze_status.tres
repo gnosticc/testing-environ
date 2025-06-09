@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://cnqhm7e7tp6ga"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_qm8ht"]
+[ext_resource type="Resource" uid="uid://7bisgmpughsk" path="res://DataResources/StatusEffects/freeze_effect.tres" id="2_de6vj"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="3_qnr3m"]
+
+[resource]
+script = ExtResource("3_qnr3m")
+id = &"freeze"
+display_name = "Frozen"
+duration = 1.5
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_qm8ht")]([ExtResource("2_de6vj")])
+next_status_effect_on_expire = &"slow"
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

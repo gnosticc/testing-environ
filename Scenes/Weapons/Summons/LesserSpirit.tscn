@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3 uid="uid://dbo7ujspjy0n4"]
+
+[ext_resource type="Texture2D" uid="uid://cl8otpb7g4h83" path="res://Assets/Pets and Summons/Lesser Spirit Animation.png" id="3_m5sn1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pcspa"]
+atlas = ExtResource("3_m5sn1")
+region = Rect2(0, 0, 75, 75)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m3rpg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pcspa")
+}],
+"loop": true,
+"name": &"orbit_loop",
+"speed": 5.0
+}]
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.05, 0.05)
+sprite_frames = SubResource("SpriteFrames_m3rpg")
+animation = &"orbit_loop"
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+autostart = true
+
+[node name="ProjectileSpawnPoint" type="Node2D" parent="."]
+position = Vector2(2, 0)

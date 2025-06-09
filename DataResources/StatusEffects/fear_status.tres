@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://ch6bxyclcotg8"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_fi27v"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_fpya2"]
+[ext_resource type="Resource" uid="uid://cyyjjyppkjcyx" path="res://DataResources/StatusEffects/fear_effect.tres" id="2_muly6"]
+
+[resource]
+script = ExtResource("2_fpya2")
+id = &"fear"
+display_name = "Feared"
+duration = 1.0
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_fi27v")]([ExtResource("2_muly6")])
+next_status_effect_on_expire = &""
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

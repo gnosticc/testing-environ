@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://dm588na72y7j5"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_dcudt"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ebrbk"]
+[ext_resource type="PackedScene" uid="uid://snbqkv5o3phl" path="res://Scenes/Weapons/LongswordAttack.tscn" id="3_ebrbk"]
+
+[resource]
+script = ExtResource("2_ebrbk")
+id = &"knight_longsword"
+title = "Longsword"
+description = "A standard, reliable sword that slashes in front of the wielder."
+weapon_scene = ExtResource("3_ebrbk")
+tags = Array[String](["melee", "knight weapon", "physical"])
+class_tag_restrictions = Array[int]([2])
+cooldown = 2.0
+max_level = 10
+base_lifetime = 0.25
+spawn_as_child = true
+requires_direction = true
+targeting_type = "mouse"
+initial_specific_stats = {
+"inherent_visual_scale_x": 0.6,
+"inherent_visual_scale_y": 0.6,
+"pierce_count": 0,
+"projectile_speed": 200.0,
+"weapon_damage_percentage": 2.0
+}
+available_upgrades = Array[ExtResource("1_dcudt")]([])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

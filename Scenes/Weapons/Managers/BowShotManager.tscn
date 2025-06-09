@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dpu7dcscl3gqn"]
-
-[ext_resource type="Script" uid="uid://bcrp2gkwl54ts" path="res://Scripts/Weapons/BowShotManager.gd" id="1_5o27r"]
-
-[node name="Node2D" type="Node2D"]
-script = ExtResource("1_5o27r")
