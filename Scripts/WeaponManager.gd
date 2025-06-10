@@ -2,13 +2,16 @@
 # This is the definitive, corrected version of the WeaponManager.
 # It correctly differentiates between persistent summons and cooldown-based attacks,
 # and restores the specific logic for Scythe upgrades.
-# It now fully integrates with the standardized stat system via GameStatConstants.
+# It now fully integrates with the standardized stat system via PlayerStatKeys
+# and applies weapon-specific stat modifications consistently with PlayerStats.gd.
 
 class_name WeaponManager
 extends Node
 
 @export var max_weapons: int = 100
-var active_weapons: Array[Dictionary] = [] # Stores current active weapons, their level, stats, etc.
+# Stores current active weapons. Each dictionary will now also hold modifier dictionaries
+# for weapon-specific stats, mirroring PlayerStats.gd's approach.
+var active_weapons: Array[Dictionary] = []
 var game_node_ref: Node # Reference to the global Game node (Main scene's root)
 
 # Timer and queue specifically for the Scythe's Whirlwind ability (multi-spin attacks)
@@ -54,11 +57,53 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 		"id": blueprint_data.id,
 		"title": blueprint_data.title,
 		"weapon_level": 1, # New weapons start at level 1
-		"specific_stats": blueprint_data.initial_specific_stats.duplicate(true), # Deep copy of initial stats
 		"blueprint_resource": blueprint_data,
-		"acquired_upgrade_ids": [] # List of upgrade IDs applied to this weapon
+		"acquired_upgrade_ids": [], # List of upgrade IDs applied to this weapon
+
+		# NEW: Initialize separate dictionaries for weapon-specific stat modifiers
+		# This mirrors the structure in PlayerStats.gd for consistency.
+		"specific_stats": blueprint_data.initial_specific_stats.duplicate(true), # Base stats for the weapon
+		"_flat_mods": {}, 		   # Flat additions (e.g., +5 Pierce)
+		"_percent_add_mods": {}, 	   # Percentage additions to base (e.g., +10% Projectile Size)
+		"_percent_mult_final_mods": {} # Final percentage multipliers (e.g., +20% Attack Duration)
 	}
-	
+
+	# Initialize all modifier dictionaries with default values for every known weapon stat key
+	for key_enum_value in PlayerStatKeys.Keys.values():
+		var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum_value]
+		# Only initialize for keys that might be weapon stats (you can refine this if needed)
+		# This ensures that any stat that *can* be a weapon stat has its modifier dictionaries initialized.
+		# You might want to refine this list to only include actual weapon-specific stats.
+		if key_string in [
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.SHOT_DELAY],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TICK_INTERVAL],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_X],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_Y],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_DAMAGE_PER_HIT], # Added for consistency
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS] # Added for consistency
+		]:
+			weapon_entry._flat_mods[key_string] = 0.0
+			weapon_entry._percent_add_mods[key_string] = 0.0
+			weapon_entry._percent_mult_final_mods[key_string] = 1.0 # Default to 1.0 for multipliers
+		# Also initialize if the base stat is already provided in initial_specific_stats
+		elif weapon_entry.specific_stats.has(key_string):
+			weapon_entry._flat_mods[key_string] = 0.0
+			weapon_entry._percent_add_mods[key_string] = 0.0
+			weapon_entry._percent_mult_final_mods[key_string] = 1.0
+
+	# DEBUG PRINT: Added to show initial specific stats upon weapon adding
+	print("WeaponManager: Initial specific stats for ", blueprint_data.id, " upon adding: ", weapon_entry.specific_stats)
+
 	# Differentiated logic based on weapon tags (e.g., "summon" for persistent entities)
 	if blueprint_data.tags.has("summon"):
 		# For persistent summons (like Moth Golem, Lesser Spirit), spawn them once.
@@ -81,7 +126,7 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 			cooldown_timer.start() # Start the first cooldown
 
 	active_weapons.append(weapon_entry)
-	emit_signal("weapon_added", weapon_entry.duplicate(true))
+	emit_signal("weapon_added", weapon_entry.duplicate(true)) # Duplicate to avoid external modification issues
 	emit_signal("active_weapons_changed")
 	return true
 
@@ -92,24 +137,26 @@ func _on_attack_cooldown_finished(weapon_id: StringName):
 	if weapon_index == -1: return # Weapon no longer active
 
 	var weapon_entry = active_weapons[weapon_index]
-	var specific_stats = weapon_entry.specific_stats # Get the weapon's specific stats
-
-	# Handle Reaping Momentum bonus (Scythe-specific logic)
-	var reaping_bonus = int(specific_stats.get(&"reaping_momentum_bonus", 0))
-	_spawn_attack_instance(weapon_entry, reaping_bonus) # Spawn the main attack
+	
+	# Get Reaping Momentum bonus (Scythe-specific logic), this is stored in weapon_entry.specific_stats
+	# Use the correct key for accumulated bonus
+	var reaping_bonus = int(weapon_entry.specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS], 0))
+	
+	# Spawn the main attack instance
+	_spawn_attack_instance(weapon_entry, reaping_bonus)
 
 	# Handle Whirlwind ability (Scythe-specific multi-spin logic)
 	var number_of_spins = 1
-	if specific_stats.get(&"has_whirlwind", false):
+	if weapon_entry.specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_ACTIVE], false):
 		# Ensure "whirlwind_count" is accessed using its StringName and defaults correctly
-		number_of_spins = int(specific_stats.get(&"whirlwind_count", 1))
+		number_of_spins = int(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT]))
 
 	if number_of_spins > 1:
 		# Add spin data to the queue for deferred processing
 		var spin_data = {
 			"weapon_id": weapon_id,
 			"spins_left": number_of_spins - 1, # Remaining spins after the first one
-			"delay": float(specific_stats.get(&"whirlwind_delay", 0.1)), # Delay between spins
+			"delay": float(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TICK_INTERVAL])), # Use calculated stat for delay
 			"reaping_bonus_to_apply": reaping_bonus # Pass the accumulated bonus
 		}
 		_whirlwind_queue.append(spin_data)
@@ -143,10 +190,10 @@ func _on_whirlwind_spin_timer_timeout():
 # Spawns an instance of a weapon's attack scene.
 # weapon_entry: Dictionary containing weapon details and its specific stats.
 # p_reaping_bonus: Accumulated Reaping Momentum bonus to apply to this attack.
-func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int):
+func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0): # Added default value for p_reaping_bonus
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
 	if not is_instance_valid(blueprint_data) or not is_instance_valid(blueprint_data.weapon_scene):
-		push_warning("WeaponManager: Cannot spawn attack. Invalid blueprint or scene for '", weapon_entry.id, "'."); return
+		push_warning("WeaponManager: Cannot spawn attack. Invalid blueprint or scene for '", blueprint_data.id, "'."); return
 	
 	var owner_player = get_parent() as PlayerCharacter
 	if not is_instance_valid(owner_player):
@@ -155,6 +202,11 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int):
 	var direction: Vector2 = Vector2.ZERO
 	var spawn_position: Vector2 = owner_player.global_position
 	var target_found: bool = true
+
+	# DEBUG PRINT: Check blueprint's direction properties
+	print("WeaponManager: Blueprint '", blueprint_data.id, "' requires_direction: ", blueprint_data.requires_direction)
+	print("WeaponManager: Blueprint '", blueprint_data.id, "' targeting_type: ", blueprint_data.targeting_type)
+
 
 	# Determine attack direction and spawn position based on targeting type
 	if blueprint_data.requires_direction:
@@ -169,33 +221,85 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int):
 				var world_mouse_pos = owner_player.get_global_mouse_position()
 				direction = (world_mouse_pos - owner_player.global_position).normalized()
 				# Clamp spawn position within a max cast range if specified
-				var max_range = float(weapon_entry.specific_stats.get(&"max_cast_range", 300.0))
+				var max_range = float(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE]))
 				if owner_player.global_position.distance_to(world_mouse_pos) > max_range:
 					spawn_position = owner_player.global_position + direction * max_range
 				else:
 					spawn_position = world_mouse_pos
 			&"mouse_direction": # Targeting mouse direction (for melee aim dot)
 				# Assuming PlayerCharacter.melee_aiming_dot is a node that can provide direction
+				# PROBLEM: owner_player.melee_aiming_dot.get_aiming_direction() might be returning Vector2.ZERO
+				# Or melee_aiming_dot might be invalid.
 				if is_instance_valid(owner_player.melee_aiming_dot) and owner_player.melee_aiming_dot.has_method("get_aiming_direction"):
 					direction = owner_player.melee_aiming_dot.get_aiming_direction()
+					# DEBUG PRINT: Verify direction from melee_aiming_dot
+					print("WeaponManager: Direction from melee_aiming_dot: ", direction)
 				else:
-					# Fallback to player facing direction or default if aim dot invalid
-					direction = Vector2.RIGHT # Or current player facing direction
-	
+					push_warning("WeaponManager: Melee aiming dot or its 'get_aiming_direction' method is invalid. Falling back to player facing direction.")
+					# FALLBACK: If melee_aiming_dot is invalid or doesn't provide direction,
+					# use player's current facing direction or mouse position as a fallback.
+					# A robust fallback would be `get_global_mouse_position()` normalized relative to player.
+					# Or, for melee, player's last input direction.
+					direction = (owner_player.get_global_mouse_position() - owner_player.global_position).normalized()
+					if direction == Vector2.ZERO: # If mouse is exactly on player, default to RIGHT
+						direction = Vector2.RIGHT 
+	else:
+		# If blueprint_data.requires_direction is false, direction remains Vector2.ZERO by default
+		# This is expected for weapons that don't need aiming (e.g., aura, some summons).
+		# For dagger, this path should NOT be taken.
+		print("WeaponManager: Blueprint '", blueprint_data.id, "' does NOT require direction. Direction remains default (0,0).")
+
+
 	if not target_found: return # Abort if no target for a targeting-dependent attack
 
 	var weapon_instance = blueprint_data.weapon_scene.instantiate()
 	if not is_instance_valid(weapon_instance):
 		push_error("WeaponManager: Failed to instantiate weapon scene for '", blueprint_data.id, "'."); return
 	
-	# Prepare stats to pass to the attack instance
-	var stats_for_this_instance = weapon_entry.specific_stats.duplicate(true)
-	stats_for_this_instance[&"base_lifetime"] = blueprint_data.base_lifetime # Pass base lifetime for projectile/melee
+	# NEW: Prepare fully calculated stats to pass to the attack instance
+	var calculated_weapon_stats: Dictionary = {} # Declared as a local variable here
+	# Populate with all relevant weapon stats that the attack instance might need
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.SHOT_DELAY]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.SHOT_DELAY])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TICK_INTERVAL]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TICK_INTERVAL])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_X]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_X])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_Y]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_Y])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
 
-	# Apply Reaping Momentum bonus to the instance and reset it in the weapon entry
+	# Add dagger-specific properties that are not "calculated" but are passed as data
+	calculated_weapon_stats[&"attack_sequence"] = weapon_entry.specific_stats.get(&"attack_sequence", []).duplicate(true)
+	calculated_weapon_stats[&"attack_area_scale"] = weapon_entry.specific_stats.get(&"attack_area_scale", 1.0)
+
+	# ADDED FOR FROZEN TERRITORY: Pass status effect application data and rotation duration
+	# Duplicate the array to ensure the instance gets its own copy, preventing shared modification.
+	calculated_weapon_stats[&"on_hit_status_applications"] = weapon_entry.specific_stats.get(&"on_hit_status_applications", []).duplicate(true)
+	calculated_weapon_stats[&"rotation_duration"] = weapon_entry.specific_stats.get(&"rotation_duration", 3.0) # Ensure this is passed
+
+
+	# Pass base lifetime from blueprint directly
+	calculated_weapon_stats[&"base_lifetime"] = blueprint_data.base_lifetime 
+
+	# Apply Reaping Momentum bonus to the instance's stats and reset it in the weapon entry
 	if p_reaping_bonus > 0:
-		stats_for_this_instance[&"reaping_momentum_bonus_to_apply"] = p_reaping_bonus
-		weapon_entry.specific_stats[&"reaping_momentum_bonus"] = 0 # Reset stored bonus after use
+		# FIX: Use REAPING_MOMENTUM_ACCUMULATED_BONUS for the key
+		calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS]] = p_reaping_bonus 
+		# Reset the stored bonus in the weapon entry's specific_stats after use
+		# FIX: Use REAPING_MOMENTUM_ACCUMULATED_BONUS for the key
+		weapon_entry.specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS]] = 0 
+
+	# DEBUG PRINT: Added to show calculated_weapon_stats being passed to the instance
+	print("WeaponManager: Spawning attack for ", weapon_entry.id, ". Passed specific_stats to instance: ", calculated_weapon_stats)
+	# DEBUG PRINT: Added to show the direction being used
+	print("WeaponManager: Spawning attack for ", weapon_entry.id, ". Calculated Direction: ", direction)
+
 
 	# Determine where to add the weapon instance in the scene tree
 	if blueprint_data.tags.has("centered_melee"):
@@ -214,7 +318,8 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int):
 	
 	# Pass attack properties and player_stats to the attack instance
 	if weapon_instance.has_method("set_attack_properties"):
-		weapon_instance.set_attack_properties(direction, stats_for_this_instance, owner_player.player_stats)
+		# Pass the *calculated* stats, and the PlayerStats reference
+		weapon_instance.set_attack_properties(direction, calculated_weapon_stats, owner_player.player_stats)
 	else:
 		push_warning("WeaponManager: Attack instance '", weapon_instance.name, "' for '", blueprint_data.id, "' is missing 'set_attack_properties' method.")
 	
@@ -227,8 +332,9 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int):
 # weapon_entry: Dictionary containing weapon details and its specific stats.
 func _spawn_persistent_summon(weapon_entry: Dictionary):
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
-	var owner_player = get_parent() as PlayerCharacter
-	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player):
+	# FIX: Declare owner_player here
+	var owner_player = get_parent() as PlayerCharacter 
+	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player): # Use owner_player here
 		push_error("WeaponManager: Cannot spawn persistent summon. Invalid blueprint or owner."); return
 
 	var summon_instance = blueprint_data.weapon_scene.instantiate()
@@ -243,9 +349,19 @@ func _spawn_persistent_summon(weapon_entry: Dictionary):
 	summon_instance.global_position = owner_player.global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
 	
 	if summon_instance.has_method("initialize"):
-		var stats_to_pass = weapon_entry.specific_stats.duplicate(true)
-		stats_to_pass[&"weapon_level"] = weapon_entry.weapon_level # Pass weapon level as a stat to the summon
-		summon_instance.initialize(owner_player, stats_to_pass) # Pass player reference and weapon stats
+		# Pass fully calculated weapon stats to the summon
+		var calculated_summon_stats: Dictionary = {}
+		# Populate with all relevant weapon stats that the summon instance might need
+		# (e.g., summon damage, duration, count, etc.)
+		# Example:
+		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION])
+		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])
+		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
+		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
+
+		calculated_summon_stats[&"weapon_level"] = weapon_entry.weapon_level # Pass weapon level as a stat to the summon
+		summon_instance.initialize(owner_player, calculated_summon_stats) # Pass player reference and weapon stats
 	else:
 		push_warning("WeaponManager: Summon instance '", summon_instance.name, "' for '", blueprint_data.id, "' is missing 'initialize' method.")
 	
@@ -284,39 +400,39 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 		if effect_resource is StatModificationEffectData:
 			var stat_mod = effect_resource as StatModificationEffectData
 			
+			# FIX: Match patterns must be constant literals or identifiers.
 			match stat_mod.target_scope:
-				&"player_stats":
+				PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PLAYER_STATS]: # Corrected to use KEY_NAMES
 					var p_stats = get_parent().player_stats # Get PlayerStats reference
 					if is_instance_valid(p_stats):
 						p_stats.apply_stat_modification(stat_mod)
 					else:
 						push_error("WeaponManager: PlayerStats node is invalid when applying player_stats modification for weapon upgrade.")
-				&"weapon_specific_stats":
-					# Apply stat modification directly to the weapon's specific_stats dictionary.
-					# This mirrors the logic in PlayerStats.gd's apply_stat_modification.
+				PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_SPECIFIC_STATS]: # Corrected to use KEY_NAMES
+					# Apply stat modification to the weapon's specific_stats modifier dictionaries.
 					var key = stat_mod.stat_key
 					var value = stat_mod.get_value()
-					var modification_type_string_name: StringName = &"" + str(stat_mod.modification_type) # Ensure StringName
+					var modification_type_string_name: StringName = stat_mod.modification_type # Assuming it's already StringName
 					
-					# Ensure the stat key exists in the specific_stats, or initialize it
-					if not weapon_entry.specific_stats.has(key):
-						weapon_entry.specific_stats[key] = 0.0 # Default to float for new stats
+					# Ensure the stat key exists in the base_specific_stats, or that it's a known weapon stat.
+					if not weapon_entry.specific_stats.has(key) and not weapon_entry._flat_mods.has(key):
+						push_warning("WeaponManager: Weapon specific stat '", key, "' not found in base stats or modifiers. Initializing to 0.0.")
+						weapon_entry.specific_stats[key] = 0.0 # Initialize base if new
 					
 					match modification_type_string_name:
 						&"flat_add":
-							weapon_entry.specific_stats[key] += value
+							weapon_entry._flat_mods[key] = weapon_entry._flat_mods.get(key, 0.0) + value
 						&"percent_add_to_base":
-							# For weapon stats, this implies a percentage increase to the base value (e.g., +10% attack damage)
-							# Store it as a sum of percentages, then apply later.
-							var current_percent_add = weapon_entry.specific_stats.get(key.replace(&"base_", &""), 0.0) # Handle 'base_X' keys for weapon stats
-							weapon_entry.specific_stats[key] = current_percent_add + value
+							weapon_entry._percent_add_mods[key] = weapon_entry._percent_add_mods.get(key, 0.0) + value
 						&"percent_mult_final":
-							# This might be used for effects like "x% more damage" for a specific weapon.
-							# Multipliers stack multiplicatively.
-							var current_mult = weapon_entry.specific_stats.get(key, 1.0)
-							weapon_entry.specific_stats[key] = current_mult * (1.0 + value)
+							weapon_entry._percent_mult_final_mods[key] = weapon_entry._percent_mult_final_mods.get(key, 1.0) * (1.0 + value)
 						&"override_value":
+							# Override value directly on the base stat, clearing modifiers if applicable.
+							# This needs careful consideration if you want modifiers to persist.
 							weapon_entry.specific_stats[key] = value
+							weapon_entry._flat_mods[key] = 0.0
+							weapon_entry._percent_add_mods[key] = 0.0
+							weapon_entry._percent_mult_final_mods[key] = 1.0
 						_:
 							push_error("WeaponManager: Unknown modification type '", modification_type_string_name, "' for weapon_specific_stats on key '", key, "'.")
 				_:
@@ -326,10 +442,13 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 		elif effect_resource is CustomFlagEffectData:
 			var flag_mod = effect_resource as CustomFlagEffectData
 			# Custom flags can be applied to weapon-specific stats or behaviors
-			if flag_mod.target_scope == &"weapon_specific_stats" or flag_mod.target_scope == &"weapon_behavior":
+			# FIX: Match patterns must be constant literals or identifiers.
+			if flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_SPECIFIC_STATS] or \
+			   flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_BEHAVIOR]: # Corrected to use KEY_NAMES
 				weapon_entry.specific_stats[flag_mod.flag_key] = flag_mod.flag_value
-			elif flag_mod.target_scope == &"player_behavior": # If a weapon upgrade affects a player flag
-				var owner_player = get_parent() as PlayerCharacter
+			elif flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PLAYER_BEHAVIOR]: # Corrected to use KEY_NAMES
+				# FIX: Declare owner_player here
+				var owner_player = get_parent() as PlayerCharacter 
 				if is_instance_valid(owner_player) and owner_player.player_stats.has_method("apply_custom_flag"):
 					owner_player.player_stats.apply_custom_flag(flag_mod)
 			else:
@@ -339,7 +458,7 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 		elif effect_resource is StatusEffectApplicationData:
 			var status_app_data = effect_resource as StatusEffectApplicationData
 			# Store status application data within weapon's specific stats to be used by attack instances.
-			if not weapon_entry.specific_stats.has(&"on_hit_status_applications"):
+			if not weapon_entry.specific_stats.has(&"on_hit_status_applications"): # Use StringName literal
 				weapon_entry.specific_stats[&"on_hit_status_applications"] = []
 			weapon_entry.specific_stats[&"on_hit_status_applications"].append(status_app_data)
 		
@@ -358,7 +477,7 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 	
 	# If it's a summon weapon, handle potential increase in max summons or stat updates for existing summons
 	if blueprint_data.tags.has("summon"):
-		var max_summons = int(weapon_entry.specific_stats.get(&"max_summons_of_type", 1))
+		var max_summons = int(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])) # Use calculated stat
 		var current_summon_list = _active_summons.get(weapon_id, [])
 		var current_summon_count = current_summon_list.size()
 		
@@ -368,15 +487,24 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 				_spawn_persistent_summon(weapon_entry)
 		
 		# Update stats of ALL active summons of this type
+		# FIX: Declare owner_player here
 		var owner_player = get_parent() as PlayerCharacter
 		if is_instance_valid(owner_player):
 			for summon_instance in current_summon_list:
 				if is_instance_valid(summon_instance) and summon_instance.has_method("update_stats"):
-					var stats_to_pass = weapon_entry.specific_stats.duplicate(true)
-					stats_to_pass[&"weapon_level"] = weapon_entry.weapon_level
-					summon_instance.update_stats(owner_player, stats_to_pass) # Pass player ref and updated stats
+					# Pass fully calculated weapon stats to the summon for update
+					var calculated_summon_stats: Dictionary = {}
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION])
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
+
+					calculated_summon_stats[&"weapon_level"] = weapon_entry.weapon_level
+					summon_instance.update_stats(owner_player, calculated_summon_stats) # Pass player ref and updated calculated stats
 	
 	# Increment basic class level if the weapon has class restrictions
+	# FIX: Declare owner_player here
 	var owner_player = get_parent() as PlayerCharacter
 	if is_instance_valid(owner_player) and owner_player.has_method("increment_basic_class_level"):
 		if not blueprint_data.class_tag_restrictions.is_empty():
@@ -395,14 +523,17 @@ func _on_reaping_momentum_hits(hit_count: int, weapon_id: StringName):
 	if weapon_index == -1: return
 	
 	var weapon_entry = active_weapons[weapon_index]
-	# Get reaping_momentum_dmg_per_hit from weapon's specific stats
-	var dmg_per_hit = int(weapon_entry.specific_stats.get(&"reaping_momentum_dmg_per_hit", 1))
+	# Get reaping_momentum_dmg_per_hit from weapon's specific stats (base value)
+	# FIX: Use REAPING_MOMENTUM_DAMAGE_PER_HIT from PlayerStatKeys
+	var dmg_per_hit = int(weapon_entry.specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_DAMAGE_PER_HIT], 1))
 	var bonus_to_add = hit_count * dmg_per_hit
 	
 	if bonus_to_add > 0:
-		var current_stored_bonus = weapon_entry.specific_stats.get(&"reaping_momentum_bonus", 0)
-		weapon_entry.specific_stats[&"reaping_momentum_bonus"] = current_stored_bonus + bonus_to_add
-		# print("WeaponManager: Reaping Momentum bonus for ", weapon_id, " increased to ", weapon_entry.specific_stats[&"reaping_momentum_bonus"])
+		# Add to the stored bonus. This is a special case not going through normal stat mod.
+		# FIX: Use REAPING_MOMENTUM_ACCUMULATED_BONUS from PlayerStatKeys
+		var current_stored_bonus = weapon_entry.specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS], 0)
+		weapon_entry.specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS]] = current_stored_bonus + bonus_to_add
+		# print("WeaponManager: Reaping Momentum bonus for ", weapon_id, " increased to ", weapon_entry.specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS]]) # FIX: Use KEY_NAMES here too
 
 # Called when a persistent summon is destroyed (e.g., via queue_free, health 0).
 func _on_summon_destroyed(weapon_id: StringName, summon_instance: Node):
@@ -423,37 +554,61 @@ func get_weapon_cooldown_value(weapon_entry: Dictionary) -> float:
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
 	if not is_instance_valid(blueprint_data): return 999.0
 	
-	var final_cooldown = blueprint_data.cooldown
+	var final_cooldown = blueprint_data.cooldown # Start with blueprint's base cooldown
 	var owner_player = get_parent() as PlayerCharacter
 	if is_instance_valid(owner_player) and is_instance_valid(owner_player.player_stats):
 		var p_stats = owner_player.player_stats
 
 		# Apply player's Attack Speed Multiplier
-		var atk_speed_mult = p_stats.get_final_stat(GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER)
+		var atk_speed_mult = p_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
 		if atk_speed_mult > 0: # Prevent division by zero
 			final_cooldown /= atk_speed_mult
 
 		# Apply player's Flat Cooldown Reduction
-		var global_cdr_flat = p_stats.get_final_stat(GameStatConstants.Keys.GLOBAL_COOLDOWN_REDUCTION_FLAT)
+		var global_cdr_flat = p_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_FLAT)
 		final_cooldown -= global_cdr_flat
 
 		# Apply player's Percentage Cooldown Reduction
-		var global_cdr_mult = p_stats.get_final_stat(GameStatConstants.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
+		var global_cdr_mult = p_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
 		# This multiplier reduces the remaining cooldown (e.g., 0.1 for 10% reduction)
 		final_cooldown *= (1.0 - global_cdr_mult)
 	
 	return maxf(0.05, final_cooldown) # Ensure cooldown doesn't go below a minimum threshold
 
 
+# NEW HELPER: Calculates the final value of a weapon-specific stat
+# by applying its base value and all modifiers stored within the weapon_entry.
+func _calculate_final_weapon_stat(weapon_entry: Dictionary, stat_key: StringName) -> float:
+	var base_value = weapon_entry.specific_stats.get(stat_key, 0.0)
+	var flat_mod = weapon_entry._flat_mods.get(stat_key, 0.0)
+	var percent_add_mod = weapon_entry._percent_add_mods.get(stat_key, 0.0)
+	var percent_mult_final_mod = weapon_entry._percent_mult_final_mods.get(stat_key, 1.0)
+	
+	var final_value = base_value + flat_mod
+	final_value *= (1.0 + percent_add_mod)
+	final_value *= percent_mult_final_mod
+	
+	return final_value
+
 # Returns a copy of active weapon data suitable for level-up screen display.
 func get_active_weapons_data_for_level_up() -> Array[Dictionary]:
 	var weapons_data_copy: Array[Dictionary] = []
 	for weapon_entry in active_weapons:
+		# When preparing for UI, we might want to pass fully calculated stats or
+		# just a simplified view. For now, let's pass a snapshot of currently calculated stats.
+		var current_calculated_specific_stats: Dictionary = {}
+		# Populate with key stats needed for UI display
+		current_calculated_specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+		current_calculated_specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT])
+		current_calculated_specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE])
+		# Add other calculated weapon stats here as needed for the UI
+
 		var display_data = {
 			"id": weapon_entry.id,
 			"title": weapon_entry.title,
 			"weapon_level": weapon_entry.weapon_level,
-			"specific_stats": weapon_entry.specific_stats.duplicate(true),
+			# Pass a copy of the calculated stats for display purposes
+			"specific_stats_snapshot": current_calculated_specific_stats.duplicate(true),
 			"blueprint_resource_path": weapon_entry.blueprint_resource.resource_path if is_instance_valid(weapon_entry.blueprint_resource) else ""
 		}
 		weapons_data_copy.append(display_data)

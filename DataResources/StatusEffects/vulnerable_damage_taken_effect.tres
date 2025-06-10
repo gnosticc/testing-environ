@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_ty8v2")
-stat_key = &"damage_taken_multiplier"
 modification_type = &"percent_add_to_base"
+stat_key = &"damage_taken_multiplier"
 value_type = 0
 value_float = 0.2
 value_int = 0

@@ -10,19 +10,21 @@ id = &"knight_longsword"
 title = "Longsword"
 description = "A standard, reliable sword that slashes in front of the wielder."
 weapon_scene = ExtResource("3_ebrbk")
-tags = Array[String](["melee", "knight weapon", "physical"])
+tags = Array[StringName]([&"melee", &"knight weapon", &"physical"])
 class_tag_restrictions = Array[int]([2])
 cooldown = 2.0
 max_level = 10
 base_lifetime = 0.25
 spawn_as_child = true
 requires_direction = true
-targeting_type = "mouse"
+targeting_type = &"mouse_direction"
 initial_specific_stats = {
+"base_attack_duration": 0.2,
 "inherent_visual_scale_x": 0.6,
 "inherent_visual_scale_y": 0.6,
 "pierce_count": 0,
 "projectile_speed": 200.0,
+"weapon_attack_speed_mod": 1.0,
 "weapon_damage_percentage": 2.0
 }
 available_upgrades = Array[ExtResource("1_dcudt")]([])

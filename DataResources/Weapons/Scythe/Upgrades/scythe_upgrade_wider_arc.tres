@@ -7,8 +7,8 @@
 
 [sub_resource type="Resource" id="Resource_es6qy"]
 script = ExtResource("2_ghern")
-stat_key = &"aoe_area_multiplier"
 modification_type = &"flat_add"
+stat_key = &"aoe_area_multiplier"
 value_type = 0
 value_float = 1.3
 value_int = 0

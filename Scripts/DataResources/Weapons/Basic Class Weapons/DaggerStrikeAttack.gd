@@ -7,6 +7,7 @@
 # FIXED: Refined rotation and flipping logic for AnimatedSprite2D.
 # FIXED: Declared '_stats_have_been_set' variable.
 # FIXED: Corrected reference to CollisionPolygon2D node.
+# UPDATED: Uses PlayerStats.get_calculated_player_damage for unified damage calculation.
 
 extends Node2D
 class_name DaggerStrikeAttack # Explicit class_name for clarity and type hinting
@@ -24,7 +25,7 @@ var owner_player_stats: PlayerStats = null # Reference to the player's PlayerSta
 var _enemies_hit_this_sweep: Array[Node2D] = [] # Tracks enemies hit to prevent multi-hitting per sweep
 var _is_attack_active: bool = false # Flag to control hit detection
 var _current_attack_duration: float = 0.25 # Actual duration of the attack animation/hitbox activity
-var _stats_have_been_set: bool = false # FIXED: Declared _stats_have_been_set here
+var _stats_have_been_set: bool = false # Declared _stats_have_been_set here
 
 func _ready():
 	if not is_instance_valid(animated_sprite):
@@ -50,7 +51,7 @@ func _ready():
 
 # Standardized initialization function called by WeaponManager or DaggerStrikeController.
 # direction: The normalized direction vector for the attack.
-# p_attack_stats: Dictionary of specific stats for this weapon instance.
+# p_attack_stats: Dictionary of specific stats for this weapon instance (already calculated by WeaponManager).
 # p_player_stats: Reference to the player's PlayerStats node.
 func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
 	specific_stats = p_attack_stats.duplicate(true) # Deep copy to avoid modifying original
@@ -117,24 +118,31 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 
 
 # Applies all calculated stats and effects to the attack instance.
-# This method pulls relevant data from 'specific_stats' and 'owner_player_stats'.
+# This method pulls relevant data from 'specific_stats' (already calculated) and 'owner_player_stats'.
 func _apply_all_stats_effects():
 	if not is_instance_valid(owner_player_stats):
 		push_warning("DaggerStrikeAttack: owner_player_stats invalid. Cannot apply effects."); return
 
 	# --- Scale Calculation (Visual and Collision) ---
-	var base_scale_x = float(specific_stats.get(&"inherent_visual_scale_x", 1.0))
-	var base_scale_y = float(specific_stats.get(&"inherent_visual_scale_y", 1.0))
-	var player_aoe_mult = owner_player_stats.get_final_stat(GameStatConstants.Keys.AOE_AREA_MULTIPLIER)
+	# specific_stats here should already contain the calculated weapon scale
+	var base_scale_x = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_X], 1.0))
+	var base_scale_y = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_Y], 1.0))
+	
+	# The player's AOE_AREA_MULTIPLIER from PlayerStats is applied on top of the weapon's inherent scale
+	var player_aoe_mult = owner_player_stats.current_aoe_area_multiplier # Use the cached 'current_' stat
 	
 	# Apply scale to the root of the attack scene (which should scale children as well)
 	self.scale = Vector2(base_scale_x * player_aoe_mult, base_scale_y * player_aoe_mult)
 	
 	# --- Attack Duration Calculation ---
-	var base_duration = float(specific_stats.get(&"base_attack_duration", 0.25)) # Default to 0.25 seconds
+	# specific_stats should already contain the calculated base_attack_duration
+	var base_duration = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION], 0.25)) # Default to 0.25 seconds
 	
-	var atk_speed_player_mult = owner_player_stats.get_final_stat(GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER)
-	var weapon_attack_speed_mod = float(specific_stats.get(&"weapon_attack_speed_mod", 1.0))
+	# Player's attack speed multiplier from PlayerStats.gd
+	var atk_speed_player_mult = owner_player_stats.current_attack_speed_multiplier # Use the cached 'current_' stat
+	
+	# Assuming 'weapon_attack_speed_mod' is a specific stat passed in specific_stats (already calculated)
+	var weapon_attack_speed_mod = float(specific_stats.get(&"weapon_attack_speed_mod", 1.0)) # Consider if this should be a PlayerStatKeys entry
 	
 	var final_attack_speed_mult = atk_speed_player_mult * weapon_attack_speed_mod
 	if final_attack_speed_mult <= 0: final_attack_speed_mult = 0.01 # Prevent division by zero
@@ -192,36 +200,25 @@ func _on_damage_area_body_entered(body: Node2D):
 			push_error("DaggerStrikeAttack: owner_player_stats is invalid. Cannot deal damage."); return
 
 		# --- Damage Calculation ---
-		# Start with player's base numerical damage.
-		var player_base_damage = owner_player_stats.get_final_stat(GameStatConstants.Keys.NUMERICAL_DAMAGE)
-		
-		# Apply weapon-specific damage percentage multiplier (from blueprint/upgrades).
+		# Get weapon-specific damage percentage multiplier (from blueprint/upgrades).
 		# Default to 0.9 if not found, as per original code.
-		var weapon_damage_percent = float(specific_stats.get(&"weapon_damage_percentage", 0.9))
+		var weapon_damage_percent = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 0.9))
 		
-		var calculated_damage = player_base_damage * weapon_damage_percent
+		# NEW: Use the unified damage calculation from PlayerStats.gd
+		var final_damage_to_deal = owner_player_stats.get_calculated_player_damage(weapon_damage_percent)
 		
-		# Apply player's global damage multiplier.
-		calculated_damage *= owner_player_stats.get_final_stat(GameStatConstants.Keys.GLOBAL_DAMAGE_MULTIPLIER)
+		# TODO: Add visual/sound effect for critical hit here - CRIT IS NOW HANDLED INTERNALLY BY get_calculated_player_damage
+		# If you want to check for crit *after* the fact (for FX), you'd need get_calculated_player_damage to
+		# return a dictionary with damage and a "is_critical_hit" flag, or emit a signal from PlayerStats.gd.
+		# For simplicity, if crit is purely a damage multiplier, the calculation is sufficient.
 
-		# Apply Critical Hit logic.
-		var crit_chance = owner_player_stats.get_final_stat(GameStatConstants.Keys.CRIT_CHANCE)
-		var crit_damage_mult = owner_player_stats.get_final_stat(GameStatConstants.Keys.CRIT_DAMAGE_MULTIPLIER)
-		
-		if randf() < crit_chance:
-			calculated_damage *= crit_damage_mult
-			# TODO: Add visual/sound effect for critical hit here
-			print("DaggerStrikeAttack: Critical Hit!") # For debugging
-
-		var final_damage_to_deal = calculated_damage # Final damage is float
-		
 		var owner_player = owner_player_stats.get_parent() if is_instance_valid(owner_player_stats) else null
 		
 		# Prepare attack stats to pass to the enemy's take_damage method.
 		# This includes armor penetration from the player's stats.
 		var attack_stats_for_enemy: Dictionary = {
-			GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION]: owner_player_stats.get_final_stat(GameStatConstants.Keys.ARMOR_PENETRATION)
-			# Add any other relevant attack stats here (e.g., lifesteal, status application chance)
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: owner_player_stats.current_armor_penetration # Use cached current_ stat
+			# Add any other relevant attack properties here (e.g., lifesteal, status application chance)
 		}
 
 		enemy_target.take_damage(final_damage_to_deal, owner_player, attack_stats_for_enemy)
@@ -235,7 +232,7 @@ func _on_damage_area_body_entered(body: Node2D):
 					enemy_target.status_effect_component.apply_effect(
 						load(app_data.status_effect_resource_path) as StatusEffectData,
 						owner_player, # Source of the effect
-						specific_stats, # Weapon stats for scaling
+						specific_stats, # Weapon stats for scaling (these are the calculated ones)
 						app_data.duration_override,
 						app_data.potency_override
 					)

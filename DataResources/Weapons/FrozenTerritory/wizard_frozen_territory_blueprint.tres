@@ -1,7 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://b8sykifhk6bdo"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=5 format=3 uid="uid://b8sykifhk6bdo"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_plnb8"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ox1t0"]
+[ext_resource type="Resource" uid="uid://3uuwkxaovfsg" path="res://DataResources/StatusEffects/slow_apply.tres" id="2_rnqi5"]
 [ext_resource type="PackedScene" uid="uid://uywgfxjqbhae" path="res://Scenes/Weapons/FrozenTerritoryController.tscn" id="3_ox1t0"]
 
 [resource]
@@ -10,7 +11,7 @@ id = &"wizard_frozen_territory"
 title = "Frozen Territory"
 description = "Chunks of ice orbit you, damaging and slowing enemies they touch."
 weapon_scene = ExtResource("3_ox1t0")
-tags = Array[String](["orbital", "magical", "ice"])
+tags = Array[StringName]([&"orbital", &"magical", &"ice", &"area"])
 class_tag_restrictions = Array[int]([4])
 cooldown = 6.0
 max_level = 10
@@ -19,12 +20,12 @@ spawn_as_child = true
 requires_direction = false
 targeting_type = "none"
 initial_specific_stats = {
-"instance_count": 2,
+"number_of_orbits": 2,
+"on_hit_status_applications": [ExtResource("2_rnqi5")],
 "orbit_radius": 60.0,
 "pierce_count": 0,
 "projectile_speed": 200.0,
 "rotation_duration": 3.0,
-"status_effect_path": "res://DataResources/StatusEffects/slow_status.tres",
 "weapon_damage_percentage": 1.0
 }
 available_upgrades = Array[ExtResource("1_plnb8")]([])

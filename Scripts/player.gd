@@ -1,11 +1,13 @@
 # player.gd
 # This script manages the player's core behavior, input, health, experience,
 # and acts as the central hub for interacting with PlayerStats and WeaponManager.
-# It now fully integrates with the standardized stat system using GameStatConstants.
+# It now fully integrates with the standardized stat system using PlayerStatKeys.
 #
 # UPDATED: Re-added player walk/idle animation logic.
 # UPDATED: Implemented UI anchoring logic for health/exp bars using GameUI's public methods.
 # FIXED: Declared 'is_dead_flag' variable.
+# FIXED: Resolved "parameter named 'new_max_health' declared in this scope" error.
+# FIXED: Ensured _last_known_max_health is initialized correctly.
 
 extends CharacterBody2D
 class_name PlayerCharacter
@@ -16,9 +18,12 @@ class_name PlayerCharacter
 # --- Player Core Variables (now primarily derived from PlayerStats) ---
 # These variables hold the CURRENT state of health and magnet radius,
 # which are updated based on the calculations in PlayerStats.gd.
-var current_health: float
-var current_pickup_magnet_radius: float
+var current_health: float = 0.0 # Initialized here, will be set from PlayerStats.MAX_HEALTH on init
+var current_pickup_magnet_radius: float = 0.0
 var is_dead_flag: bool = false # FIXED: Declared is_dead_flag here
+
+# Store the last known max health to correctly scale current health percentage
+var _last_known_max_health: float = 0.0 # Initialize here to ensure it's always set
 
 # --- Component References ---
 @onready var weapon_manager: WeaponManager = $WeaponManager
@@ -133,7 +138,7 @@ func _initialize_player_class_and_stats(p_class_enum: BasicClass):
 	current_basic_class_enum_val = p_class_enum
 	var class_name_str = BasicClass.keys()[p_class_enum].to_lower()
 
-	var class_data_path = "res://DataResources/Classes/" + class_name_str + "_class_data.tres"
+	var class_data_path = "res://Data/Classes/" + class_name_str + "_class_data.tres"
 
 	var class_data_res: PlayerClassData = null
 	if ResourceLoader.exists(class_data_path):
@@ -142,7 +147,8 @@ func _initialize_player_class_and_stats(p_class_enum: BasicClass):
 	if is_instance_valid(class_data_res):
 		player_stats.initialize_base_stats(class_data_res)
 		# Set current_health based on the newly initialized max health from PlayerStats
-		current_health = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+		# _on_player_stats_recalculated will be called right after this via the signal
+		# and will correctly set current_health based on the new max health.
 	else:
 		push_error("PlayerCharacter: Failed to load PlayerClassData at '", class_data_path, "'. Initializing with fallback stats.")
 		_fallback_initialize_stats_directly()
@@ -158,27 +164,27 @@ func _fallback_initialize_stats_directly():
 
 	# Use standardized keys for fallback stats
 	var raw_stats = {
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MAX_HEALTH]: 100.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.HEALTH_REGENERATION]: 0.1,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.NUMERICAL_DAMAGE]: 10.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.GLOBAL_DAMAGE_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION]: 0.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MOVEMENT_SPEED]: 70.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MAGNET_RANGE]: 50.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.EXPERIENCE_GAIN_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.AOE_AREA_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.PROJECTILE_SIZE_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.PROJECTILE_SPEED_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.EFFECT_DURATION_MULTIPLIER]: 1.0,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.CRIT_CHANCE]: 0.05,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.CRIT_DAMAGE_MULTIPLIER]: 1.5,
-		GameStatConstants.KEY_NAMES[GameStatConstants.Keys.LUCK]: 0.0
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_HEALTH]: 100.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.HEALTH_REGENERATION]: 0.1,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMERICAL_DAMAGE]: 10.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DAMAGE_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: 0.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED]: 70.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGNET_RANGE]: 50.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.EXPERIENCE_GAIN_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SIZE_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER]: 1.0,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.CRIT_CHANCE]: 0.05,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER]: 1.5,
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.LUCK]: 0.0
 	}
 	# Pass these raw stats to PlayerStats for initialization
 	player_stats.initialize_base_stats_with_raw_dict(raw_stats)
-	current_health = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+	# current_health will be set by _on_player_stats_recalculated, which is called by initialize_base_stats_with_raw_dict
 	push_warning("PlayerCharacter: Fallback stats applied. Ensure PlayerStats has 'initialize_base_stats_with_raw_dict' method.")
 
 
@@ -202,6 +208,8 @@ func _try_equip_initial_weapon():
 	if is_instance_valid(weapon_blueprint):
 		var success = weapon_manager.add_weapon(weapon_blueprint)
 		if success and not weapon_blueprint.class_tag_restrictions.is_empty():
+			# This implies that the blueprint's first class tag restriction is the class to increment.
+			# Ensure this logic is correct for your game design.
 			increment_basic_class_level(weapon_blueprint.class_tag_restrictions[0])
 	else:
 		push_error("PlayerCharacter: Failed to get weapon blueprint for ID: ", _initial_chosen_weapon_id)
@@ -211,30 +219,47 @@ func _try_equip_initial_weapon():
 
 # This function is triggered by PlayerStats.gd whenever its stats are recalculated.
 # PlayerCharacter updates its own derived properties here.
-func _on_player_stats_recalculated():
-	if not is_instance_valid(player_stats): return
+func _on_player_stats_recalculated(new_max_health_from_signal: float, new_movement_speed_from_signal: float):
+	# Renamed parameters to avoid shadowing, although using the provided signal args is preferred.
+	# The goal is to update current_health and current_pickup_magnet_radius.
+	
+	if not is_instance_valid(player_stats): return # Safety check
 
-	var new_max_health = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+	# Retrieve the actual calculated max health and magnet range from PlayerStats.
+	# Using the current_ (cached) properties on player_stats is the most consistent approach
+	# as these are already updated by PlayerStats.recalculate_all_stats().
+	var new_max_health = player_stats.current_max_health
+	var new_magnet_range = player_stats.current_magnet_range
 	
-	# Calculate health percentage before updating max health, to maintain relative health
+	# --- Health Scaling Logic ---
+	# Calculate health percentage based on the *old* max health to maintain relative health.
+	# We use _last_known_max_health which was correctly set during the *previous* recalculation or initialization.
 	var health_percentage = 1.0
-	var old_max_health = get_max_health_value() # Get current max health value for accurate percentage
-	if old_max_health > 0:
-		health_percentage = current_health / old_max_health
+	if _last_known_max_health > 0: # Avoid division by zero if this is the very first initialization
+		health_percentage = current_health / _last_known_max_health
 	
-	current_health = clampf(new_max_health * health_percentage, 0, new_max_health)
+	# Apply the percentage to the new max health to determine the new current health.
+	current_health = clampf(new_max_health * health_percentage, 0.0, new_max_health)
 	
-	# Ensure current_health doesn't become 0 from percentage if it was >0 before
-	if new_max_health > 0 and current_health < 1.0 and health_percentage > 0: # Check for <1.0 for floats
+	# Safety check: If max health is positive but current health became very small (e.g., due to float precision)
+	# and the player was not dead, ensure they have at least 1 HP.
+	if new_max_health > 0 and current_health < 0.01 and health_percentage > 0:
 		current_health = 1.0
 	
-	# Update pickup magnet radius
-	var new_magnet_range = player_stats.get_final_stat(GameStatConstants.Keys.MAGNET_RANGE)
+	# Update the _last_known_max_health for the next recalculation.
+	_last_known_max_health = new_max_health
+	
+	# --- Magnet Range Update ---
 	if current_pickup_magnet_radius != new_magnet_range:
 		current_pickup_magnet_radius = new_magnet_range
-		update_experience_collector_radius()
-			
+		update_experience_collector_radius() # Call your method to update the actual Area2D radius
+
+	# --- Signal Emission for UI Updates ---
 	emit_signal("health_changed", current_health, new_max_health)
+
+	# The new_movement_speed_from_signal argument can be used here if PlayerCharacter
+	# needs to directly react to movement speed changes beyond just fetching it in _physics_process.
+	# For example, if you have a temporary speed buff visual effect.
 
 
 func _physics_process(delta: float):
@@ -244,8 +269,8 @@ func _physics_process(delta: float):
 	if Input.is_action_pressed("move_down"): input_direction.y += 1
 	if Input.is_action_pressed("move_up"): input_direction.y -= 1
 
-	# Get current movement speed from PlayerStats
-	var current_move_speed = player_stats.get_final_stat(GameStatConstants.Keys.MOVEMENT_SPEED)
+	# Get current movement speed from PlayerStats (using cached property for efficiency)
+	var current_move_speed = player_stats.current_movement_speed
 	
 	if input_direction.length_squared() > 0:
 		velocity = input_direction.normalized() * current_move_speed
@@ -258,21 +283,20 @@ func _physics_process(delta: float):
 				animated_sprite.flip_h = false
 				animated_sprite.offset.x = 0.0
 			# Play walk animation
-			# UPDATED: Use StringName for animation name
 			if animated_sprite.animation != &"walk":
 				animated_sprite.play(&"walk")
 	else:
 		velocity = Vector2.ZERO
 		# Play idle animation if not moving
 		if animated_sprite and animated_sprite.animation != &"idle":
-			animated_sprite.play(&"idle") # UPDATED: Use StringName for animation name
+			animated_sprite.play(&"idle")
 	
 	move_and_slide()
 	
 	# Health Regeneration
 	if is_instance_valid(player_stats):
-		var regen = player_stats.get_final_stat(GameStatConstants.Keys.HEALTH_REGENERATION)
-		var current_max_hp = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+		var regen = player_stats.current_health_regeneration # Use cached current_ stat
+		var current_max_hp = player_stats.current_max_health # Use cached current_ stat
 		if regen > 0.0 and current_health < current_max_hp:
 			current_health += regen * delta
 			current_health = clampf(current_health, 0, current_max_hp) # Use clampf for floats
@@ -287,8 +311,8 @@ func _on_experience_collector_area_entered(area: Area2D):
 		elif "experience_value" in area: # Fallback to property if method doesn't exist
 			exp_value = area.experience_value
 			
-		# Get experience gain multiplier from PlayerStats
-		var exp_gain_mod = player_stats.get_final_stat(GameStatConstants.Keys.EXPERIENCE_GAIN_MULTIPLIER)
+		# Get experience gain multiplier from PlayerStats (using cached property)
+		var exp_gain_mod = player_stats.current_experience_gain_multiplier
 		var modified_exp_value = int(round(float(exp_value) * exp_gain_mod))
 		
 		current_experience += modified_exp_value
@@ -304,6 +328,9 @@ func check_level_up():
 		current_experience -= exp_cost_of_this_level
 		experience_to_next_level = calculate_exp_for_next_level(current_level)
 		emit_signal("player_level_up", current_level)
+		# Game.gd should listen to this signal and display the level-up screen.
+		
+		print("Player Leveled Up! New Level: ", current_level, ", Next Exp: ", experience_to_next_level)
 
 
 func calculate_exp_for_next_level(player_curr_level: int) -> int:
@@ -316,8 +343,8 @@ func calculate_exp_for_next_level(player_curr_level: int) -> int:
 func take_damage(amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}): # Changed amount to float for consistency
 	if current_health <= 0 or is_dead_flag: return # Do not take damage if dead or already dying
 	
-	var current_armor = player_stats.get_final_stat(GameStatConstants.Keys.ARMOR)
-	var armor_penetration_value = float(p_attack_stats.get(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION], 0.0)) # Get penetration from incoming attack
+	var current_armor = player_stats.current_armor # Use cached current_ stat
+	var armor_penetration_value = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0)) # Get penetration from incoming attack
 
 	# Calculate effective armor after penetration
 	var effective_armor = maxf(0.0, current_armor - armor_penetration_value)
@@ -326,13 +353,13 @@ func take_damage(amount: float, attacker: Node2D = null, p_attack_stats: Diction
 	var actual_damage = maxf(0.0, amount - effective_armor)
 
 	# Apply DAMAGE_REDUCTION_MULTIPLIER (from player's own buffs or debuffs)
-	var damage_reduction_mult_val = player_stats.get_final_stat(GameStatConstants.Keys.DAMAGE_REDUCTION_MULTIPLIER)
+	var damage_reduction_mult_val = player_stats.get_final_stat(PlayerStatKeys.Keys.DAMAGE_REDUCTION_MULTIPLIER)
 	actual_damage *= (1.0 - damage_reduction_mult_val) # Assuming this is a reduction, so (1.0 - value)
 	actual_damage = maxf(0.0, actual_damage) # Ensure damage doesn't go negative after reduction
 
 	current_health = maxf(0.0, current_health - actual_damage)
 	
-	var current_max_hp = player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+	var current_max_hp = player_stats.current_max_health # Use cached current_ stat
 	emit_signal("health_changed", current_health, current_max_hp)
 	
 	if is_instance_valid(attacker):
@@ -464,7 +491,7 @@ func get_current_level() -> int: return current_level
 func get_current_health_value() -> float: return current_health
 func get_max_health_value() -> float:
 	if is_instance_valid(player_stats):
-		return player_stats.get_final_stat(GameStatConstants.Keys.MAX_HEALTH)
+		return player_stats.current_max_health # Use the cached current_max_health
 	return 0.0
 
 func get_ui_anchor_global_position() -> Vector2:

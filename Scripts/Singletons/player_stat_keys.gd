@@ -1,101 +1,144 @@
 # player_stat_keys.gd
-# This script defines all standardized StringName keys for player stats.
-# It acts as a single source of truth for stat names throughout the project.
-#
-# IMPORTANT: This script MUST be set as an Autoload in Project Settings
-# (Project -> Project Settings -> Autoload, Node Name: GameStatConstants).
-# It now extends Node to be instantiable as an Autoload.
+# This script defines standardized StringName constants for all player and weapon-specific stats,
+# as well as behavioral flags.
+# It should be set as an Autoload Singleton in Project Settings (e.g., as 'PlayerStatKeys').
+# Using StringName constants prevents typos and enables autocompletion, improving code robustness.
 
-extends Node # FIXED: CRITICAL - Must extend Node to be a valid Autoload singleton.
+extends Node # CRITICAL: Must extend Node to be a valid Autoload singleton.
 
 # The enum holds symbolic names for each stat. These provide autocompletion benefits
 # in the script editor and make your code more readable.
 enum Keys {
 	# --- Core Health & Regeneration ---
-	MAX_HEALTH,                     # Total health capacity
-	HEALTH_REGENERATION,            # HP restored per second
-	HEALTH_ON_HIT_FLAT,             # Flat HP restored on hitting an enemy
-	HEALTH_ON_KILL_FLAT,            # Flat HP restored on killing an enemy
-	HEALTH_ON_KILL_PERCENT_MAX,     # Percentage of Max HP restored on killing an enemy
+	MAX_HEALTH, # Total health capacity
+	HEALTH_REGENERATION, # HP restored per second
+	HEALTH_ON_HIT_FLAT, # Flat HP restored on hitting an enemy
+	HEALTH_ON_KILL_FLAT, # Flat HP restored on killing an enemy
+	HEALTH_ON_KILL_PERCENT_MAX, # Percentage of Max HP restored on killing an enemy
 
 	# --- Core Combat Stats ---
-	NUMERICAL_DAMAGE,               # Player's base damage value (weapons use this as a base)
-	GLOBAL_DAMAGE_MULTIPLIER,       # Multiplier applied to ALL player damage (e.g., from buffs like Empower)
-	ATTACK_SPEED_MULTIPLIER,        # Multiplier affecting weapon cooldowns/attack rates
-	ARMOR,                          # Flat damage reduction against physical attacks
-	ARMOR_PENETRATION,              # Flat amount of enemy armor ignored by player attacks
+	NUMERICAL_DAMAGE, # Player's base damage value (weapons use this as a base)
+	GLOBAL_DAMAGE_MULTIPLIER, # Multiplier applied to ALL player damage (e.g., from buffs like Empower)
+	ATTACK_SPEED_MULTIPLIER, # Multiplier affecting weapon cooldowns/attack rates
+	ARMOR, # Flat damage reduction against physical attacks
+	ARMOR_PENETRATION, # Player's base armor penetration
 
 	# --- Movement & Utility ---
-	MOVEMENT_SPEED,                 # Player's base movement speed
-	MAGNET_RANGE,                   # Radius for auto-collecting experience and other pickups
-	EXPERIENCE_GAIN_MULTIPLIER,     # Multiplier for experience gained
+	MOVEMENT_SPEED, # Player's base movement speed
+	MAGNET_RANGE, # Radius for auto-collecting experience and other pickups
+	EXPERIENCE_GAIN_MULTIPLIER, # Multiplier for experience gained
 
 	# --- Weapon Effect Modifiers (affecting ALL weapons and abilities) ---
-	AOE_AREA_MULTIPLIER,            # Multiplier for the radius/area of effect abilities
-	PROJECTILE_SIZE_MULTIPLIER,     # Multiplier for the visual size and collision of projectiles
-	PROJECTILE_SPEED_MULTIPLIER,    # Multiplier for the travel speed of projectiles
-	EFFECT_DURATION_MULTIPLIER,     # Multiplier for the duration of player-applied effects (buffs/debuffs)
+	AOE_AREA_MULTIPLIER, # Multiplier for the radius/area of effect abilities
+	PROJECTILE_SIZE_MULTIPLIER, # Multiplier for the visual size and collision of projectiles
+	PROJECTILE_SPEED_MULTIPLIER, # Multiplier for the travel speed of projectiles
+	EFFECT_DURATION_MULTIPLIER, # Multiplier for the duration of player-applied effects (buffs/debuffs)
 
 	# --- Critical Hit Stats ---
-	CRIT_CHANCE,                    # Probability (0.0 to 1.0) of landing a critical hit
-	CRIT_DAMAGE_MULTIPLIER,         # Multiplier for damage when a critical hit occurs (e.g., 1.5 for 150% damage)
+	CRIT_CHANCE, # Probability (0.0 to 1.0) of landing a critical hit
+	CRIT_DAMAGE_MULTIPLIER, # Multiplier for damage when a critical hit occurs (e.g., 1.5 for 150% damage)
 
 	# --- Other Core Stats ---
-	LUCK,                           # Affects various probabilistic outcomes (e.g., item drops, rare events)
+	LUCK, # Affects various probabilistic outcomes (e.g., item drops, rare events)
 
 	# --- Advanced Defensive Stats (typically gained from upgrades/effects) ---
-	DAMAGE_REDUCTION_MULTIPLIER,    # Overall percentage reduction to incoming damage (e.g., 10% less)
-	DAMAGE_TAKEN_MULTIPLIER,        # Multiplier to damage taken (e.g., from Vulnerable debuff)
-	DODGE_CHANCE,                   # Probability (0.0 to 1.0) to completely avoid an attack
-	BLOCK_CHANCE,                   # Probability (0.0 to 1.0) to block an attack
+	DAMAGE_REDUCTION_MULTIPLIER, # Overall percentage reduction to incoming damage (e.g., 10% less)
+	DAMAGE_TAKEN_MULTIPLIER, # Multiplier to damage taken (e.g., from Vulnerable debuff)
+	DODGE_CHANCE, # Probability (0.0 to 1.0) to completely avoid an attack
+	BLOCK_CHANCE, # Probability (0.0 to 1.0) to block an attack
 	BLOCK_EFFECTIVENESS_MULTIPLIER, # Multiplier for the amount of damage blocked
-	KNOCKBACK_RESISTANCE_FLAT,      # Flat reduction to incoming knockback distance
+	KNOCKBACK_RESISTANCE_FLAT, # Flat reduction to incoming knockback distance
 
 	# --- Resource Management (Examples: Mana/Stamina/Energy - extend as needed) ---
-	MAX_RESOURCE,                   # Generic placeholder for max capacity of any resource
-	RESOURCE_REGENERATION,          # Generic placeholder for resource regeneration per second
-	RESOURCE_ON_HIT,                # Generic placeholder for resource gained on hitting an enemy
-	RESOURCE_ON_KILL,               # Generic placeholder for resource gained on killing an enemy
-	RESOURCE_COST_REDUCTION_MULT,   # Percentage reduction in resource costs for abilities
+	MAX_RESOURCE, # Generic placeholder for max capacity of any resource
+	RESOURCE_REGENERATION, # Generic placeholder for resource regeneration per second
+	RESOURCE_ON_HIT, # Generic placeholder for resource gained on hitting an enemy
+	RESOURCE_ON_KILL, # Generic placeholder for resource gained on killing an enemy
+	RESOURCE_COST_REDUCTION_MULT, # Percentage reduction in resource costs for abilities
 
 	# --- Offensive - General (additional modifiers, not typically base class stats) ---
-	GLOBAL_FLAT_DAMAGE_ADD,         # Flat damage added to every hit (e.g., from "Might" upgrade)
+	GLOBAL_FLAT_DAMAGE_ADD, # Flat damage added to every hit (e.g., from "Might" upgrade)
 	GLOBAL_COOLDOWN_REDUCTION_FLAT, # Flat seconds reduced from all weapon/ability cooldowns
 	GLOBAL_COOLDOWN_REDUCTION_MULT, # Percentage reduction from all weapon/ability cooldowns
-	GLOBAL_PROJECTILE_COUNT_ADD,    # Flat number of additional projectiles for relevant abilities
-	GLOBAL_DEBUFF_POTENCY_MULT,     # Multiplier for the strength/potency of debuffs applied by player
-	GLOBAL_BUFF_POTENCY_MULT,       # Multiplier for the strength/potency of buffs applied to player/allies
+	GLOBAL_PROJECTILE_COUNT_ADD, # Flat number of additional projectiles for relevant abilities
+	GLOBAL_DEBUFF_POTENCY_MULT, # Multiplier for the strength/potency of debuffs applied by player
+	GLOBAL_BUFF_POTENCY_MULT, # Multiplier for the strength/potency of buffs applied to player/allies
 
 	# --- Utility & Economy (additional modifiers) ---
-	CURRENCY_GAIN_MULTIPLIER,       # Multiplier for gold/currency gained
-	ITEM_DROP_CHANCE_ADD,           # Flat addition to the chance of items dropping
-	INVULNERABILITY_FRAMES_ADD,     # Flat duration added to invulnerability frames after taking damage
+	CURRENCY_GAIN_MULTIPLIER, # Multiplier for gold/currency gained
+	ITEM_DROP_CHANCE_ADD, # Flat addition to the chance of items dropping
+	INVULNERABILITY_FRAMES_ADD, # Flat duration added to invulnerability frames after taking damage
 
 	# --- Shield System Stats (if implemented) ---
-	SHIELD_CAPACITY_FLAT,           # Flat increase to shield capacity
-	SHIELD_REGEN_RATE_FLAT,         # Flat increase to shield regeneration rate
-	SHIELD_REGEN_DELAY_REDUCTION,   # Flat reduction to shield regeneration delay
+	SHIELD_CAPACITY_FLAT, # Flat increase to shield capacity
+	SHIELD_REGEN_RATE_FLAT, # Flat increase to shield regeneration rate
+	SHIELD_REGEN_DELAY_REDUCTION, # Flat reduction to shield regeneration delay
 
 	# --- Magic Penetration (if magic resistance exists) ---
-	MAGIC_RESIST_PEN_FLAT,          # Flat amount of enemy magic resistance ignored
-	MAGIC_RESIST_PEN_PERCENT,       # Percentage of enemy magic resistance ignored
+	MAGIC_RESIST_PEN_FLAT, # Flat amount of enemy magic resistance ignored
+	MAGIC_RESIST_PEN_PERCENT, # Percentage of enemy magic resistance ignored
 
 	# --- Threat Management ---
-	THREAT_GENERATION_MULTIPLIER,   # Multiplier for threat generated by player actions (for aggro systems)
+	THREAT_GENERATION_MULTIPLIER, # Multiplier for threat generated by player actions (for aggro systems)
 
 	# --- Specific Temporary Bonuses (consumed after use) ---
-	NEXT_ATTACK_FLAT_DAMAGE_BONUS,  # Flat damage added to the very next attack (e.g., from an ability)
+	NEXT_ATTACK_FLAT_DAMAGE_BONUS, # Flat damage added to the very next attack (e.g., from an ability)
 
 	# --- Specific Resource Keys (if you differentiate resources like Mana/Stamina) ---
-	MANA_MAX,                       # Maximum mana capacity
-	MANA_REGENERATION_RATE,         # Mana restored per second
-	MANA_ON_HIT_FLAT,               # Flat mana restored on hitting an enemy
-	MANA_ON_KILL_FLAT,              # Flat mana restored on killing an enemy
-	MANA_COST_REDUCTION_PERCENT,    # Percentage reduction in mana costs
+	MANA_MAX, # Maximum mana capacity
+	MANA_REGENERATION_RATE, # Mana restored per second
+	MANA_ON_HIT_FLAT, # Flat mana restored on hitting an enemy
+	MANA_ON_KILL_FLAT, # Flat mana restored on killing an enemy
+	MANA_COST_REDUCTION_PERCENT, # Percentage reduction in mana costs
 
 	# --- Damage Type Conversions (if applicable) ---
 	PHYSICAL_TO_FIRE_CONVERSION_PERCENT, # Percentage of physical damage converted to fire damage
 	# Add other conversion types (e.g., ICE_TO_LIGHTNING_CONVERSION_PERCENT) as needed
+	
+	# --- Weapon Specific Stats ---
+	WEAPON_DAMAGE_PERCENTAGE, # Multiplier for player's numerical_damage
+	PIERCE_COUNT, # How many enemies a projectile can pierce
+	PROJECTILE_SPEED, # Speed of projectiles
+	SHOT_DELAY, # Delay between individual shots/hits in an attack
+	BASE_ATTACK_DURATION, # Base duration of an attack animation/hitbox
+	AREA_SCALE, # Scaling factor for weapon hitboxes/areas
+	DAMAGE_TICK_INTERVAL, # Interval for damage-over-time effects
+	MAX_CAST_RANGE, # Maximum range for casting abilities/projectiles
+	MAX_SUMMONS_OF_TYPE, # Max number of a specific type of summon
+	INHERENT_VISUAL_SCALE_X, # X-scale for the weapon's visual
+	INHERENT_VISUAL_SCALE_Y, # Y-scale for the weapon's visual
+	WHIRLWIND_COUNT, # Number of whirlwind spins (Scythe-specific)
+	ORBIT_RADIUS, # Radius for orbiting attacks (e.g., Lesser Spirit)
+	NUMBER_OF_ORBITS, # Number of orbiting instances
+
+	# --- Behavioral Flags ---
+	APPLIES_BLEED, # Does this weapon/ability apply bleed?
+	APPLIES_VULNERABLE, # Does this weapon/ability apply vulnerable?
+	HAS_REAPING_MOMENTUM, # Scythe-specific: grants damage on kill
+	HAS_SOUL_SIPHON, # Scythe-specific: grants health on kill
+	WHIRLWIND_ACTIVE, # Scythe-specific: enables whirlwind attacks
+	CAN_DASH, # Player-specific: enables dashing ability
+
+	# --- Target Scopes for Effects (used in EffectData.gd subclasses) ---
+	PLAYER_STATS, # Effect applies to the player's main stat system
+	PLAYER_BEHAVIOR, # Effect applies to player-specific flags/behaviors
+	WEAPON_SPECIFIC_STATS, # Effect applies to a specific weapon's stats (e.g., Scythe's damage)
+	WEAPON_BEHAVIOR, # Effect applies to a specific weapon's flags/behaviors
+	
+	# --- Reaping Momentum Specific Keys (clarified from previous discussion) ---
+	REAPING_MOMENTUM_DAMAGE_PER_HIT, # The base damage per hit for Reaping Momentum
+	REAPING_MOMENTUM_ACCUMULATED_BONUS, # The current accumulated bonus for Reaping Momentum
+	SCYTHE_SHARPENED_EDGE_1_ACQUIRED,
+	SCYTHE_SHARPENED_EDGE_2_ACQUIRED,
+	SCYTHE_SHARPENED_EDGE_3_ACQUIRED,
+	SCYTHE_CURSED_EDGE_ACQUIRED,
+	SCYTHE_REAPING_MOMENTUM_ACQUIRED,
+	SCYTHE_SERRATED_BLADE_ACQUIRED,
+	SCYTHE_SOUL_SIPHON_ACQUIRED,
+	SCYTHE_WHIRLWIND_TECHNIQUE_ACQUIRED,
+	SCYTHE_WIDER_ARC_ACQUIRED,
+	CROSSBOW_PIERCING_BOLTS_ACQUIRED,
+	DAGGER_SHADOW_STEP_ACQUIRED,
 }
 
 # This dictionary maps the enum keys to their actual StringName values.
@@ -150,7 +193,7 @@ const KEY_NAMES: Dictionary = {
 
 	Keys.CURRENCY_GAIN_MULTIPLIER: &"currency_gain_multiplier",
 	Keys.ITEM_DROP_CHANCE_ADD: &"item_drop_chance_add",
-	Keys.INVULNERABILITY_FRAMES_ADD: &"invulnerabilities_frames_add", # Corrected typo
+	Keys.INVULNERABILITY_FRAMES_ADD: &"invulnerability_frames_add",
 
 	Keys.SHIELD_CAPACITY_FLAT: &"shield_capacity_flat",
 	Keys.SHIELD_REGEN_RATE_FLAT: &"shield_regeneration_rate",
@@ -170,4 +213,51 @@ const KEY_NAMES: Dictionary = {
 	Keys.MANA_COST_REDUCTION_PERCENT: &"mana_cost_reduction_percent",
 
 	Keys.PHYSICAL_TO_FIRE_CONVERSION_PERCENT: &"physical_to_fire_conversion_percent",
+	
+	# Weapon Specific Stats (Integrated from previous version)
+	Keys.WEAPON_DAMAGE_PERCENTAGE: &"weapon_damage_percentage",
+	Keys.PIERCE_COUNT: &"pierce_count",
+	Keys.PROJECTILE_SPEED: &"projectile_speed",
+	Keys.SHOT_DELAY: &"shot_delay",
+	Keys.BASE_ATTACK_DURATION: &"base_attack_duration",
+	Keys.AREA_SCALE: &"area_scale",
+	Keys.DAMAGE_TICK_INTERVAL: &"damage_tick_interval",
+	Keys.MAX_CAST_RANGE: &"max_cast_range",
+	Keys.MAX_SUMMONS_OF_TYPE: &"max_summons_of_type",
+	Keys.INHERENT_VISUAL_SCALE_X: &"inherent_visual_scale_x",
+	Keys.INHERENT_VISUAL_SCALE_Y: &"inherent_visual_scale_y",
+	Keys.WHIRLWIND_COUNT: &"whirlwind_count",
+	Keys.ORBIT_RADIUS: &"orbit_radius",
+	Keys.NUMBER_OF_ORBITS: &"number_of_orbits",
+
+	# Behavioral Flags (Integrated from previous version)
+	Keys.APPLIES_BLEED: &"applies_bleed",
+	Keys.APPLIES_VULNERABLE: &"applies_vulnerable",
+	Keys.HAS_REAPING_MOMENTUM: &"has_reaping_momentum", # This is the boolean flag for the ability itself
+	Keys.HAS_SOUL_SIPHON: &"has_soul_siphon",
+	Keys.WHIRLWIND_ACTIVE: &"whirlwind_active",
+	Keys.CAN_DASH: &"can_dash",
+
+	# Target Scopes (NEWLY ADDED)
+	Keys.PLAYER_STATS: &"player_stats",
+	Keys.PLAYER_BEHAVIOR: &"player_behavior",
+	Keys.WEAPON_SPECIFIC_STATS: &"weapon_specific_stats",
+	Keys.WEAPON_BEHAVIOR: &"weapon_behavior",
+
+	# Reaping Momentum Specific Keys (NEWLY CLARIFIED)
+	Keys.REAPING_MOMENTUM_DAMAGE_PER_HIT: &"reaping_momentum_damage_per_hit", # The static damage per hit value
+	Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS: &"reaping_momentum_accumulated_bonus", # The dynamic, accumulated bonus
+	
+	# Acquired Upgrade Flags (Integrated from previous version)
+	Keys.SCYTHE_SHARPENED_EDGE_1_ACQUIRED: &"scythe_sharpened_edge_1_acquired",
+	Keys.SCYTHE_SHARPENED_EDGE_2_ACQUIRED: &"scythe_sharpened_edge_2_acquired",
+	Keys.SCYTHE_SHARPENED_EDGE_3_ACQUIRED: &"scythe_sharpened_edge_3_acquired",
+	Keys.SCYTHE_CURSED_EDGE_ACQUIRED: &"scythe_cursed_edge_acquired",
+	Keys.SCYTHE_REAPING_MOMENTUM_ACQUIRED: &"scythe_reaping_momentum_acquired",
+	Keys.SCYTHE_SERRATED_BLADE_ACQUIRED: &"scythe_serrated_blade_acquired",
+	Keys.SCYTHE_SOUL_SIPHON_ACQUIRED: &"scythe_soul_siphon_acquired",
+	Keys.SCYTHE_WHIRLWIND_TECHNIQUE_ACQUIRED: &"scythe_whirlwind_technique_acquired",
+	Keys.SCYTHE_WIDER_ARC_ACQUIRED: &"scythe_wider_arc_acquired",
+	Keys.CROSSBOW_PIERCING_BOLTS_ACQUIRED: &"crossbow_piercing_bolts_acquired",
+	Keys.DAGGER_SHADOW_STEP_ACQUIRED: &"dagger_shadow_step_acquired",
 }

@@ -1,6 +1,6 @@
 # stat_modification_effect_data.gd
 # This resource defines a numerical modification to a player stat.
-# It uses standardized stat keys from the 'GameStatConstants' Autoload.
+# It uses standardized stat keys from the 'PlayerStatKeys' Autoload.
 #
 # This script should be saved as 'res://Scripts/DataResources/Effects/StatModificationEffectData.gd'
 # (or its equivalent path in your project structure).
@@ -14,11 +14,12 @@ enum ValueType {
 	FLOAT   # For float-based stats like MOVEMENT_SPEED, CRIT_CHANCE, MULTIPLIERS
 }
 
+@export var id: StringName = &""
 # The type of modification to apply to the stat.
 # This should be set in the Inspector using StringName literals like &"flat_add".
 @export var modification_type: StringName = &"flat_add" # e.g., &"flat_add", &"percent_add_to_base", &"percent_mult_final", &"override_value"
 
-# The stat key to be modified. This *must* be one of the StringNames defined in GameStatConstants.KEY_NAMES.
+# The stat key to be modified. This *must* be one of the StringNames defined in PlayerStatKeys.KEY_NAMES.
 # When creating .tres files, you will manually type the StringName (e.g., &"max_health") here.
 # In a more advanced setup, this could be made into a dropdown in a custom editor plugin.
 @export var stat_key: StringName = &"" # e.g., &"max_health", &"movement_speed", &"numerical_damage"
@@ -55,13 +56,13 @@ func _validate_property(property: Dictionary):
 	if property.name == "stat_key":
 		var current_value = property.get("value", &"") # Get the value currently entered for stat_key.
 
-		# Ensure that the GameStatConstants Autoload is available.
+		# Ensure that the PlayerStatKeys Autoload is available.
 		# This check prevents errors if the Autoload isn't set up yet.
-		if Engine.has_singleton("GameStatConstants"):
+		if Engine.has_singleton("PlayerStatKeys"):
 			# Check if the entered stat_key exists in our standardized list of keys.
-			if not GameStatConstants.KEY_NAMES.values().has(current_value):
+			if not PlayerStatKeys.KEY_NAMES.values().has(current_value):
 				# If it doesn't exist, push a warning to the editor's output.
-				push_warning("StatModificationEffectData: 'stat_key' (", current_value, ") is not a recognized key in GameStatConstants.KEY_NAMES. Please check for typos.")
+				push_warning("StatModificationEffectData: 'stat_key' (", current_value, ") is not a recognized key in PlayerStatKeys.KEY_NAMES. Please check for typos.")
 		else:
 			# If the Autoload isn't found, warn the user to set it up.
-			push_warning("StatModificationEffectData: GameStatConstants Autoload not found. Stat key validation is skipped. Please ensure 'GameStatConstants.gd' is added as an Autoload with the name 'GameStatConstants' in Project Settings.")
+			push_warning("StatModificationEffectData: PlayerStatKeys Autoload not found. Stat key validation is skipped. Please ensure 'PlayerStatKeys.gd' is added as an Autoload with the name 'PlayerStatKeys' in Project Settings.")

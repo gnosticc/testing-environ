@@ -4,6 +4,8 @@
 
 [resource]
 script = ExtResource("1_d8hfu")
+id = &"druid"
+display_name = "Druid"
 base_max_health = 100
 base_health_regeneration = 0.0
 base_numerical_damage = 10
@@ -21,5 +23,4 @@ base_effect_duration_multiplier = 1.0
 base_crit_chance = 0.05
 base_crit_damage_multiplier = 1.5
 base_luck = 0
-class_description = "Description of this class."
 metadata/_custom_type_script = "uid://bk3kcyvjws6fh"

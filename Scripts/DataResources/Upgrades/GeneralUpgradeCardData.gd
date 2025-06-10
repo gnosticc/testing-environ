@@ -77,9 +77,9 @@ func _validate_property(property: Dictionary):
 				if stat_mod.stat_key == &"":
 					push_warning("GeneralUpgradeCardData: StatModificationEffectData in 'effects' at index ", i, " has an empty 'stat_key'.")
 				# If targeting player stats, ensure the key is recognized
-				if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("GameStatConstants"):
-					if not GameStatConstants.KEY_NAMES.values().has(stat_mod.stat_key):
-						push_warning("GeneralUpgradeCardData: Player stat key '", stat_mod.stat_key, "' in effect at index ", i, " is not a recognized key in GameStatConstants.KEY_NAMES.")
+				if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("PlayerStatKeys"):
+					if not PlayerStatKeys.KEY_NAMES.values().has(stat_mod.stat_key):
+						push_warning("GeneralUpgradeCardData: Player stat key '", stat_mod.stat_key, "' in effect at index ", i, " is not a recognized key in PlayerStatKeys.KEY_NAMES.")
 			elif effect is CustomFlagEffectData:
 				var flag_mod = effect as CustomFlagEffectData
 				if flag_mod.flag_key == &"":

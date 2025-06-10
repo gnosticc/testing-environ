@@ -17,8 +17,8 @@ metadata/_custom_type_script = "uid://dc316ihl7h1xg"
 
 [sub_resource type="Resource" id="Resource_sl6jq"]
 script = ExtResource("3_turna")
-stat_key = &"whirlwind_count"
 modification_type = &"flat_add"
+stat_key = &"whirlwind_count"
 value_type = 1
 value_float = 0.0
 value_int = 1

@@ -1,7 +1,15 @@
 # StatusEffectComponent.gd
 # This component manages active status effects (buffs/debuffs) on an owner node (e.g., Player, Enemy).
 # It handles their duration, ticking effects, and applying their modifiers.
-# It now integrates with GameStatConstants and routes flag changes to PlayerStats.
+# It now integrates with PlayerStatKeys and routes flag changes to PlayerStats.
+# UPDATED: Implemented separate aggregation for additive and multiplicative modifiers.
+# FIXED: Corrected tick timer assignment in apply_effect.
+# ADDED: More specific debug print for stat modification aggregation.
+# CRITICAL ADDITION: Now tracks Custom Flags directly for the owner, and exposes a has_flag() getter.
+# FIXED: Moved current_owner_name declaration to the top of _recalculate_and_apply_stat_modifiers.
+# ADDED: Debug print in _on_effect_expired to confirm effect removal.
+# FIXED: Added direct call to owner.on_status_effects_changed() to ensure tint updates on expiration.
+
 class_name StatusEffectComponent
 extends Node
 
@@ -10,14 +18,16 @@ signal status_effects_changed(owner_node: Node) # Emitted when effects are appli
 # Dictionary to hold currently active status effects.
 # Key: StatusEffectData.id (StringName)
 # Value: Dictionary { "data": StatusEffectData, "duration_timer": Timer, "tick_timer": Timer,
-#                     "stacks": int, "source": Node, "weapon_stats": Dictionary, "potency_override": float }
+#"stacks": int, "source": Node, "weapon_stats": Dictionary, "potency_override": float }
 var active_effects: Dictionary = {}
 
-# This dictionary locally aggregates stat modifiers from active effects for easy querying.
-# IMPORTANT: These modifiers are *local* to StatusEffectComponent.
-# For these to affect the owner's actual stats (e.g., in PlayerStats.gd), PlayerStats.gd
-# must be updated to query these values or have its own temporary modifier system.
-var current_stat_modifiers: Dictionary = {}
+# NEW: Separate dictionaries to correctly aggregate additive and multiplicative modifiers.
+# This ensures that a StatModificationEffectData's 'modification_type' is correctly respected.
+var _additive_modifiers: Dictionary = {}    # Stores sum of 'flat_add' and 'percent_add_to_base' from effects
+var _multiplicative_modifiers: Dictionary = {} # Stores product of 'percent_mult_final' from effects
+
+# NEW: Dictionary to track active custom flags applied by effects managed by this component.
+var _active_flags: Dictionary = {}
 
 
 func _ready():
@@ -48,21 +58,25 @@ func apply_effect(
 	var effect_id: StringName = effect_data.id
 	var final_duration = duration_override if duration_override >= 0.0 else effect_data.duration
 	
+	# Declare these variables at the top of the function's scope
+	var new_effect_entry: Dictionary = {} 
+	var current_effect_entry: Dictionary = {} # To hold either existing or new entry
+
 	# Check if the effect is already active on the owner
 	if active_effects.has(effect_id):
-		var existing_effect_entry = active_effects[effect_id]
+		current_effect_entry = active_effects[effect_id] # Use existing entry
 		
 		# If re-application refreshes duration, update and restart timers
 		if effect_data.refresh_duration_on_reapply:
-			existing_effect_entry.source = source_node
-			existing_effect_entry.weapon_stats = p_weapon_stats_for_scaling.duplicate(true)
-			existing_effect_entry.potency_override = potency_override # Update potency override on reapply
+			current_effect_entry.source = source_node
+			current_effect_entry.weapon_stats = p_weapon_stats_for_scaling.duplicate(true)
+			current_effect_entry.potency_override = potency_override # Update potency override on reapply
 
 			# Update duration timer
 			if final_duration > 0: # If it has a finite duration
-				if is_instance_valid(existing_effect_entry.duration_timer):
-					existing_effect_entry.duration_timer.wait_time = final_duration
-					existing_effect_entry.duration_timer.start() # Restart timer
+				if is_instance_valid(current_effect_entry.duration_timer):
+					current_effect_entry.duration_timer.wait_time = final_duration
+					current_effect_entry.duration_timer.start() # Restart timer
 				else: # If timer was nullified (e.g., -1 duration changed to positive)
 					var duration_timer_node = Timer.new()
 					duration_timer_node.name = "DurationTimer_" + str(effect_id)
@@ -71,18 +85,18 @@ func apply_effect(
 					add_child(duration_timer_node)
 					duration_timer_node.timeout.connect(Callable(self, "_on_effect_expired").bind(effect_id, duration_timer_node))
 					duration_timer_node.start()
-					existing_effect_entry.duration_timer = duration_timer_node
+					current_effect_entry.duration_timer = duration_timer_node
 			else: # If duration is infinite (-1) or becomes 0
-				if is_instance_valid(existing_effect_entry.duration_timer):
-					existing_effect_entry.duration_timer.stop()
-					existing_effect_entry.duration_timer.queue_free()
-					existing_effect_entry.duration_timer = null
+				if is_instance_valid(current_effect_entry.duration_timer):
+					current_effect_entry.duration_timer.stop()
+					current_effect_entry.duration_timer.queue_free()
+					current_effect_entry.duration_timer = null
 
 			# Update tick timer (for DoT/HoT effects)
 			if effect_data.tick_interval > 0:
-				if is_instance_valid(existing_effect_entry.tick_timer):
-					existing_effect_entry.tick_timer.wait_time = effect_data.tick_interval
-					existing_effect_entry.tick_timer.start() # Restart timer
+				if is_instance_valid(current_effect_entry.tick_timer):
+					current_effect_entry.tick_timer.wait_time = effect_data.tick_interval
+					current_effect_entry.tick_timer.start() # Restart timer
 				else: # If timer was nullified
 					var tick_timer_node = Timer.new()
 					tick_timer_node.name = "TickTimer_" + str(effect_id)
@@ -91,21 +105,21 @@ func apply_effect(
 					add_child(tick_timer_node)
 					tick_timer_node.timeout.connect(Callable(self, "_on_status_effect_tick").bind(effect_id))
 					tick_timer_node.start()
-					existing_effect_entry.tick_timer = tick_timer_node
+					current_effect_entry.tick_timer = tick_timer_node # FIX: Assign to current_effect_entry.tick_timer
 				
 				if effect_data.tick_on_application: # Perform an immediate tick if specified
 					_on_status_effect_tick(effect_id)
 			else: # No ticking for this effect
-				if is_instance_valid(existing_effect_entry.tick_timer):
-					existing_effect_entry.tick_timer.stop()
-					existing_effect_entry.tick_timer.queue_free()
-					existing_effect_entry.tick_timer = null
+				if is_instance_valid(current_effect_entry.tick_timer):
+					current_effect_entry.tick_timer.stop()
+					current_effect_entry.tick_timer.queue_free()
+					current_effect_entry.tick_timer = null
 
 		else: # If re-application does NOT refresh duration (e.g., unique effects)
 			return # Do nothing on reapply
 
 	else: # Effect is not active, create a new entry
-		var new_effect_entry: Dictionary = {
+		current_effect_entry = { # Assign to current_effect_entry
 			"data": effect_data,
 			"duration_timer": null,
 			"tick_timer": null,
@@ -124,7 +138,7 @@ func apply_effect(
 			add_child(duration_timer_node)
 			duration_timer_node.timeout.connect(Callable(self, "_on_effect_expired").bind(effect_id, duration_timer_node))
 			duration_timer_node.start()
-			new_effect_entry.duration_timer = duration_timer_node
+			current_effect_entry.duration_timer = duration_timer_node
 		
 		# Create and start tick timer if tick_interval is positive
 		if effect_data.tick_interval > 0:
@@ -135,14 +149,20 @@ func apply_effect(
 			add_child(tick_timer_node)
 			tick_timer_node.timeout.connect(Callable(self, "_on_status_effect_tick").bind(effect_id))
 			tick_timer_node.start()
-			new_effect_entry.tick_timer = tick_timer_node
+			current_effect_entry.tick_timer = tick_timer_node # FIX: Assign to current_effect_entry.tick_timer
 			if effect_data.tick_on_application: # Perform an immediate tick if specified
 				_on_status_effect_tick(effect_id)
 
-		active_effects[effect_id] = new_effect_entry
+		active_effects[effect_id] = current_effect_entry # Assign to active_effects after populating
 	
-	_recalculate_and_apply_stat_modifiers() # Re-aggregate modifiers from all active effects
-	emit_signal("status_effects_changed", get_parent()) # Notify owner of status changes
+	# CRITICAL FIX: Direct call to owner's on_status_effects_changed after recalculation
+	_recalculate_and_apply_stat_modifiers() 
+	
+	var owner_node = get_parent() # Get owner reference once
+	if is_instance_valid(owner_node) and owner_node.has_method("on_status_effects_changed"):
+		owner_node.on_status_effects_changed(owner_node) # Direct call to ensure immediate update
+	
+	emit_signal("status_effects_changed", owner_node) # Keep signal for other listeners
 
 
 # Called repeatedly by a status effect's tick_timer.
@@ -166,7 +186,7 @@ func _on_status_effect_tick(effect_id: StringName):
 			var stat_mod = effect as StatModificationEffectData
 			
 			# Special handling for Health modification (typically damage over time)
-			if stat_mod.stat_key == GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MAX_HEALTH] \
+			if stat_mod.stat_key == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_HEALTH] \
 			and stat_mod.modification_type == &"flat_add":
 				var damage_per_tick = stat_mod.get_value()
 				var actual_potency_override = effect_entry.get("potency_override", -1.0)
@@ -189,6 +209,9 @@ func _on_status_effect_tick(effect_id: StringName):
 # effect_id_expired: The ID of the effect that expired.
 # duration_timer_ref: Reference to the timer that triggered the expiration.
 func _on_effect_expired(effect_id_expired: StringName, duration_timer_ref: Timer):
+	# DEBUG PRINT: Added to confirm expiration
+	print("StatusEffectComponent: Effect '", effect_id_expired, "' has expired. Removing.") # DEBUG
+	
 	if active_effects.has(effect_id_expired):
 		var effect_entry = active_effects[effect_id_expired]
 		var status_data_to_check = effect_entry.data as StatusEffectData
@@ -201,8 +224,14 @@ func _on_effect_expired(effect_id_expired: StringName, duration_timer_ref: Timer
 
 		# Remove the effect from active effects
 		active_effects.erase(effect_id_expired)
-		_recalculate_and_apply_stat_modifiers() # Re-aggregate modifiers after removal
-		emit_signal("status_effects_changed", get_parent()) # Notify owner of status changes
+		
+		# CRITICAL FIX: Direct call to owner's on_status_effects_changed after recalculation
+		# This ensures the tint is reset immediately when the effect is gone.
+		_recalculate_and_apply_stat_modifiers() # Re-aggregate modifiers AFTER removing the effect
+		var owner_node = get_parent() # Get owner reference once
+		if is_instance_valid(owner_node) and owner_node.has_method("on_status_effects_changed"):
+			owner_node.on_status_effects_changed(owner_node) # Direct call to ensure immediate update
+		emit_signal("status_effects_changed", owner_node) # Keep signal for other listeners
 		
 		# NEW: Check if this expired effect should trigger another status effect
 		if is_instance_valid(status_data_to_check) and status_data_to_check.next_status_effect_on_expire != &"":
@@ -242,23 +271,37 @@ func remove_effect(effect_id_to_remove: StringName):
 			tick_timer.queue_free()
 			
 		active_effects.erase(effect_id_to_remove)
-		_recalculate_and_apply_stat_modifiers() # Re-aggregate modifiers after removal
-		emit_signal("status_effects_changed", get_parent()) # Notify owner of status changes
+		# CRITICAL FIX: Direct call to owner's on_status_effects_changed after recalculation
+		_recalculate_and_apply_stat_modifiers() # Re-aggregate modifiers AFTER removing the effect
+		var owner_node = get_parent() # Get owner reference once
+		if is_instance_valid(owner_node) and owner_node.has_method("on_status_effects_changed"):
+			owner_node.on_status_effects_changed(owner_node) # Direct call to ensure immediate update
+		emit_signal("status_effects_changed", owner_node) # Keep signal for other listeners
 
 
 # Recalculates the aggregated stat modifiers from all currently active effects.
-# This function populates the 'current_stat_modifiers' dictionary, which is then
-# used by getter methods (e.g., get_sum_of_additive_modifiers).
-#
-# IMPORTANT: For these temporary modifiers to affect the owner's actual stats
-# (e.g., PlayerStats.gd), the owner's PlayerStats instance MUST be updated
-# to query these values from StatusEffectComponent or to maintain its own
-# temporary modifier tracking system. This is a crucial next step for PlayerStats.gd.
+# This function populates the '_additive_modifiers' and '_multiplicative_modifiers' dictionaries.
 func _recalculate_and_apply_stat_modifiers():
-	current_stat_modifiers.clear() # Clear previous calculations
+	_additive_modifiers.clear()    # Clear previous additive calculations
+	_multiplicative_modifiers.clear() # Clear previous multiplicative calculations
+	
 	var owner = get_parent()
 	if not is_instance_valid(owner):
 		push_error("StatusEffectComponent: Owner is invalid during stat recalculation."); return
+
+	# FIX: Declare current_owner_name at the top of the function
+	var current_owner_name = owner.name if is_instance_valid(owner) else "UnknownOwner"
+	var owner_enemy_data_id = "N/A"
+	if owner is BaseEnemy and is_instance_valid(owner.enemy_data_resource):
+		owner_enemy_data_id = owner.enemy_data_resource.id
+
+
+	# Initialize multiplicative modifiers with 1.0 for all known stats,
+	# as multiplying by 0 would zero out everything.
+	for key_enum_value in PlayerStatKeys.Keys.values():
+		var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum_value]
+		_multiplicative_modifiers[key_string] = 1.0
+		_additive_modifiers[key_string] = 0.0 # Also initialize additive to 0.0
 
 	# Iterate through all active effects and aggregate their stat modifications
 	for effect_id in active_effects:
@@ -269,7 +312,7 @@ func _recalculate_and_apply_stat_modifiers():
 			for actual_effect_data_res in status_effect_data_res.effects_while_active:
 				if not is_instance_valid(actual_effect_data_res): continue
 
-				# --- Stat Modification Effects (Aggregating into local dictionary) ---
+				# --- Stat Modification Effects (Aggregating into local dictionaries) ---
 				if actual_effect_data_res is StatModificationEffectData:
 					var stat_mod_effect = actual_effect_data_res as StatModificationEffectData
 					var mod_value = stat_mod_effect.get_value()
@@ -279,43 +322,47 @@ func _recalculate_and_apply_stat_modifiers():
 					if actual_potency_override >= 0.0:
 						mod_value *= actual_potency_override
 					
-					# Apply stack count to the modification value
-					mod_value *= effect_entry.stacks
+					# Apply stack count to the modification value (if stacking is enabled and > 1)
+					if status_effect_data_res.is_stackable and status_effect_data_res.max_stacks > 1:
+						mod_value *= effect_entry.stacks
 					
 					var key_to_mod: StringName = stat_mod_effect.stat_key # This should already be a StringName
-					var mod_type: StringName = &"" + str(stat_mod_effect.modification_type) # Ensure StringName
+					var mod_type: StringName = stat_mod_effect.modification_type # This should already be a StringName
+
+					# DEBUG PRINT: Log what StatModificationEffectData is being processed
+					print("StatusEffectComponent: Processing StatMod: Key='", key_to_mod, "', Type='", mod_type, "', Value=", mod_value)
+
 
 					# Aggregate based on modification type.
-					# (Excluding health flat_add, as it's handled by ticks)
-					if not (key_to_mod == GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MAX_HEALTH] \
+					# (Excluding health flat_add, as it's handled by ticks directly in _on_status_effect_tick)
+					if not (key_to_mod == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_HEALTH] \
 					and mod_type == &"flat_add"):
 						
 						match mod_type:
 							&"flat_add":
-								current_stat_modifiers[key_to_mod] = current_stat_modifiers.get(key_to_mod, 0.0) + mod_value
+								_additive_modifiers[key_to_mod] = _additive_modifiers.get(key_to_mod, 0.0) + mod_value
 							&"percent_add_to_base":
-								current_stat_modifiers[key_to_mod] = current_stat_modifiers.get(key_to_mod, 0.0) + mod_value
+								_additive_modifiers[key_to_mod] = _additive_modifiers.get(key_to_mod, 0.0) + mod_value
 							&"percent_mult_final":
 								# Multipliers stack multiplicatively here.
-								# Ensure initial value is 1.0 for these.
-								current_stat_modifiers[key_to_mod] = current_stat_modifiers.get(key_to_mod, 1.0) * (1.0 + mod_value)
+								_multiplicative_modifiers[key_to_mod] = _multiplicative_modifiers.get(key_to_mod, 1.0) * (1.0 + mod_value)
 							&"override_value":
-								current_stat_modifiers[key_to_mod] = mod_value
+								# Override values are tricky in aggregation. For simplicity,
+								# if an override is present, it might take precedence.
+								# For now, let's treat it as a flat_add that sets the base.
+								# This would need to be handled by the consuming system if it's truly an override.
+								_additive_modifiers[key_to_mod] = mod_value # Treat as flat add for aggregation
+								push_warning("StatusEffectComponent: 'override_value' modification type for stat '", key_to_mod, "' is aggregated as a flat_add. Consuming system might need special handling.")
 							_:
 								push_warning("StatusEffectComponent: Unhandled modification type '", mod_type, "' for stat '", key_to_mod, "'.")
 				
 				# --- Custom Flag Effects (Route to PlayerStats.gd) ---
+				# CRITICAL CHANGE: Instead of routing to PlayerStats, store flag locally for this owner.
 				elif actual_effect_data_res is CustomFlagEffectData:
 					var flag_effect = actual_effect_data_res as CustomFlagEffectData
-					# Flags are directly applied to the owner's PlayerStats (if it exists)
-					if owner.has_node("PlayerStats"):
-						var p_stats = owner.get_node("PlayerStats") as PlayerStats
-						if is_instance_valid(p_stats) and p_stats.has_method("apply_custom_flag"):
-							p_stats.apply_custom_flag(flag_effect)
-						else:
-							push_warning("StatusEffectComponent: Owner's PlayerStats node invalid or missing 'apply_custom_flag' for flag '", flag_effect.flag_key, "'.")
-					else:
-						push_warning("StatusEffectComponent: Owner has no 'PlayerStats' node to apply flag '", flag_effect.flag_key, "'.")
+					# Store the flag directly in this component's _active_flags dictionary
+					_active_flags[flag_effect.flag_key] = flag_effect.flag_value
+					print("StatusEffectComponent: Flag '", flag_effect.flag_key, "' set to ", flag_effect.flag_value, " for owner '", current_owner_name, "'.")
 				
 				# --- Trigger Ability Effects (Currently handled by owner) ---
 				elif actual_effect_data_res is TriggerAbilityEffectData:
@@ -326,6 +373,13 @@ func _recalculate_and_apply_stat_modifiers():
 				else:
 					push_warning("StatusEffectComponent: Status effect contains unhandled effect type: ", actual_effect_data_res.get_class())
 	
+	# DEBUG PRINTS for StatusEffectComponent's aggregated modifiers
+	print("StatusEffectComponent: Recalculated modifiers for ", current_owner_name, " (ID: ", owner_enemy_data_id, ")")
+	print("StatusEffectComponent: Additive modifiers: ", _additive_modifiers)
+	print("StatusEffectComponent: Multiplicative modifiers: ", _multiplicative_modifiers)
+	print("StatusEffectComponent: Active Flags: ", _active_flags) # DEBUG: Show active flags
+
+
 	# Signal owner that status effects (and their aggregated modifiers) have changed.
 	# The owner should then re-query its stats.
 	emit_signal("status_effects_changed", owner)
@@ -334,24 +388,22 @@ func _recalculate_and_apply_stat_modifiers():
 # --- Getter Functions for aggregated temporary modifiers ---
 # These functions allow the owner's PlayerStats (or other systems) to query
 # the total temporary modifiers applied by active status effects.
-#
-# Once PlayerStats.gd is updated to manage temporary modifiers directly,
-# these methods might become internal or less frequently used, as PlayerStats
-# would then handle the full aggregation.
 
 func get_sum_of_additive_modifiers(stat_key: StringName) -> float:
-	# Returns the sum of 'flat_add' and 'percent_add_to_base' modifiers aggregated by this component.
-	# This requires careful consideration of how PlayerStats.gd will apply these.
-	return current_stat_modifiers.get(stat_key, 0.0)
+	# Returns the sum of 'flat_add' and 'percent_add_to_base' modifiers.
+	return _additive_modifiers.get(stat_key, 0.0)
 
 func get_product_of_multiplicative_modifiers(stat_key: StringName) -> float:
-	# Returns the product of 'percent_mult_final' modifiers aggregated by this component.
-	# This requires careful consideration of how PlayerStats.gd will apply these.
-	return current_stat_modifiers.get(stat_key, 1.0)
+	# Returns the product of 'percent_mult_final' modifiers.
+	return _multiplicative_modifiers.get(stat_key, 1.0)
 
 func get_flat_sum_modifier(stat_key: StringName) -> float:
 	# A more generic getter for flat additions.
-	return current_stat_modifiers.get(stat_key, 0.0)
+	return _additive_modifiers.get(stat_key, 0.0)
+
+# NEW: Getter for Custom Flags
+func has_flag(flag_key: StringName) -> bool:
+	return _active_flags.get(flag_key, false)
 
 func has_status_effect(effect_id: StringName) -> bool:
 	return active_effects.has(effect_id)

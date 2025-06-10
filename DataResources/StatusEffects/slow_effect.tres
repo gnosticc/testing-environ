@@ -1,15 +1,16 @@
-[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://045mdt2vpkq"]
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://br5hmy6ev35gq"]
 
 [ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_4dwo7"]
 
 [resource]
 script = ExtResource("1_4dwo7")
-stat_key = &"movement_speed_direct_multiplier"
+id = &"slow_effect"
 modification_type = &"percent_mult_final"
-value_type = 0
+stat_key = &"movement_speed"
+value_type = 1
 value_float = -0.5
 value_int = 0
 effect_type_id = &"stat_mod"
-target_scope = &"enemy_stats"
+target_scope = &"target_stats"
 developer_note = ""
 metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

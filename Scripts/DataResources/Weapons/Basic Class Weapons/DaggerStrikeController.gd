@@ -2,6 +2,8 @@
 # This script manages the complex sequence of hits for the Dagger Strike weapon.
 # It reads an "attack_sequence" array from its stats and executes each hit
 # by spawning instances of the DaggerStrikeAttack scene with appropriate timing and properties.
+#
+# No major logic changes are needed here, as its data passing aligns with WeaponManager.gd's output.
 
 class_name DaggerStrikeController
 extends Node2D
@@ -13,7 +15,8 @@ extends Node2D
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 # --- Internal State ---
-var _specific_stats: Dictionary # Weapon-specific stats for the Dagger Strike (from WeaponBlueprintData/UpgradeData)
+# _specific_stats now holds the 'calculated_weapon_stats' from WeaponManager
+var _specific_stats: Dictionary 
 var _owner_player_stats: PlayerStats # Reference to the player's PlayerStats node
 var _base_direction: Vector2 # The initial direction of the Dagger Strike (e.g., player aiming direction)
 
@@ -27,15 +30,16 @@ func _ready():
 
 # Standardized initialization function called by WeaponManager.
 # direction: The base direction for the entire Dagger Strike sequence.
-# p_attack_stats: The weapon's specific_stats dictionary.
+# p_attack_stats: The weapon's specific_stats dictionary (these are the calculated stats from WeaponManager).
 # p_player_stats: Reference to the player's PlayerStats node.
 func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+	print("DaggerStrikeController: Received p_attack_stats: ", p_attack_stats)
 	_specific_stats = p_attack_stats.duplicate(true) # Deep copy to prevent modifying original
 	_owner_player_stats = p_player_stats
 	_base_direction = direction.normalized() if direction.length_squared() > 0 else Vector2.RIGHT # Ensure normalized direction
 	
 	_attack_sequence = _specific_stats.get(&"attack_sequence", []) # Get the attack sequence from stats
-
+	print("DaggerStrikeController: Extracted _attack_sequence: ", _attack_sequence)
 	if not is_instance_valid(hitbox_scene):
 		push_error("ERROR (DaggerStrikeController): 'hitbox_scene' is not assigned or is invalid! Queueing free."); queue_free(); return
 	if _attack_sequence.is_empty():
@@ -45,14 +49,21 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 	# The controller itself might have an animated sprite for the overall effect.
 	if is_instance_valid(animated_sprite):
 		# Apply scale for the overall attack visual (e.g., if the controller has a sprite)
-		var attack_area_scale = float(_specific_stats.get(&"attack_area_scale", 1.0))
-		animated_sprite.scale = Vector2.ONE * attack_area_scale * _owner_player_stats.get_final_stat(GameStatConstants.Keys.AOE_AREA_MULTIPLIER)
+		# Use the already calculated AREA_SCALE from _specific_stats, and player's AOE multiplier
+		var attack_area_scale = float(_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE], 1.0))
+		animated_sprite.scale = Vector2.ONE * attack_area_scale * _owner_player_stats.current_aoe_area_multiplier # Use cached current_ stat
 		
 		# Set rotation of the controller's sprite (if it has one)
 		if _base_direction != Vector2.ZERO:
 			self.rotation = _base_direction.angle()
-			if absf(_base_direction.angle()) > PI / 2.0:
-				animated_sprite.flip_v = true # Flip based on overall attack direction
+			# This flip logic depends on your sprite's orientation. Adjust if needed.
+			if absf(_base_direction.angle()) > PI / 2.0: # If aiming mostly left or right
+				animated_sprite.flip_v = false # No vertical flip for horizontal attacks
+			else: # If aiming mostly up or down
+				if _base_direction.y < 0: # Aiming up
+					animated_sprite.flip_v = true
+				else: # Aiming down
+					animated_sprite.flip_v = false
 		
 		# Play the overall attack animation (if the controller has one, e.g., a "wind-up")
 		if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation(&"slash"): # Example animation name
@@ -67,11 +78,11 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 	# --- Controller's Lifetime Logic ---
 	# This timer is for the entire controller node, which manages the sequence.
 	# The individual hitboxes will have their own lifetime.
-	var total_lifetime = float(_specific_stats.get(&"base_lifetime", 0.3)) # From weapon blueprint or upgrades
+	# Use BASE_ATTACK_DURATION from _specific_stats (already calculated by WeaponManager)
+	var total_lifetime = float(_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION], 0.3)) 
 	
-	# Consider factoring in player's effect duration multiplier for the controller's lifetime
-	var effect_duration_mult = _owner_player_stats.get_final_stat(GameStatConstants.Keys.EFFECT_DURATION_MULTIPLIER)
-	total_lifetime *= effect_duration_mult
+	# Factor in player's effect duration multiplier for the controller's lifetime
+	total_lifetime *= _owner_player_stats.current_effect_duration_multiplier # Use cached current_ stat
 
 	var cleanup_timer = get_tree().create_timer(total_lifetime, true, false, true)
 	cleanup_timer.timeout.connect(Callable(self, "queue_free")) # Queue free the controller after its lifetime
@@ -127,13 +138,15 @@ func _spawn_hitbox(hit_data: Dictionary):
 	
 	# Create a copy of the weapon's overall specific_stats for this individual hit.
 	# Then, apply any hit-specific multipliers defined in hit_data.
+	# _specific_stats already contain the fully calculated stats from WeaponManager.
 	var hit_specific_stats = _specific_stats.duplicate(true)
 	var hit_damage_mult = float(hit_data.get(&"damage_multiplier", 1.0))
 	
 	# Update the 'weapon_damage_percentage' in the hit_specific_stats for this hit.
 	# This allows individual hits in the sequence to have different damage modifiers.
-	var current_weapon_damage_percent = float(hit_specific_stats.get(&"weapon_damage_percentage", 1.0))
-	hit_specific_stats[&"weapon_damage_percentage"] = current_weapon_damage_percent * hit_damage_mult
+	# We use the current calculated weapon_damage_percentage from _specific_stats
+	var current_weapon_damage_percent = float(hit_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.0))
+	hit_specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = current_weapon_damage_percent * hit_damage_mult
 
 	# Call the standardized initialization function on the individual hitbox instance.
 	# This passes all necessary data for the hitbox to calculate its own damage, scale, etc.

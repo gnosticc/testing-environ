@@ -64,22 +64,22 @@ func _apply_all_stats_effects():
 
 	# --- Damage Calculation (Data-Driven) ---
 	# Start with player's base numerical damage.
-	var player_base_damage = _owner_player_stats.get_final_stat(GameStatConstants.Keys.NUMERICAL_DAMAGE)
+	var player_base_damage = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.NUMERICAL_DAMAGE)
 	
 	# Apply weapon-specific damage percentage multiplier (from blueprint/upgrades).
 	var weapon_damage_percent = _received_stats.get(&"weapon_damage_percentage", 1.0)
 	var calculated_damage = player_base_damage * weapon_damage_percent
 	
 	# Apply player's global damage multiplier.
-	calculated_damage *= _owner_player_stats.get_final_stat(GameStatConstants.Keys.GLOBAL_DAMAGE_MULTIPLIER)
+	calculated_damage *= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_DAMAGE_MULTIPLIER)
 
 	# Apply Reaping Momentum bonus (Scythe-specific, but example usage)
 	var reaping_bonus = _received_stats.get(&"reaping_momentum_bonus_to_apply", 0.0)
 	calculated_damage += reaping_bonus
 
 	# Apply Critical Hit logic.
-	var crit_chance = _owner_player_stats.get_final_stat(GameStatConstants.Keys.CRIT_CHANCE)
-	var crit_damage_mult = _owner_player_stats.get_final_stat(GameStatConstants.Keys.CRIT_DAMAGE_MULTIPLIER)
+	var crit_chance = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_CHANCE)
+	var crit_damage_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
 	
 	if randf() < crit_chance:
 		calculated_damage *= crit_damage_mult
@@ -90,7 +90,7 @@ func _apply_all_stats_effects():
 
 	# --- Projectile Speed Calculation ---
 	var base_w_speed = _received_stats.get(&"projectile_speed", 200.0)
-	var p_proj_spd_mult = _owner_player_stats.get_final_stat(GameStatConstants.Keys.PROJECTILE_SPEED_MULTIPLIER)
+	var p_proj_spd_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER)
 	final_speed = base_w_speed * p_proj_spd_mult
 	
 	# --- Pierce Count ---
@@ -99,7 +99,7 @@ func _apply_all_stats_effects():
 	# --- Scale Calculation (Visual and Collision) ---
 	var base_scale_x = float(_received_stats.get(&"inherent_visual_scale_x", 1.0))
 	var base_scale_y = float(_received_stats.get(&"inherent_visual_scale_y", 1.0))
-	var p_proj_size_mult = _owner_player_stats.get_final_stat(GameStatConstants.Keys.PROJECTILE_SIZE_MULTIPLIER)
+	var p_proj_size_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SIZE_MULTIPLIER)
 	final_applied_scale.x = base_scale_x * p_proj_size_mult
 	final_applied_scale.y = base_scale_y * p_proj_size_mult
 	
@@ -107,7 +107,7 @@ func _apply_all_stats_effects():
 	
 	# --- Lifetime Calculation ---
 	var base_lifetime = float(_received_stats.get(&"base_lifetime", 2.0))
-	var duration_mult = _owner_player_stats.get_final_stat(GameStatConstants.Keys.EFFECT_DURATION_MULTIPLIER)
+	var duration_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER)
 	lifetime_timer.wait_time = base_lifetime * duration_mult
 	
 	if is_instance_valid(lifetime_timer) and lifetime_timer.is_stopped():
@@ -134,7 +134,7 @@ func _on_body_entered(body: Node2D):
 			# This includes armor penetration from the player's stats.
 			var attack_stats_for_enemy: Dictionary = {
 				# Pass player's armor penetration for enemy's damage calculation.
-				GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(GameStatConstants.Keys.ARMOR_PENETRATION)
+				PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 				# Add any other relevant attack stats here (e.g., lifesteal, status application chance)
 			}
 			

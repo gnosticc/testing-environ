@@ -2,7 +2,7 @@
 # Main game logic.
 # Manages enemy spawning, DDS, level-up options, and acts as a central hub
 # for various game systems.
-# It now fully integrates with the standardized stat system using GameStatConstants.
+# It now fully integrates with the standardized stat system using PlayerStatKeys.
 
 extends Node2D
 

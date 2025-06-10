@@ -36,7 +36,7 @@ animations = [{
 }],
 "loop": false,
 "name": &"slash",
-"speed": 12.0
+"speed": 16.0
 }]
 
 [node name="Node2D" type="Node2D"]

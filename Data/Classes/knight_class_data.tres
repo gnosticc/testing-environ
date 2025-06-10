@@ -4,9 +4,12 @@
 
 [resource]
 script = ExtResource("1_dopf7")
+id = &"knight"
+display_name = "Knight"
 base_max_health = 100
 base_health_regeneration = 0.0
-base_damage_multiplier = 1.0
+base_numerical_damage = 10
+base_global_damage_multiplier = 1.0
 base_attack_speed_multiplier = 1.0
 base_armor = 0
 base_armor_penetration = 0.0
@@ -20,5 +23,4 @@ base_effect_duration_multiplier = 1.0
 base_crit_chance = 0.05
 base_crit_damage_multiplier = 1.5
 base_luck = 0
-class_description = "Description of this class."
 metadata/_custom_type_script = "uid://bk3kcyvjws6fh"

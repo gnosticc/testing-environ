@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_3cxi2")
-stat_key = &"weapon_damage_percentage"
 modification_type = &"flat_add"
+stat_key = &"weapon_damage_percentage"
 value_type = 0
 value_float = 1.0
 value_int = 0

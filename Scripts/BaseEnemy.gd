@@ -1,9 +1,18 @@
 # BaseEnemy.gd
 # This script defines the base behavior for all enemies, including movement, damage,
 # health, death, and elite mechanics.
-# It now integrates with PlayerStats for damage calculation and uses GameStatConstants.
+# It now integrates with PlayerStats for damage calculation and uses PlayerStatKeys.
 #
 # FIXED: Variable shadowing warning for 'move_direction'.
+# UPDATED: Correctly applies movement speed modifiers from StatusEffectComponent.
+# UPDATED: Uses status_effect_component.has_flag() for visual tints and movement impairments.
+# UPDATED: Correctly handles enemy body for stat/flag queries.
+# FIXED: Implemented robust layered tinting system to ensure status effect tints
+#        apply on top of elite tints and revert correctly after expiration/flash.
+# FIXED: Corrected 'data' to 'base_data_source' in make_elite function for sprite_modulate_color access.
+# CRITICAL FIX: Ensures status_effect_component reference is always synced and valid by removing @onready
+#               and guaranteeing early, explicit assignment.
+# FIXED: Explicitly resets animated_sprite.modulate to _final_base_modulate_color before applying status tints.
 
 extends CharacterBody2D
 class_name BaseEnemy
@@ -30,7 +39,8 @@ var _can_deal_contact_damage_again: bool = true # Cooldown for contact damage
 @onready var damage_area: Area2D = $DamageArea # Use $ shorthand
 @onready var health_bar: ProgressBar = $HealthBar # Use $ shorthand
 @onready var separation_detector: Area2D = $SeparationDetector # Use $ shorthand
-@onready var status_effect_component: StatusEffectComponent = $StatusEffectComponent # Use $ shorthand
+# CRITICAL CHANGE: Removed @onready here. Reference will be set in _get_status_effect_component_reference().
+var status_effect_component: StatusEffectComponent = null 
 
 # --- Elite Mechanic Nodes (will be created dynamically as children) ---
 var phaser_teleport_timer: Timer = null
@@ -41,7 +51,8 @@ var time_warper_aura: Area2D = null # For time_warper elite
 
 # --- Visual & State Variables ---
 const FLASH_COLOR: Color = Color(1.0, 0.3, 0.3, 1.0) # Red tint for hit feedback
-var original_modulate_color: Color = Color(1.0, 1.0, 1.0, 1.0) # Original sprite color for resetting
+var _initial_sprite_modulate_from_scene: Color = Color(1.0, 1.0, 1.0, 1.0) # Stores the sprite's modulate from the scene file
+var _final_base_modulate_color: Color = Color(1.0, 1.0, 1.0, 1.0) # Combines scene color + EnemyData color + elite tint
 const SLOW_TINT_COLOR: Color = Color(0.7, 0.85, 1.0, 1.0) # Light blue tint for slow effect
 const FLASH_DURATION: float = 0.2 # How long the hit flash lasts
 var player_node: PlayerCharacter = null # Reference to the player
@@ -87,7 +98,10 @@ func _ready():
 
 	# Animated Sprite setup
 	if is_instance_valid(animated_sprite):
-		original_modulate_color = animated_sprite.modulate
+		_initial_sprite_modulate_from_scene = animated_sprite.modulate # Store the absolute original scene modulate
+		_final_base_modulate_color = _initial_sprite_modulate_from_scene # Start final base with scene color
+		print("BaseEnemy '", name, "': _initial_sprite_modulate_from_scene set in _ready(): ", _initial_sprite_modulate_from_scene) # DEBUG
+		
 		if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation(&"attack"):
 			if not animated_sprite.is_connected("animation_finished", Callable(self, "_on_animated_sprite_animation_finished")):
 				animated_sprite.animation_finished.connect(Callable(self, "_on_animated_sprite_animation_finished"))
@@ -109,18 +123,29 @@ func _ready():
 		if not damage_area.is_connected("body_exited", Callable(self, "_on_damage_area_body_exited")):
 			damage_area.body_exited.connect(Callable(self, "_on_damage_area_body_exited"))
 
-	# Status Effect Component setup
-	if is_instance_valid(status_effect_component):
-		if status_effect_component.has_signal("status_effects_changed"):
-			if not status_effect_component.is_connected("status_effects_changed", Callable(self, "on_status_effects_changed")):
-				status_effect_component.status_effects_changed.connect(Callable(self, "on_status_effects_changed"))
-	else: push_error("BaseEnemy '", name, "': StatusEffectComponent node not found.")
+	# CRITICAL FIX: Ensure status_effect_component is properly referenced and synced
+	# This call should be done in _ready AND again in initialize_from_data for pooled/re-initialized enemies.
+	_get_status_effect_component_reference() 
 	
-	# Initial animation state update
+	# Initial animation state update (might be updated again by on_status_effects_changed if effects exist)
 	if speed > 0 and is_instance_valid(player_node):
 		_update_animation_state()
 	else:
 		_set_animation_state(EnemyAnimState.IDLE)
+
+# NEW: Helper function to get and connect the StatusEffectComponent reference
+# This ensures that 'status_effect_component' is always the correct child instance
+# and its signal is connected.
+func _get_status_effect_component_reference():
+	status_effect_component = get_node_or_null("StatusEffectComponent") as StatusEffectComponent
+	if is_instance_valid(status_effect_component):
+		# Connect to status_effects_changed to update visuals/behavior when effects change
+		if status_effect_component.has_signal("status_effects_changed"):
+			# Ensure we only connect once by checking if already connected
+			if not status_effect_component.is_connected("status_effects_changed", Callable(self, "on_status_effects_changed")):
+				status_effect_component.status_effects_changed.connect(Callable(self, "on_status_effects_changed"))
+	else:
+		push_error("BaseEnemy '", name, "': StatusEffectComponent node not found. Status effects will not work.")
 
 
 # Handles cleanup when the enemy is removed from the scene tree.
@@ -139,6 +164,7 @@ func _notification(what: int):
 		if is_instance_valid(time_warper_aura): time_warper_aura.queue_free() # For time_warper
 
 # Initializes enemy stats and visuals from an EnemyData resource.
+# This function is called after the enemy is instantiated and added to the scene tree.
 func initialize_from_data(data: EnemyData):
 	if not is_instance_valid(data):
 		push_error("BaseEnemy '", name, "': Invalid EnemyData provided. Using scene defaults."); return
@@ -153,9 +179,20 @@ func initialize_from_data(data: EnemyData):
 	
 	current_health = max_health # Start with full health
 	
+	# CRITICAL FIX: Ensure status_effect_component is properly referenced and synced
+	# This re-gets the reference for each newly initialized enemy (e.g., from a pool).
+	_get_status_effect_component_reference() 
+
 	if is_instance_valid(animated_sprite):
-		animated_sprite.modulate = data.sprite_modulate_color # Apply base color from data
-		original_modulate_color = animated_sprite.modulate # Store for hit flash reset
+		# Combine initial scene modulate with EnemyData's sprite_modulate_color
+		_final_base_modulate_color = _initial_sprite_modulate_from_scene * data.sprite_modulate_color
+		print("BaseEnemy '", name, "': _final_base_modulate_color after EnemyData applied: ", _final_base_modulate_color) # DEBUG
+		
+		# Now, trigger the status effect tint update
+		if is_instance_valid(status_effect_component):
+			on_status_effects_changed(self) # Call it to apply any active status tints
+	else:
+		push_warning("BaseEnemy '", name, "': AnimatedSprite2D missing in initialize_from_data. Cannot apply base color.")
 		
 	update_health_bar()
 	_update_animation_state()
@@ -165,7 +202,8 @@ func apply_knockback(direction: Vector2, force: float):
 	# Don't knock back immovable elites or if currently stunned/frozen
 	if is_elite_immovable: return
 	if is_instance_valid(status_effect_component):
-		if status_effect_component.has_status_effect(&"is_stunned") or status_effect_component.has_status_effect(&"is_frozen"):
+		# FIX: Use has_flag() for flags now
+		if status_effect_component.has_flag(&"is_stunned") or status_effect_component.has_flag(&"is_frozen"):
 			return # Stunned/frozen enemies are typically immune to knockback
 	
 	knockback_velocity = direction.normalized() * force
@@ -179,20 +217,28 @@ func _physics_process(delta: float):
 
 	# Handle status effects that stop movement
 	if is_instance_valid(status_effect_component):
-		if status_effect_component.has_status_effect(&"is_stunned") or status_effect_component.has_status_effect(&"is_frozen") or status_effect_component.has_status_effect(&"is_rooted"):
+		# FIX: Use has_flag() for flags now
+		if status_effect_component.has_flag(&"is_stunned") or status_effect_component.has_flag(&"is_frozen") or status_effect_component.has_flag(&"is_rooted"):
 			velocity = Vector2.ZERO; move_and_slide(); return # Cannot move
 		# If feared, change movement direction
-		if status_effect_component.has_status_effect(&"is_feared"):
+		# FIX: Use has_flag() for flags now
+		if status_effect_component.has_flag(&"is_feared"):
 			if is_instance_valid(player_node):
-				var move_direction = (global_position - player_node.global_position).normalized() # FIXED: Declare move_direction locally here
-				velocity = move_direction * speed # Feared enemies move away from player
-				# Apply modifiers to speed if desired
-				var speed_mult_add = status_effect_component.get_sum_of_additive_modifiers(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MOVEMENT_SPEED])
-				var speed_mult_final = status_effect_component.get_product_of_multiplicative_modifiers(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MOVEMENT_SPEED]) # Or specific enemy speed key
-				velocity *= (1.0 + speed_mult_add) * speed_mult_final
+				var move_direction = (global_position - player_node.global_position).normalized()
+				var current_move_speed_from_base = speed # Start with base speed from EnemyData for feared logic
+				
+				# Apply speed modifiers from status effects for feared movement as well
+				var speed_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+				var speed_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+				current_move_speed_from_base *= (1.0 + speed_mod_add)
+				current_move_speed_from_base *= speed_mod_mult
+				current_move_speed_from_base = maxf(0.0, current_move_speed_from_base)
+				
+				velocity = move_direction * current_move_speed_from_base # Feared enemies move away from player
+				
 				move_and_slide(); _update_animation_state(); return # Exit after handling feared movement
 
-	var move_direction = Vector2.ZERO # FIXED: Declare move_direction here for the main path
+	var move_direction = Vector2.ZERO
 	if is_instance_valid(player_node):
 		move_direction = (player_node.global_position - global_position).normalized()
 	
@@ -204,12 +250,9 @@ func _physics_process(delta: float):
 	# Apply speed modifiers from status effects
 	if is_instance_valid(status_effect_component):
 		# Assumes status effects modify the base speed directly
-		var speed_mod_add = status_effect_component.get_sum_of_additive_modifiers(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MOVEMENT_SPEED]) # Use standardized key
-		var speed_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.MOVEMENT_SPEED]) # Use standardized key
-		
-		# Note: You might have specific keys for enemy speed (e.g., &"enemy_movement_speed")
-		# but for simplicity, using the player one here. Ensure your StatModificationEffectData
-		# targeting enemy movement points to the correct 'stat_key'.
+		# These will now correctly get values from _additive_modifiers and _multiplicative_modifiers
+		var speed_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+		var speed_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
 		
 		current_move_speed *= (1.0 + speed_mod_add) # Apply additive percentage modifiers
 		current_move_speed *= speed_mod_mult # Apply final multiplicative modifiers
@@ -258,7 +301,7 @@ func take_damage(amount: float, attacker_node: Node = null, p_attack_stats: Dict
 	var current_armor_stat = armor # Enemy's current armor
 	
 	# Get armor penetration from the attack stats (from player's PlayerStats)
-	var armor_penetration_value = float(p_attack_stats.get(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.ARMOR_PENETRATION], 0.0))
+	var armor_penetration_value = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0))
 		
 	# Calculate effective armor after penetration
 	# This uses the formula: Effective Armor = Current Armor * (1 - Penetration%) for percentage,
@@ -273,8 +316,8 @@ func take_damage(amount: float, attacker_node: Node = null, p_attack_stats: Dict
 	if is_instance_valid(status_effect_component):
 		# Assumes "damage_taken_multiplier" is a percentage (e.g., 0.25 for +25% damage taken)
 		# The multiplier from status effects is stored as a sum of additive percentages.
-		var damage_taken_mod_add = status_effect_component.get_sum_of_additive_modifiers(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.DAMAGE_TAKEN_MULTIPLIER])
-		var damage_taken_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(GameStatConstants.KEY_NAMES[GameStatConstants.Keys.DAMAGE_TAKEN_MULTIPLIER]) # If you have this type
+		var damage_taken_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER])
+		var damage_taken_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER]) # If you have this type
 		
 		final_damage_taken *= (1.0 + damage_taken_mod_add) # Apply additive percentage modifiers
 		final_damage_taken *= damage_taken_mod_mult # Apply final multiplicative modifiers
@@ -294,11 +337,12 @@ func _die(killer_node: Node = null):
 	_is_contact_attacking = false # Stop attack animation/logic
 	_set_animation_state(EnemyAnimState.DEATH)
 
-	# Stop and free elite-specific timers/nodes if they exist.
-	if is_instance_valid(phaser_teleport_timer): phaser_teleport_timer.stop(); phaser_teleport_timer.queue_free()
-	if is_instance_valid(summoner_spawn_timer): summoner_spawn_timer.stop(); summoner_spawn_timer.queue_free()
-	if is_instance_valid(shaman_aura): shaman_aura.queue_free() # Area nodes need to be freed manually
-	if is_instance_valid(shaman_heal_pulse_timer): shaman_heal_pulse_timer.stop(); shaman_heal_pulse_timer.queue_free()
+	# Stop and free elite-specific timers and nodes.
+	# This should be called *before* decrementing active enemy count or queue_freeing.
+	if is_instance_valid(phaser_teleport_timer): phaser_teleport_timer.queue_free()
+	if is_instance_valid(summoner_spawn_timer): summoner_spawn_timer.queue_free()
+	if is_instance_valid(shaman_aura): shaman_aura.queue_free()
+	if is_instance_valid(shaman_heal_pulse_timer): shaman_heal_pulse_timer.queue_free()
 	if is_instance_valid(time_warper_aura): time_warper_aura.queue_free() # For time_warper
 
 	# Decrement active enemy count in game.gd.
@@ -389,14 +433,18 @@ func cull_self_and_report_threat():
 # Flashes the enemy sprite red briefly when hit.
 func _flash_on_hit():
 	if not is_instance_valid(animated_sprite): return
+	
+	var current_modulate_before_flash = animated_sprite.modulate # Store current modulate before applying flash
 	animated_sprite.modulate = FLASH_COLOR
+	
 	# Create a one-shot timer for the flash duration
 	var flash_timer = get_tree().create_timer(FLASH_DURATION, true, false, true)
 	await flash_timer.timeout # Wait for the timer to finish
 	
-	# Restore original color if still valid (enemy might have died)
+	# Restore to the color it was BEFORE the flash (which includes any status tints)
 	if is_instance_valid(self) and is_instance_valid(animated_sprite):
-		animated_sprite.modulate = original_modulate_color
+		animated_sprite.modulate = current_modulate_before_flash
+
 
 # Updates the enemy's health bar display.
 func update_health_bar():
@@ -409,6 +457,11 @@ func update_health_bar():
 
 # Updates the enemy's animation state based on its current velocity.
 func _update_animation_state():
+	if is_instance_valid(status_effect_component): # Check for status effects that might prevent animation change
+		if status_effect_component.has_flag(&"is_stunned") or status_effect_component.has_flag(&"is_frozen") or status_effect_component.has_flag(&"is_rooted"):
+			_set_animation_state(EnemyAnimState.IDLE) # Force idle if movement is stopped by status effect
+			return
+
 	if is_dead_flag or _is_contact_attacking or current_anim_state == EnemyAnimState.ATTACK: return # Prioritize these states
 	
 	if velocity.length_squared() > MIN_SPEED_FOR_WALK_ANIM * MIN_SPEED_FOR_WALK_ANIM:
@@ -478,7 +531,8 @@ func _on_damage_area_body_exited(body: Node2D):
 		_player_in_contact_area = false
 		# Stop the timer when player leaves contact to prevent unnecessary ticking.
 		if is_instance_valid(contact_damage_cooldown_timer):
-			contact_damage_cooldown_timer.stop()
+			contact_damage_cooldown_timer.stop() # Typo: This should be contact_damage_cooldown_timer
+	
 
 # --- Contact Damage Logic ---
 # Attempts to deal contact damage to the player if conditions are met.
@@ -486,10 +540,11 @@ func _try_deal_contact_damage():
 	# --- NEW: Check for attack impairing status effects ---
 	if is_instance_valid(status_effect_component):
 		# Enemies cannot attack while stunned, frozen, disarmed, or feared.
-		if status_effect_component.has_status_effect(&"is_stunned") \
-		or status_effect_component.has_status_effect(&"is_frozen") \
-		or status_effect_component.has_status_effect(&"is_feared") \
-		or status_effect_component.has_status_effect(&"is_disarmed"):
+		# FIX: Use has_flag() for flags here
+		if status_effect_component.has_flag(&"is_stunned") \
+		or status_effect_component.has_flag(&"is_frozen") \
+		or status_effect_component.has_flag(&"is_feared") \
+		or status_effect_component.has_flag(&"is_disarmed"): # Assuming is_disarmed is another flag
 			return # Cannot attack
 	
 	if not _player_in_contact_area or is_dead_flag or _is_contact_attacking: return
@@ -520,17 +575,19 @@ func make_elite(p_elite_type: StringName, p_elite_DDS_contribution: float = 0.0,
 	# This ensures elite scaling applies to the original, un-modified base stats.
 	var true_base_hp = max_health; var true_base_speed = speed
 	var true_base_damage = contact_damage; var true_base_exp = experience_to_drop
-	var true_base_armor = armor; var true_base_modulate = original_modulate_color
+	var true_base_armor = armor; var true_base_modulate = _initial_sprite_modulate_from_scene # Start with scene's original modulate
 	var true_base_scale = base_scene_root_scale
 	
-	var base_data = p_base_data_for_elite if is_instance_valid(p_base_data_for_elite) else enemy_data_resource
-	if is_instance_valid(base_data):
-		true_base_hp = float(base_data.base_health)
-		true_base_speed = base_data.base_speed
-		true_base_damage = float(base_data.base_contact_damage)
-		true_base_exp = base_data.base_exp_drop
-		true_base_armor = float(base_data.base_armor)
-		if is_instance_valid(animated_sprite): true_base_modulate = base_data.sprite_modulate_color
+	var base_data_source = p_base_data_for_elite if is_instance_valid(p_base_data_for_elite) else enemy_data_resource # Renamed to avoid shadowing 'data'
+	if is_instance_valid(base_data_source):
+		true_base_hp = float(base_data_source.base_health)
+		true_base_speed = base_data_source.base_speed
+		true_base_damage = float(base_data_source.base_contact_damage)
+		true_base_exp = base_data_source.base_exp_drop
+		true_base_armor = float(base_data_source.base_armor)
+		if is_instance_valid(animated_sprite): 
+			# Apply EnemyData's color to the true_base_modulate
+			true_base_modulate *= base_data_source.sprite_modulate_color # FIX: Changed 'data' to 'base_data_source'
 	else:
 		push_warning("BaseEnemy '", name, "': No valid base_data for elite. Using current scene stats.")
 
@@ -562,7 +619,7 @@ func make_elite(p_elite_type: StringName, p_elite_DDS_contribution: float = 0.0,
 		&"phaser":
 			elite_tint_overlay = Color(0.8, 0.5, 1.0, 1.0) # Purplish tint
 			phaser_teleport_timer = Timer.new(); phaser_teleport_timer.name = "PhaserTimer"
-			phaser_teleport_timer.wait_time = base_data.phaser_cooldown # Cooldown from EnemyData
+			phaser_teleport_timer.wait_time = base_data_source.phaser_cooldown # Cooldown from EnemyData
 			phaser_teleport_timer.one_shot = false
 			add_child(phaser_teleport_timer)
 			phaser_teleport_timer.timeout.connect(_on_phaser_teleport_timer_timeout)
@@ -570,7 +627,7 @@ func make_elite(p_elite_type: StringName, p_elite_DDS_contribution: float = 0.0,
 		&"summoner":
 			elite_tint_overlay = Color(1.0, 1.0, 0.5, 1.0) # Yellowish tint
 			summoner_spawn_timer = Timer.new(); summoner_spawn_timer.name = "SummonerTimer"
-			summoner_spawn_timer.wait_time = base_data.summoner_interval # Interval from EnemyData
+			summoner_spawn_timer.wait_time = base_data_source.summoner_interval # Interval from EnemyData
 			summoner_spawn_timer.one_shot = false
 			add_child(summoner_spawn_timer)
 			summoner_spawn_timer.timeout.connect(_on_summoner_spawn_timer_timeout)
@@ -578,12 +635,12 @@ func make_elite(p_elite_type: StringName, p_elite_DDS_contribution: float = 0.0,
 		&"shaman":
 			elite_tint_overlay = Color(0.5, 1.0, 0.8, 1.0) # Teal tint
 			shaman_aura = Area2D.new(); shaman_aura.name = "ShamanAura"; add_child(shaman_aura)
-			var aura_shape = CircleShape2D.new(); aura_shape.radius = base_data.shaman_heal_radius # Radius from EnemyData
+			var aura_shape = CircleShape2D.new(); aura_shape.radius = base_data_source.shaman_heal_radius # Radius from EnemyData
 			var aura_col = CollisionShape2D.new(); aura_col.shape = aura_shape; shaman_aura.add_child(aura_col)
 			shaman_aura.collision_layer = 0 # No collision layer for the aura itself
 			shaman_aura.collision_mask = 8 # Mask 8 is typically the 'enemies' layer
 			shaman_heal_pulse_timer = Timer.new(); shaman_heal_pulse_timer.name = "ShamanHealTimer"
-			shaman_heal_pulse_timer.wait_time = base_data.shaman_heal_interval # Interval from EnemyData
+			shaman_heal_pulse_timer.wait_time = base_data_source.shaman_heal_interval # Interval from EnemyData
 			shaman_heal_pulse_timer.one_shot = false
 			add_child(shaman_heal_pulse_timer)
 			shaman_heal_pulse_timer.timeout.connect(_on_shaman_heal_pulse_timer_timeout)
@@ -610,9 +667,15 @@ func make_elite(p_elite_type: StringName, p_elite_DDS_contribution: float = 0.0,
 	self.scale = true_base_scale * scale_multiplier
 	
 	if is_instance_valid(animated_sprite):
-		# Apply the color tint to the sprite. Its scale is now handled by the root node.
-		animated_sprite.modulate = true_base_modulate * elite_tint_overlay
-		original_modulate_color = animated_sprite.modulate # Store new modulated color for hit flash reset
+		# Apply the elite tint on top of the already set _final_base_modulate_color
+		_final_base_modulate_color = _final_base_modulate_color * elite_tint_overlay
+		print("BaseEnemy '", name, "': _final_base_modulate_color after Elite applied: ", _final_base_modulate_color) # DEBUG
+		
+		# Trigger the status effect tint update
+		if is_instance_valid(status_effect_component):
+			on_status_effects_changed(self) # Call it to apply any active status tints
+	else:
+		push_warning("BaseEnemy '", name, "': AnimatedSprite2D missing in make_elite. Cannot apply elite tint.")
 	
 	update_health_bar()
 	print("BaseEnemy '", name, "': Transformed into Elite (", elite_type_tag, "). HP: ", current_health, ", Speed: ", speed, ", DMG: ", contact_damage)
@@ -691,32 +754,43 @@ func _on_shaman_heal_pulse_timer_timeout():
 # --- Status Effects & Getters ---
 # Called by StatusEffectComponent when its active effects change.
 func on_status_effects_changed(_owner_node: Node):
-	# Update visual tints based on active status effects
+	# DEBUG PRINT: Confirm function call
+	print("BaseEnemy '", name, "': on_status_effects_changed called.")
+	
 	if not is_instance_valid(animated_sprite) or not is_instance_valid(status_effect_component): return
 	
-	var applied_tint: Color = original_modulate_color # Start with original color
+	# Start applied_tint from the combined scene/EnemyData/elite color
+	var applied_tint: Color = _final_base_modulate_color 
 	
-	# Apply tints based on status effect presence (order matters for visual priority)
-	if status_effect_component.has_status_effect(&"is_stunned"):
-		# Example tint for stunned
+	# DEBUG PRINT: Show _final_base_modulate_color and initial tint before applying status tints
+	print("BaseEnemy '", name, "': _final_base_modulate_color: ", _final_base_modulate_color)
+	print("BaseEnemy '", name, "': Sprite modulate BEFORE status tint application: ", animated_sprite.modulate)
+	print("BaseEnemy '", name, "': Is Slowed Flag: ", status_effect_component.has_flag(&"is_slowed")) # DEBUG
+
+	# Apply tints based on active status effect flags (order matters for visual priority)
+	if status_effect_component.has_flag(&"is_stunned"):
 		applied_tint *= Color(0.5, 0.5, 0.5, 1.0) # Darken
-	elif status_effect_component.has_status_effect(&"is_frozen"):
-		# Example tint for frozen
+		print("BaseEnemy '", name, "': Applying STUN tint.")
+	elif status_effect_component.has_flag(&"is_frozen"):
 		applied_tint *= Color(0.7, 0.9, 1.0, 1.0) # Icy blue
-	elif status_effect_component.has_status_effect(&"is_slowed"):
+		print("BaseEnemy '", name, "': Applying FROZEN tint.")
+	elif status_effect_component.has_flag(&"is_slowed"):
 		applied_tint *= SLOW_TINT_COLOR # Light blue tint for slow
+		print("BaseEnemy '", name, "': Applying SLOW tint.")
 	# Add more tints for other effects as needed (e.g., Burn, Poison)
 	
 	animated_sprite.modulate = applied_tint
-	
+
+	# DEBUG PRINT: Show final modulate color
+	print("BaseEnemy '", name, "': Sprite modulate AFTER status tint application: ", animated_sprite.modulate)
+
 	# Update movement behavior based on status effects that impair movement.
-	# This should trigger _physics_process to re-evaluate velocity.
-	set_physics_process(true) # Ensure physics process is running to update movement
+	set_physics_process(true) # Ensure physics process is running to re-evaluate movement
 
 func is_dead() -> bool:
 	return is_dead_flag
 
-func get_current_health() -> float: # Changed to float
+func get_current_health() -> float:
 	return current_health
 
 func get_is_elite_immovable() -> bool:

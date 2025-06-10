@@ -70,9 +70,9 @@ func _validate_property(property: Dictionary):
 				if stat_mod.stat_key == &"":
 					push_warning("PlayerClassTierData: StatModificationEffectData in 'permanent_stat_bonuses' at index ", i, " has an empty 'stat_key'.")
 				# Check if the player_stats-targeted key is valid (assuming these bonuses only target player_stats)
-				if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("GameStatConstants"):
-					if not GameStatConstants.KEY_NAMES.values().has(stat_mod.stat_key):
-						push_warning("PlayerClassTierData: Player stat key '", stat_mod.stat_key, "' in 'permanent_stat_bonuses' at index ", i, " is not a recognized key in GameStatConstants.KEY_NAMES.")
+				if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("PlayerStatKeys"):
+					if not PlayerStatKeys.KEY_NAMES.values().has(stat_mod.stat_key):
+						push_warning("PlayerClassTierData: Player stat key '", stat_mod.stat_key, "' in 'permanent_stat_bonuses' at index ", i, " is not a recognized key in PlayerStatKeys.KEY_NAMES.")
 			elif effect is CustomFlagEffectData:
 				var flag_mod = effect as CustomFlagEffectData
 				if flag_mod.flag_key == &"":

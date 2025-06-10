@@ -2,7 +2,7 @@
 # This script creates and manages a comprehensive in-game debug panel.
 # It allows real-time inspection and modification of game parameters, player stats,
 # weapons, and enemy spawning.
-# It now fully integrates with the standardized stat system via GameStatConstants.
+# It now fully integrates with the standardized stat system via PlayerStatKeys.
 
 extends CanvasLayer
 
@@ -101,8 +101,8 @@ const UI_UPDATE_INTERVAL: float = 0.25 # How often the UI elements update
 
 # --- Helper function for Player Stats Tab (creating LineEdit for stat) ---
 # p_stats_node_ref: Reference to PlayerStats node.
-# stat_key_enum: The GameStatConstants.Keys enum value for the stat.
-func _add_stat_editor_to_grid(p_grid: GridContainer, label_text: String, placeholder: String, stat_key_enum: GameStatConstants.Keys) -> LineEdit:
+# stat_key_enum: The PlayerStatKeys.Keys enum value for the stat.
+func _add_stat_editor_to_grid(p_grid: GridContainer, label_text: String, placeholder: String, stat_key_enum: PlayerStatKeys.Keys) -> LineEdit:
 	p_grid.add_child(Label.new()) # Placeholder for spacing if needed
 	var lbl = Label.new(); lbl.text = label_text; p_grid.add_child(lbl)
 	var line_edit = LineEdit.new(); line_edit.name = "PSEdit" + str(stat_key_enum).capitalize()
@@ -118,7 +118,7 @@ func _add_stat_editor_to_grid(p_grid: GridContainer, label_text: String, placeho
 	return line_edit
 
 # --- Helper function for Player Stats Tab (updating LineEdit with current stat value) ---
-func _update_line_edit_from_stat(le: LineEdit, stat_key_enum: GameStatConstants.Keys, default_val_str: String = "N/A"):
+func _update_line_edit_from_stat(le: LineEdit, stat_key_enum: PlayerStatKeys.Keys, default_val_str: String = "N/A"):
 	if is_instance_valid(le) and is_instance_valid(player_stats_node):
 		# Get the current FINAL value from PlayerStats for display
 		le.text = str(player_stats_node.get_final_stat(stat_key_enum))
@@ -480,16 +480,16 @@ func _setup_player_stats_tab():
 	player_stats_tab_content = VBoxContainer.new(); player_stats_tab_content.name = "PlayerStatsTabContent"
 	var grid = GridContainer.new(); grid.columns = 2; player_stats_tab_content.add_child(grid)
 	
-	# Create LineEdits for each player stat, using the GameStatConstants enum
-	ps_max_health_edit = _add_stat_editor_to_grid(grid, "Max Health:", "e.g., 100", GameStatConstants.Keys.MAX_HEALTH)
-	ps_health_regen_edit = _add_stat_editor_to_grid(grid, "Health Regen:", "e.g., 0.5", GameStatConstants.Keys.HEALTH_REGENERATION)
-	ps_numerical_damage_edit = _add_stat_editor_to_grid(grid, "Numerical Dmg:", "e.g., 10", GameStatConstants.Keys.NUMERICAL_DAMAGE)
-	ps_global_flat_damage_edit = _add_stat_editor_to_grid(grid, "Global Flat Dmg Add:", "e.g., 5", GameStatConstants.Keys.GLOBAL_FLAT_DAMAGE_ADD)
-	ps_attack_speed_mult_edit = _add_stat_editor_to_grid(grid, "Atk Speed Mult:", "e.g., 1.0", GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER)
-	ps_armor_edit = _add_stat_editor_to_grid(grid, "Armor:", "e.g., 0", GameStatConstants.Keys.ARMOR)
-	ps_armor_penetration_edit = _add_stat_editor_to_grid(grid, "Armor Penetration:", "e.g., 0", GameStatConstants.Keys.ARMOR_PENETRATION) # New field
-	ps_move_speed_edit = _add_stat_editor_to_grid(grid, "Move Speed:", "e.g., 60", GameStatConstants.Keys.MOVEMENT_SPEED)
-	ps_luck_edit = _add_stat_editor_to_grid(grid, "Luck:", "e.g., 0", GameStatConstants.Keys.LUCK)
+	# Create LineEdits for each player stat, using the PlayerStatKeys enum
+	ps_max_health_edit = _add_stat_editor_to_grid(grid, "Max Health:", "e.g., 100", PlayerStatKeys.Keys.MAX_HEALTH)
+	ps_health_regen_edit = _add_stat_editor_to_grid(grid, "Health Regen:", "e.g., 0.5", PlayerStatKeys.Keys.HEALTH_REGENERATION)
+	ps_numerical_damage_edit = _add_stat_editor_to_grid(grid, "Numerical Dmg:", "e.g., 10", PlayerStatKeys.Keys.NUMERICAL_DAMAGE)
+	ps_global_flat_damage_edit = _add_stat_editor_to_grid(grid, "Global Flat Dmg Add:", "e.g., 5", PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD)
+	ps_attack_speed_mult_edit = _add_stat_editor_to_grid(grid, "Atk Speed Mult:", "e.g., 1.0", PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	ps_armor_edit = _add_stat_editor_to_grid(grid, "Armor:", "e.g., 0", PlayerStatKeys.Keys.ARMOR)
+	ps_armor_penetration_edit = _add_stat_editor_to_grid(grid, "Armor Penetration:", "e.g., 0", PlayerStatKeys.Keys.ARMOR_PENETRATION) # New field
+	ps_move_speed_edit = _add_stat_editor_to_grid(grid, "Move Speed:", "e.g., 60", PlayerStatKeys.Keys.MOVEMENT_SPEED)
+	ps_luck_edit = _add_stat_editor_to_grid(grid, "Luck:", "e.g., 0", PlayerStatKeys.Keys.LUCK)
 	
 	var button_hbox = HBoxContainer.new(); button_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	player_stats_tab_content.add_child(button_hbox)
@@ -510,15 +510,15 @@ func _setup_player_stats_tab():
 func _update_player_stats_display_fields():
 	if not is_instance_valid(player_stats_node): return
 	
-	_update_line_edit_from_stat(ps_max_health_edit, GameStatConstants.Keys.MAX_HEALTH)
-	_update_line_edit_from_stat(ps_health_regen_edit, GameStatConstants.Keys.HEALTH_REGENERATION)
-	_update_line_edit_from_stat(ps_numerical_damage_edit, GameStatConstants.Keys.NUMERICAL_DAMAGE)
-	_update_line_edit_from_stat(ps_global_flat_damage_edit, GameStatConstants.Keys.GLOBAL_FLAT_DAMAGE_ADD)
-	_update_line_edit_from_stat(ps_attack_speed_mult_edit, GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER)
-	_update_line_edit_from_stat(ps_armor_edit, GameStatConstants.Keys.ARMOR)
-	_update_line_edit_from_stat(ps_armor_penetration_edit, GameStatConstants.Keys.ARMOR_PENETRATION) # New field
-	_update_line_edit_from_stat(ps_move_speed_edit, GameStatConstants.Keys.MOVEMENT_SPEED)
-	_update_line_edit_from_stat(ps_luck_edit, GameStatConstants.Keys.LUCK)
+	_update_line_edit_from_stat(ps_max_health_edit, PlayerStatKeys.Keys.MAX_HEALTH)
+	_update_line_edit_from_stat(ps_health_regen_edit, PlayerStatKeys.Keys.HEALTH_REGENERATION)
+	_update_line_edit_from_stat(ps_numerical_damage_edit, PlayerStatKeys.Keys.NUMERICAL_DAMAGE)
+	_update_line_edit_from_stat(ps_global_flat_damage_edit, PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD)
+	_update_line_edit_from_stat(ps_attack_speed_mult_edit, PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	_update_line_edit_from_stat(ps_armor_edit, PlayerStatKeys.Keys.ARMOR)
+	_update_line_edit_from_stat(ps_armor_penetration_edit, PlayerStatKeys.Keys.ARMOR_PENETRATION) # New field
+	_update_line_edit_from_stat(ps_move_speed_edit, PlayerStatKeys.Keys.MOVEMENT_SPEED)
+	_update_line_edit_from_stat(ps_luck_edit, PlayerStatKeys.Keys.LUCK)
 
 # Applies changes from the Player Stats tab LineEdits to player_stats_node.
 func _on_apply_player_stats_button_pressed():
@@ -527,15 +527,15 @@ func _on_apply_player_stats_button_pressed():
 	# Call debug setter methods on PlayerStats.gd (these methods need to be implemented there)
 	# Use the _get_float_from_line_edit / _get_int_from_line_edit helpers.
 	if player_stats_node.has_method("debug_set_stat_base_value"):
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.MAX_HEALTH, _get_int_from_line_edit(ps_max_health_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.HEALTH_REGENERATION, _get_float_from_line_edit(ps_health_regen_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.NUMERICAL_DAMAGE, _get_int_from_line_edit(ps_numerical_damage_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.GLOBAL_FLAT_DAMAGE_ADD, _get_int_from_line_edit(ps_global_flat_damage_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.ATTACK_SPEED_MULTIPLIER, _get_float_from_line_edit(ps_attack_speed_mult_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.ARMOR, _get_int_from_line_edit(ps_armor_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.ARMOR_PENETRATION, _get_float_from_line_edit(ps_armor_penetration_edit, player_stats_node, "", false)) # New field
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.MOVEMENT_SPEED, _get_float_from_line_edit(ps_move_speed_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(GameStatConstants.Keys.LUCK, _get_int_from_line_edit(ps_luck_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.MAX_HEALTH, _get_int_from_line_edit(ps_max_health_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.HEALTH_REGENERATION, _get_float_from_line_edit(ps_health_regen_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.NUMERICAL_DAMAGE, _get_int_from_line_edit(ps_numerical_damage_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD, _get_int_from_line_edit(ps_global_flat_damage_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER, _get_float_from_line_edit(ps_attack_speed_mult_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ARMOR, _get_int_from_line_edit(ps_armor_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ARMOR_PENETRATION, _get_float_from_line_edit(ps_armor_penetration_edit, player_stats_node, "", false)) # New field
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.MOVEMENT_SPEED, _get_float_from_line_edit(ps_move_speed_edit, player_stats_node, "", false))
+		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.LUCK, _get_int_from_line_edit(ps_luck_edit, player_stats_node, "", false))
 	else:
 		push_error("DebugPanel: PlayerStatsComponent missing 'debug_set_stat_base_value' method. Cannot apply changes.")
 	

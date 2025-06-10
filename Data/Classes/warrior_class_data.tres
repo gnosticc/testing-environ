@@ -4,8 +4,8 @@
 
 [resource]
 script = ExtResource("1_chu8r")
-id = &""
-display_name = "New Class"
+id = &"warrior"
+display_name = "Warrior"
 base_max_health = 100
 base_health_regeneration = 0.0
 base_numerical_damage = 10

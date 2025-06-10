@@ -2,18 +2,18 @@
 
 [ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_idb4i"]
 [ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_8py2s"]
-[ext_resource type="Resource" uid="uid://045mdt2vpkq" path="res://DataResources/StatusEffects/slow_effect.tres" id="2_l021h"]
-[ext_resource type="Resource" uid="uid://ckt4jmlx6s7up" path="res://DataResources/StatusEffects/slow_apply_flag.tres" id="3_6tr1g"]
+[ext_resource type="Resource" uid="uid://br5hmy6ev35gq" path="res://DataResources/StatusEffects/slow_effect.tres" id="2_l021h"]
+[ext_resource type="Resource" uid="uid://cjcv5xgg8gllo" path="res://DataResources/StatusEffects/is_slowed_flag.tres" id="3_l021h"]
 
 [resource]
 script = ExtResource("2_8py2s")
 id = &"slow"
-display_name = "Slowed"
+display_name = "Slow"
 duration = 2.0
 max_stacks = 1
 refresh_duration_on_reapply = true
-tick_interval = 0.0
+tick_interval = -1.0
 tick_on_application = false
-effects_while_active = Array[ExtResource("1_idb4i")]([ExtResource("2_l021h"), ExtResource("3_6tr1g")])
+effects_while_active = Array[ExtResource("1_idb4i")]([ExtResource("2_l021h"), ExtResource("3_l021h")])
 next_status_effect_on_expire = &""
 metadata/_custom_type_script = "uid://5du86wr4q1bj"

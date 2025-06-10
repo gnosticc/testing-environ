@@ -10,15 +10,17 @@ id = &"knight_shield_bash"
 title = "Shield Bash"
 description = "A quick bash that knocks enemies back."
 weapon_scene = ExtResource("3_xbeby")
-tags = Array[String](["melee", "knockback", "physical"])
+tags = Array[StringName]([&"melee", &"knockback", &"physical"])
 class_tag_restrictions = Array[int]([2])
 cooldown = 2.5
 max_level = 10
 base_lifetime = 0.2
 spawn_as_child = true
 requires_direction = true
-targeting_type = "mouse"
+targeting_type = &"mouse_direction"
 initial_specific_stats = {
+"base_attack_duration": 0.2,
+"knockback_strength": 150.0,
 "pierce_count": 0,
 "projectile_speed": 200.0,
 "weapon_damage_percentage": 1.2

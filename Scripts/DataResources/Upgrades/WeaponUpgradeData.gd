@@ -65,10 +65,10 @@ func _validate_property(property: Dictionary):
 				var stat_mod = effect as StatModificationEffectData
 				if stat_mod.stat_key == &"":
 					push_warning("WeaponUpgradeData: StatModificationEffectData at index ", i, " has an empty 'stat_key'.")
-				# You could add further validation here to check if stat_key exists in GameStatConstants.KEY_NAMES
-				# if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("GameStatConstants"):
-				# 	if not GameStatConstants.KEY_NAMES.values().has(stat_mod.stat_key):
-				# 		push_warning("WeaponUpgradeData: Player stat key '", stat_mod.stat_key, "' in effect at index ", i, " is not in GameStatConstants.KEY_NAMES.")
+				# You could add further validation here to check if stat_key exists in PlayerStatKeys.KEY_NAMES
+				# if stat_mod.target_scope == &"player_stats" and Engine.has_singleton("PlayerStatKeys"):
+				# 	if not PlayerStatKeys.KEY_NAMES.values().has(stat_mod.stat_key):
+				# 		push_warning("WeaponUpgradeData: Player stat key '", stat_mod.stat_key, "' in effect at index ", i, " is not in PlayerStatKeys.KEY_NAMES.")
 			elif effect is CustomFlagEffectData:
 				var flag_mod = effect as CustomFlagEffectData
 				if flag_mod.flag_key == &"":

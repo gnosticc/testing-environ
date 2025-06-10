@@ -17,7 +17,7 @@ max_level = 10
 base_lifetime = 0.3
 spawn_as_child = false
 requires_direction = true
-targeting_type = "mouse"
+targeting_type = &"mouse_direction"
 initial_specific_stats = {
 "attack_area_scale": 1.0,
 "attack_sequence": [{

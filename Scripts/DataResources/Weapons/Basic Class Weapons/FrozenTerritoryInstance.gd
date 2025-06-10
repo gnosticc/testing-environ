@@ -1,58 +1,84 @@
 # FrozenTerritoryInstance.gd
 # This script controls a single orbiting instance of Frozen Territory.
-# CORRECTED: The initialize function now correctly reads the `base_lifetime`
-# value from the stats dictionary to ensure proper despawning.
+# UPDATED: Now processes 'on_hit_status_applications' array for status effect application,
+# aligning with the standardized weapon system.
+# UPDATED: Uses PlayerStatKeys for all stat lookups.
+# UPDATED: Leverages PlayerStats.get_calculated_player_damage for unified damage calculation.
+# UPDATED: Passes calculated weapon stats for status effect scaling.
+
 class_name FrozenTerritoryInstance
 extends Area2D
 
 @onready var animated_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D")
+@onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D") # Ensure this is the correct node name for your CollisionShape
 
 # --- Orbit Properties ---
 var owner_player: PlayerCharacter
+var specific_weapon_stats: Dictionary # Stores the calculated weapon stats passed from controller
 var orbit_radius: float = 75.0
 var rotation_speed: float = 1.0 # Radians per second
 var current_angle: float = 0.0
 
 # --- Attack Properties ---
-var damage_on_contact: int = 5
-var status_effect_to_apply: StatusEffectData = null
+var damage_on_contact: int = 0 # Will be set by calculation
+# NO LONGER NEEDED: var status_effect_to_apply: StatusEffectData = null 
+# Status effects will be applied from the on_hit_status_applications array
+
 var _enemies_hit: Array[Node2D] = []
 
 func _ready():
-	var collision_shape = get_node_or_null("CollisionShape2D")
-	if is_instance_valid(collision_shape):
-		collision_shape.disabled = false
-	
-	body_entered.connect(_on_body_entered)
+	if not is_instance_valid(animated_sprite):
+		push_warning("FrozenTerritoryInstance: AnimatedSprite2D missing.")
+	if not is_instance_valid(collision_shape):
+		push_error("FrozenTerritoryInstance: CollisionShape2D missing! Attack will not register hits.");
+		call_deferred("queue_free"); return # Queue free if essential node is missing
+
+	collision_shape.disabled = false # Enable collision by default
+	body_entered.connect(Callable(self, "_on_body_entered"))
+
 
 # This function is called by the controller that spawns this instance
+# p_owner: Reference to the PlayerCharacter node.
+# p_stats: The *calculated* weapon-specific stats dictionary from WeaponManager.
+# start_angle: The initial angle for this instance in the orbit.
 func initialize(p_owner: PlayerCharacter, p_stats: Dictionary, start_angle: float):
 	owner_player = p_owner
+	specific_weapon_stats = p_stats # Store the calculated weapon stats
 	
-	orbit_radius = float(p_stats.get("orbit_radius", 75.0))
+	if not is_instance_valid(owner_player) or not is_instance_valid(owner_player.player_stats):
+		push_error("FrozenTerritoryInstance: Player or PlayerStats invalid during initialization. Cannot calculate stats.");
+		call_deferred("queue_free"); return
+
+	# Use PlayerStatKeys for stat lookups and leverage calculated stats
+	orbit_radius = float(specific_weapon_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS], 75.0))
 	
-	var rotation_duration = float(p_stats.get("rotation_duration", 3.0))
+	var rotation_duration = float(specific_weapon_stats.get(&"rotation_duration", 3.0)) # Assuming rotation_duration is a direct key
 	if rotation_duration > 0:
 		rotation_speed = TAU / rotation_duration
 	
 	current_angle = start_angle
 	
-	var player_stats = owner_player.get_node_or_null("PlayerStats") as PlayerStats
-	if is_instance_valid(player_stats):
-		var player_base_damage = float(player_stats.get_current_base_numerical_damage())
-		var player_global_mult = float(player_stats.get_current_global_damage_multiplier())
-		var weapon_damage_percent = float(p_stats.get("weapon_damage_percentage", 0.5))
-		damage_on_contact = int(round(player_base_damage * weapon_damage_percent * player_global_mult))
+	# --- Damage Calculation using unified method ---
+	var weapon_damage_percent = float(specific_weapon_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 0.5))
+	damage_on_contact = int(round(owner_player.player_stats.get_calculated_player_damage(weapon_damage_percent)))
 	
-	var status_effect_path = p_stats.get("status_effect_path", "")
-	if ResourceLoader.exists(status_effect_path):
-		status_effect_to_apply = load(status_effect_path)
+	# --- LIFETIME LOGIC ---
+	# Use base_lifetime from specific_weapon_stats (already calculated by WeaponManager)
+	var lifetime = float(specific_weapon_stats.get(&"base_lifetime", 3.0)) # Make sure base_lifetime is in blueprint
+	
+	# Apply player's global effect duration multiplier
+	var duration_mult = owner_player.player_stats.current_effect_duration_multiplier # Use cached current_ stat
+	lifetime *= duration_mult
+	
+	var instance_lifetime_timer = get_tree().create_timer(lifetime, true, false, true)
+	if not is_instance_valid(instance_lifetime_timer):
+		push_error("FrozenTerritoryInstance: Failed to create lifetime timer. Instance may persist indefinitely.");
+	else:
+		instance_lifetime_timer.timeout.connect(Callable(self, "queue_free")) # Connect to queue_free directly
 
-	# --- CORRECTED LIFETIME LOGIC ---
-	# The instance now uses the `base_lifetime` passed from the blueprint.
-	var lifetime = float(p_stats.get("base_lifetime", 3.0))
-	var lifetime_timer = get_tree().create_timer(lifetime, true, false, true)
-	lifetime_timer.timeout.connect(queue_free)
+	# Debug print to confirm initialization and stats
+	print("FrozenTerritoryInstance: Initialized. Damage: ", damage_on_contact, ", Orbit Radius: ", orbit_radius, ", Lifetime: ", lifetime)
+
 
 func _physics_process(delta: float):
 	if not is_instance_valid(owner_player):
@@ -65,17 +91,33 @@ func _physics_process(delta: float):
 	global_position = owner_player.global_position + offset
 
 func _on_body_entered(body: Node2D):
-	if _enemies_hit.has(body): return
+	# Allow multiple hits if pierce_count is > 0, otherwise single hit per enemy.
+	# For an aura-like weapon, you might want to hit multiple enemies over time,
+	# but avoid hitting the *same* enemy on consecutive frames if it's not a tick-based area.
+	if _enemies_hit.has(body): return # Prevent multiple hits on the same enemy per frame
 
 	if body.is_in_group("enemies") and body is BaseEnemy:
 		var enemy_target = body as BaseEnemy
-		if enemy_target.is_dead(): return
+		if not is_instance_valid(enemy_target) or enemy_target.is_dead(): return
 		
-		_enemies_hit.append(enemy_target)
-		
+		# Prevent hitting the same enemy again for this specific instance's lifetime
+		_enemies_hit.append(enemy_target) # Add to list of hit enemies
+
+		# Take damage
 		enemy_target.take_damage(damage_on_contact, owner_player)
 		
-		if is_instance_valid(status_effect_to_apply):
-			var enemy_status_comp = enemy_target.get_node_or_null("StatusEffectComponent") as StatusEffectComponent
-			if is_instance_valid(enemy_status_comp):
-				enemy_status_comp.apply_effect(status_effect_to_apply, owner_player)
+		# --- Apply Status Effects on Hit ---
+		# Iterate through the 'on_hit_status_applications' array from WeaponManager.
+		if specific_weapon_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
+			var status_apps: Array = specific_weapon_stats.get(&"on_hit_status_applications", [])
+			for app_data_res in status_apps:
+				var app_data = app_data_res as StatusEffectApplicationData
+				if is_instance_valid(app_data) and randf() < app_data.application_chance:
+					enemy_target.status_effect_component.apply_effect(
+						load(app_data.status_effect_resource_path) as StatusEffectData, # Load StatusEffectData from path
+						owner_player, # Source of the effect (the player)
+						specific_weapon_stats, # Pass weapon stats for scaling of the status effect
+						app_data.duration_override,
+						app_data.potency_override
+					)
+					print("FrozenTerritoryInstance: Applied status from '", app_data.status_effect_resource_path, "' to enemy.")
