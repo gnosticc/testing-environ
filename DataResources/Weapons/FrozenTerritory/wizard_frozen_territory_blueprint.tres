@@ -20,6 +20,7 @@ spawn_as_child = true
 requires_direction = false
 targeting_type = "none"
 initial_specific_stats = {
+"area_scale": 1.0,
 "number_of_orbits": 2,
 "on_hit_status_applications": [ExtResource("2_rnqi5")],
 "orbit_radius": 60.0,

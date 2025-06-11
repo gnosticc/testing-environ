@@ -5,6 +5,11 @@
 #
 # IMPORTANT: This script should replace your existing PlayerStats.gd.
 # 'PlayerStatKeys' must be set as an Autoload (see Step 2 in previous instructions).
+#
+# UPDATED: Added new global stat properties and their recalculation.
+# UPDATED: get_calculated_player_damage now accepts weapon tags to apply tag-specific multipliers.
+# FIXED: Ensured ALL PlayerStatKeys are properly initialized in base_stat_values and modifier dictionaries.
+# ADDED: More comprehensive debug prints for stat initialization and recalculation.
 
 extends Node
 class_name PlayerStats # Explicit class name for clarity and type hinting
@@ -46,7 +51,41 @@ var current_crit_chance: float = 0.0
 var current_crit_damage_multiplier: float = 1.0
 var current_luck: float = 0.0
 var current_health_regeneration: float = 0.0
+
+# NEW: Current calculated values for recently added global stats
+var current_global_percent_damage_reduction: float = 0.0
+var current_global_status_effect_chance_add: float = 0.0
+var current_global_projectile_fork_count_add: int = 0
+var current_global_projectile_bounce_count_add: int = 0
+var current_global_projectile_explode_on_death_chance: float = 0.0
+var current_global_chain_lightning_count: int = 0
+var current_global_lifesteal_percent: float = 0.0
+var current_global_flat_damage_reduction: float = 0.0
+var current_invulnerability_duration_add: float = 0.0
+var current_global_gold_gain_multiplier: float = 1.0
+var current_item_drop_chance_add: float = 0.0 # Assuming this is an additive chance (e.g., +0.05 for 5%)
+var current_global_summon_damage_multiplier: float = 1.0
+var current_global_summon_lifetime_multiplier: float = 1.0
+var current_global_summon_count_add: int = 0
+var current_global_summon_cooldown_reduction_percent: float = 0.0
+var current_enemy_debuff_resistance_reduction: float = 0.0
+var current_dodge_chance: float = 0.0
+
 # Add other 'current_' stats here as needed, based on your PlayerStatKeys.Keys
+# For Tag-Specific Multipliers (these are read directly from get_final_stat_by_string, not cached here)
+# MELEE_DAMAGE_MULTIPLIER
+# PROJECTILE_DAMAGE_MULTIPLIER
+# MAGIC_DAMAGE_MULTIPLIER
+# PHYSICAL_DAMAGE_MULTIPLIER
+# FIRE_DAMAGE_MULTIPLIER
+# ICE_DAMAGE_MULTIPLIER
+# MELEE_ATTACK_SPEED_MULTIPLIER
+# PROJECTILE_ATTACK_SPEED_MULTIPLIER
+# MAGIC_ATTACK_SPEED_MULTIPLIER
+# MELEE_AOE_AREA_MULTIPLIER
+# MAGIC_AOE_AREA_MULTIPLIER
+# PROJECTILE_PIERCE_COUNT_ADD (already cached as int)
+# PROJECTILE_MAX_RANGE_ADD (already cached as float)
 
 # --- Initialization ---
 func _ready():
@@ -68,27 +107,73 @@ func initialize_base_stats(class_data: PlayerClassData):
 	# Get the standardized dictionary of initial stats from PlayerClassData
 	var initial_class_stats: Dictionary = class_data.get_base_stats_as_standardized_dict()
 
+	# FIXED: Ensure ALL PlayerStatKeys are properly initialized here.
 	# Iterate through all known stat keys defined in PlayerStatKeys.Keys
 	for key_enum_value in PlayerStatKeys.Keys.values():
 		var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum_value]
 
-		# Initialize base_stat_values using the values from PlayerClassData.
-		# If a stat is not provided by PlayerClassData, it defaults to 0.0.
-		# Ensure values are floats for consistency in calculations.
-		base_stat_values[key_string] = float(initial_class_stats.get(key_string, 0.0))
+		# Initialize base_stat_values using the values from PlayerClassData if available.
+		# For new stats not in PlayerClassData, they will be initialized to 0.0 (or 1.0 for multipliers).
+		var base_val = float(initial_class_stats.get(key_string, 0.0))
+		
+		# Specific defaults for multipliers
+		if key_string in [
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SIZE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DEBUFF_POTENCY_MULT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_BUFF_POTENCY_MULT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.CURRENCY_GAIN_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_GOLD_GAIN_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER],
+			# Tag-specific multipliers default to 1.0
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_AOE_AREA_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_AOE_AREA_MULTIPLIER],
+		]:
+			# If the class data provides a value, use it, otherwise default to 1.0 for multipliers
+			base_stat_values[key_string] = float(initial_class_stats.get(key_string, 1.0))
+			percent_mult_final_modifiers[key_string] = 1.0 # Initialize multiplier modifier to 1.0
+		# For percentage reduction stats, default to 0.0 as it's a reduction amount
+		elif key_string in [
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DODGE_CHANCE],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION],
+		]:
+			base_stat_values[key_string] = float(initial_class_stats.get(key_string, 0.0))
+			percent_add_modifiers[key_string] = 0.0 # These are typically added percentages
+		else:
+			# For all other stats (flat adds, counts, etc.), use 0.0 as default
+			base_stat_values[key_string] = base_val
+			flat_modifiers[key_string] = 0.0
+			percent_add_modifiers[key_string] = 0.0
+			percent_mult_final_modifiers[key_string] = 1.0 # Default all remaining to 1.0 if not already set
 
-		# Initialize modifier dictionaries for each stat key.
-		# Flat and percent_add start at 0.0 (no modification).
-		# Percent_mult_final starts at 1.0 (no multiplicative change).
-		flat_modifiers[key_string] = 0.0
-		percent_add_modifiers[key_string] = 0.0
-		percent_mult_final_modifiers[key_string] = 1.0 # Default to 1.0 for multipliers
-
-	print("Player stats initialized for class: ", class_data.display_name)
+	print("PlayerStats: Initialized base stats for class: ", class_data.display_name)
 	# After initial setup, recalculate and emit signal
 	recalculate_all_stats()
-	print("Initial Max Health: ", current_max_health) # Use current_max_health
-	print("Initial Numerical Damage: ", current_numerical_damage) # Use current_numerical_damage
+	print("PlayerStats DEBUG: After initialization and first recalculation:")
+	print("  MAX_HEALTH: ", current_max_health)
+	print("  NUMERICAL_DAMAGE: ", current_numerical_damage)
+	print("  GLOBAL_DAMAGE_MULTIPLIER: ", current_global_damage_multiplier)
+	print("  GLOBAL_FLAT_DAMAGE_ADD: ", current_global_flat_damage_add)
+	print("  MOVEMENT_SPEED: ", current_movement_speed)
+	print("  PROJECTILE_DAMAGE_MULTIPLIER (example): ", get_final_stat(PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER))
 
 
 # This method is a fallback for debugging, to initialize with raw dictionary data.
@@ -98,12 +183,57 @@ func initialize_base_stats_with_raw_dict(raw_stats_dict: Dictionary):
 	percent_add_modifiers.clear()
 	percent_mult_final_modifiers.clear()
 
+	# FIXED: Ensure ALL PlayerStatKeys are properly initialized here for debug fallback too.
 	for key_enum_value in PlayerStatKeys.Keys.values(): # Use PlayerStatKeys
 		var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum_value] # Use PlayerStatKeys
-		base_stat_values[key_string] = float(raw_stats_dict.get(key_string, 0.0))
-		flat_modifiers[key_string] = 0.0
-		percent_add_modifiers[key_string] = 0.0
-		percent_mult_final_modifiers[key_string] = 1.0
+		
+		var base_val = float(raw_stats_dict.get(key_string, 0.0))
+		
+		# Specific defaults for multipliers (copied from initialize_base_stats)
+		if key_string in [
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SIZE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DEBUFF_POTENCY_MULT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_BUFF_POTENCY_MULT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.CURRENCY_GAIN_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_GOLD_GAIN_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER],
+			# Tag-specific multipliers default to 1.0
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_AOE_AREA_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_AOE_AREA_MULTIPLIER],
+		]:
+			base_stat_values[key_string] = float(raw_stats_dict.get(key_string, 1.0))
+			percent_mult_final_modifiers[key_string] = 1.0
+		elif key_string in [
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DODGE_CHANCE],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION],
+		]:
+			base_stat_values[key_string] = float(raw_stats_dict.get(key_string, 0.0))
+			percent_add_modifiers[key_string] = 0.0
+		else:
+			base_stat_values[key_string] = base_val
+			flat_modifiers[key_string] = 0.0
+			percent_add_modifiers[key_string] = 0.0
+			percent_mult_final_modifiers[key_string] = 1.0
+
 
 	print("Player stats initialized with raw dictionary for debugging.")
 	recalculate_all_stats()
@@ -192,6 +322,8 @@ func get_final_stat_by_string(key_string: StringName) -> float:
 	# For example, DAMAGE_REDUCTION_MULTIPLIER: 0.1 means 10% reduction, so (1.0 - 0.1) = 0.9 multiplier.
 	if key_string == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_REDUCTION_MULTIPLIER]:
 		final_value *= (1.0 - final_multiplier) # Apply as a reduction
+	elif key_string == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION]:
+		final_value = final_value * (1.0 - final_multiplier) # Apply as a percentage reduction from 1.0
 	elif key_string == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER]:
 		final_value *= final_multiplier # This is already a multiplier to damage taken, so it applies directly.
 	# Add similar conditional logic for other reduction/inverse stats if needed.
@@ -209,12 +341,12 @@ func get_final_stat_by_string(key_string: StringName) -> float:
 # --- Unified Damage Calculation ---
 # This method should be called by WeaponManager or individual attack scripts
 # when they need to determine the final damage output from the player.
-# It takes the 'weapon_damage_percentage' from the *specific weapon's* blueprint/instance data.
-func get_calculated_player_damage(weapon_damage_percentage: float = 1.0) -> float:
+# It now accepts an array of weapon tags to apply tag-specific multipliers.
+func get_calculated_player_damage(weapon_damage_percentage: float = 1.0, weapon_tags: Array[StringName] = []) -> float:
 	# This function uses the 'current_' cached values from recalculate_all_stats()
 	# to ensure consistency and avoid re-calculating base stats.
 
-	# Formula: (player_base_numerical_damage * weapon_damage_percentage) * player_global_damage_multiplier + player_global_flat_damage_add
+	# Formula: (player_base_numerical_damage * weapon_damage_percentage * tag_multipliers) * player_global_damage_multiplier + player_global_flat_damage_add
 
 	# 1. Start with the player's current numerical damage (which includes class base + flat/percent_add modifiers to it).
 	var damage_from_player_base = current_numerical_damage
@@ -222,10 +354,30 @@ func get_calculated_player_damage(weapon_damage_percentage: float = 1.0) -> floa
 	# 2. Apply the weapon's specific percentage multiplier to the player's base damage component.
 	var weapon_scaled_damage = damage_from_player_base * weapon_damage_percentage
 
-	# 3. Apply the player's global damage multiplier (from class, general upgrades, etc.).
+	# 3. Apply tag-specific damage multipliers.
+	var tag_damage_multiplier = 1.0
+	for tag in weapon_tags:
+		# Map tags to their corresponding damage multiplier keys
+		var tag_key: StringName = &""
+		match tag:
+			&"melee": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER]
+			&"projectile": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER]
+			&"magic": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_DAMAGE_MULTIPLIER]
+			&"physical": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER] # Refers to the 'physical' tag
+			&"fire": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER]
+			&"ice": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER]
+			_: continue # Skip if tag doesn't have a corresponding damage multiplier stat
+
+		# Get and apply the multiplier for this tag.
+		# Note: get_final_stat_by_string will return 1.0 if the stat is not found/initialized.
+		tag_damage_multiplier *= get_final_stat_by_string(tag_key)
+
+	weapon_scaled_damage *= tag_damage_multiplier
+
+	# 4. Apply the player's global damage multiplier (from class, general upgrades, etc.).
 	var final_multiplied_damage = weapon_scaled_damage * current_global_damage_multiplier
 
-	# 4. Add any flat damage bonuses from global player upgrades.
+	# 5. Add any flat damage bonuses from global player upgrades.
 	var final_damage = final_multiplied_damage + current_global_flat_damage_add
 
 	# Ensure damage is never negative
@@ -248,19 +400,11 @@ func debug_reset_to_class_defaults():
 	# This needs to re-load the initial class data and re-initialize stats.
 	# It assumes the PlayerCharacter knows the initial class ID.
 	var owner_player = get_parent() as PlayerCharacter
-	if is_instance_valid(owner_player) and owner_player.has_method("get_current_basic_class_enum"):
-		var initial_class_enum = owner_player.get_current_basic_class_enum()
-		# Assuming PlayerCharacter.BasicClass is an accessible enum or StringName constant
-		# If PlayerCharacter.BasicClass is an enum, you'd get its name like this:
-		# var class_name_str = PlayerCharacter.BasicClass.keys()[initial_class_enum].to_lower()
-		# If PlayerCharacter.BasicClass is a StringName (e.g., &"WARRIOR"), it's simpler.
-		
-		# For demonstration, let's assume `get_current_basic_class_id()` returns a StringName like &"warrior"
-		# or that `get_current_basic_class_enum()` allows you to map to a string.
-		var class_id_string: StringName = owner_player.get_current_basic_class_id() # Assuming this method exists and returns StringName
+	if is_instance_valid(owner_player) and owner_player.has_method("get_current_basic_class_id"): # Changed to get_current_basic_class_id
+		var class_id_string: StringName = owner_player.get_current_basic_class_id() # Use new method
 		
 		if class_id_string != &"none": # Assuming 'none' or similar for uninitialized
-			var class_data_path = "res://DataResources/Classes/" + str(class_id_string) + "_class_data.tres"
+			var class_data_path = "res://Data/Classes/" + str(class_id_string) + "_class_data.tres" # Corrected path to res://Data/Classes
 			
 			if ResourceLoader.exists(class_data_path):
 				var class_data_res = load(class_data_path) as PlayerClassData
@@ -300,6 +444,25 @@ func recalculate_all_stats():
 	current_crit_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
 	current_luck = get_final_stat(PlayerStatKeys.Keys.LUCK)
 	current_health_regeneration = get_final_stat(PlayerStatKeys.Keys.HEALTH_REGENERATION)
+
+	# NEW: Recalculate newly added global stats
+	current_global_percent_damage_reduction = get_final_stat(PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
+	current_global_status_effect_chance_add = get_final_stat(PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
+	current_global_projectile_fork_count_add = int(get_final_stat(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_FORK_COUNT_ADD))
+	current_global_projectile_bounce_count_add = int(get_final_stat(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_BOUNCE_COUNT_ADD))
+	current_global_projectile_explode_on_death_chance = get_final_stat(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE)
+	current_global_chain_lightning_count = int(get_final_stat(PlayerStatKeys.Keys.GLOBAL_CHAIN_LIGHTNING_COUNT))
+	current_global_lifesteal_percent = get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
+	current_global_flat_damage_reduction = get_final_stat(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_REDUCTION)
+	current_invulnerability_duration_add = get_final_stat(PlayerStatKeys.Keys.INVULNERABILITY_DURATION_ADD)
+	current_global_gold_gain_multiplier = get_final_stat(PlayerStatKeys.Keys.GLOBAL_GOLD_GAIN_MULTIPLIER)
+	current_item_drop_chance_add = get_final_stat(PlayerStatKeys.Keys.ITEM_DROP_CHANCE_ADD)
+	current_global_summon_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+	current_global_summon_lifetime_multiplier = get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
+	current_global_summon_count_add = int(get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD))
+	current_global_summon_cooldown_reduction_percent = get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT)
+	current_enemy_debuff_resistance_reduction = get_final_stat(PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION)
+	current_dodge_chance = get_final_stat(PlayerStatKeys.Keys.DODGE_CHANCE)
 	# Add more 'current_' stat updates here for any other relevant keys
 
 	# Emit signal with current critical stats for listeners to update.

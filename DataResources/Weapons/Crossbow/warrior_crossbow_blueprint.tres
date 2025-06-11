@@ -19,12 +19,11 @@ spawn_as_child = false
 requires_direction = true
 targeting_type = "nearest_enemy"
 initial_specific_stats = {
-"damage": 18,
 "inherent_visual_scale_x": 0.05,
 "inherent_visual_scale_y": 0.05,
 "pierce_count": 1,
 "player_damage_scale_percent": 1.0,
-"projectile_speed": 220.0,
+"projectile_speed": 180.0,
 "weapon_damage_percentage": 2.2
 }
 available_upgrades = Array[ExtResource("1_a1lgw")]([])

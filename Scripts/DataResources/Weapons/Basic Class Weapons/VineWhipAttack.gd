@@ -1,104 +1,197 @@
 # VineWhipAttack.gd
 # Behavior for the Druid's Vine Whip attack.
 # A fast, aimed melee attack with a longer reach.
+#
+# UPDATED: Standardized stat key access using PlayerStatKeys.
+# UPDATED: Leverages PlayerStats.get_calculated_player_damage for unified damage calculation.
+# UPDATED: Uses PlayerStats.get_final_stat for global player stat lookups.
+# UPDATED: Uses push_error and push_warning for consistent error reporting.
+# UPDATED: Passes attack_stats_for_enemy (including ARMOR_PENETRATION) to enemy's take_damage.
+# UPDATED: Ensures specific_stats is a deep copy to prevent unintended modifications.
+# REFACTORED: Renamed on_stats_or_upgrades_changed to _apply_all_stats_and_start_animation for clarity and consistency.
+
 class_name VineWhipAttack
 extends Node2D
 
 @onready var animated_sprite: AnimatedSprite2D = get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 @onready var damage_area: Area2D = get_node_or_null("DamageArea") as Area2D
 
-const SLASH_ANIMATION_NAME = "whip" # Assuming the animation is named 'whip'
+const SLASH_ANIMATION_NAME = &"whip" # Using StringName for animation names
 
-var specific_stats: Dictionary = {}   
-var owner_player_stats: PlayerStats = null
+var specific_stats: Dictionary = {}   # Stores the calculated weapon-specific stats from WeaponManager
+var owner_player_stats: PlayerStats = null # Reference to the player's PlayerStats node
 
-var _enemies_hit_this_sweep: Array[Node2D] = []
-var _is_attack_active: bool = false 
-var _current_attack_duration: float = 0.3
+var _enemies_hit_this_sweep: Array[Node2D] = [] # Tracks enemies hit per attack instance to prevent multiple hits
+var _is_attack_active: bool = false # Flag to control hit detection
+var _current_attack_duration: float # Calculated duration of the attack animation/hitbox activity
 
 func _ready():
+	# Validate essential nodes. If any are missing, free the instance immediately.
 	if not is_instance_valid(animated_sprite):
-		print("ERROR (VineWhipAttack): AnimatedSprite2D node missing."); call_deferred("queue_free"); return
+		push_error("ERROR (VineWhipAttack): AnimatedSprite2D node missing! Queueing free."); call_deferred("queue_free"); return
 	else:
+		# Connect animation_finished to its handler.
 		animated_sprite.animation_finished.connect(Callable(self, "_on_animation_finished"))
 
 	if not is_instance_valid(damage_area):
-		print_debug("WARNING (VineWhipAttack): DamageArea node missing.")
+		push_warning("WARNING (VineWhipAttack): DamageArea node missing. Hit detection might not work.")
 	else:
-		damage_area.body_entered.connect(Callable(self, "_on_damage_area_body_entered"))
-		var collision_shape = damage_area.get_node_or_null("CollisionShape2D")
+		damage_area.body_entered.connect(Callable(self, "_on_body_entered"))
+		
+		# Get and disable the collision shape initially. It will be enabled when the attack starts.
+		var collision_shape = damage_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		if is_instance_valid(collision_shape):
 			collision_shape.disabled = true
 		else:
-			print_debug("WARNING (VineWhipAttack): No CollisionShape2D found under DamageArea.")
+			push_warning("WARNING (VineWhipAttack): No CollisionShape2D found under DamageArea. Hit detection might fail.")
 
+# Standardized initialization function called by WeaponManager.
+# direction: The normalized direction vector for the attack.
+# p_attack_stats: Dictionary of specific stats for this weapon instance (already calculated by WeaponManager).
+# p_player_stats: Reference to the player's PlayerStats node.
 func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
-	specific_stats = p_attack_stats
+	specific_stats = p_attack_stats.duplicate(true) # Create a deep copy to ensure isolated data.
 	owner_player_stats = p_player_stats
 	
+	# Set the rotation of the entire Node2D (self) to face the attack direction.
 	if direction != Vector2.ZERO:
 		self.rotation = direction.angle()
 		if is_instance_valid(animated_sprite):
-			if abs(direction.angle()) > PI / 2.0:
-				animated_sprite.flip_v = true
+			# Apply vertical flip if the attack is aimed predominantly upwards or downwards.
+			# This logic might need fine-tuning based on the sprite's original orientation.
+			if absf(direction.angle()) > PI / 2.0: # Roughly aiming left half
+				animated_sprite.flip_v = true # Flip for visual consistency
+			else:
+				animated_sprite.flip_v = false # No flip for right half
+			# Also ensure horizontal flip is reset if previously set
+			animated_sprite.flip_h = false
+	else:
+		# Default to no rotation if direction is zero (e.g., fallback scenario)
+		self.rotation = 0.0
+		if is_instance_valid(animated_sprite):
+			animated_sprite.flip_h = false
+			animated_sprite.flip_v = false
 
-	on_stats_or_upgrades_changed()
+	# Apply all calculated stats and start the animation.
+	_apply_all_stats_and_start_animation()
 
-func on_stats_or_upgrades_changed():
-	if not is_instance_valid(self) or specific_stats.is_empty(): return
+# Applies all calculated stats and effects to the attack instance.
+# This method pulls relevant data from 'specific_stats' (calculated by WeaponManager)
+# and 'owner_player_stats' (cached current_ properties from PlayerStats).
+func _apply_all_stats_and_start_animation():
+	if not is_instance_valid(self) or specific_stats.is_empty() or not is_instance_valid(owner_player_stats):
+		push_error("ERROR (VineWhipAttack): Cannot apply stats or start animation. Missing owner_player_stats or specific_stats. Queueing free."); call_deferred("queue_free"); return
 
-	var base_scale_x = float(specific_stats.get("inherent_visual_scale_x", 1.0))
-	var base_scale_y = float(specific_stats.get("inherent_visual_scale_y", 1.0))
-	var player_aoe_mult = 1.0
-	if is_instance_valid(owner_player_stats):
-		player_aoe_mult = owner_player_stats.get_current_aoe_area_multiplier()
-	self.scale = Vector2(base_scale_x * player_aoe_mult, base_scale_y * player_aoe_mult)
+	# --- Scale Calculation (Visual and Collision Area) ---
+	# Retrieve base visual scales from received stats, using PlayerStatKeys.
+	var base_scale_x = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_X], 1.0))
+	var base_scale_y = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_Y], 1.0))
 	
-	var base_duration = float(specific_stats.get("base_attack_duration", 0.3))
-	var atk_speed_player_mult = 1.0 
-	if is_instance_valid(owner_player_stats):
-		atk_speed_player_mult = owner_player_stats.get_current_attack_speed_multiplier()
-	var final_attack_speed_mult = atk_speed_player_mult * float(specific_stats.get("weapon_attack_speed_mod", 1.0))
-	if final_attack_speed_mult <= 0: final_attack_speed_mult = 0.01
-	_current_attack_duration = base_duration / final_attack_speed_mult
+	# Apply player's global AoE area multiplier from PlayerStats.
+	var player_aoe_multiplier = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER)
+	
+	# Apply the combined scale to the entire Node2D node (which includes the sprite and hitbox).
+	self.scale = Vector2(base_scale_x * player_aoe_multiplier, base_scale_y * player_aoe_multiplier)
+	
+	# --- Attack Duration Calculation ---
+	# Retrieve base attack duration from received stats, using PlayerStatKeys.
+	var base_duration = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION], 0.3)) # Default to 0.3 seconds
+	
+	# Apply player's attack speed multiplier from PlayerStats.
+	var player_attack_speed_multiplier = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	
+	# The blueprint currently has "weapon_attack_speed_mod" as a direct key.
+	# If this is a weapon-specific multiplier (not a PlayerStatKeys enum), keep it as is.
+	# Otherwise, consider adding it to PlayerStatKeys.
+	var weapon_attack_speed_mod = float(specific_stats.get(&"weapon_attack_speed_mod", 1.0)) 
+	
+	var final_attack_speed_multiplier = player_attack_speed_multiplier * weapon_attack_speed_mod
+	if final_attack_speed_multiplier <= 0: final_attack_speed_multiplier = 0.01 # Prevent division by zero
+	
+	_current_attack_duration = base_duration / final_attack_speed_multiplier
+	
+	# Adjust animation speed scale based on calculated attack speed.
 	if is_instance_valid(animated_sprite):
-		animated_sprite.speed_scale = final_attack_speed_mult
+		animated_sprite.speed_scale = final_attack_speed_multiplier
+	else:
+		push_warning("WARNING (VineWhipAttack): AnimatedSprite2D is invalid, cannot set speed_scale.")
 	
 	_start_attack_animation()
 
+# Initiates the attack animation and enables the hitbox.
 func _start_attack_animation():
 	if not is_instance_valid(animated_sprite) or not is_instance_valid(damage_area):
-		call_deferred("queue_free"); return
+		call_deferred("queue_free"); return # Self-destruct if essential nodes are missing.
 
-	_enemies_hit_this_sweep.clear()
-	_is_attack_active = true
-	var collision_shape = damage_area.get_node_or_null("CollisionShape2D")
-	if is_instance_valid(collision_shape): collision_shape.disabled = false
+	_enemies_hit_this_sweep.clear() # Clear the list of hit enemies for this new attack instance.
+	_is_attack_active = true # Activate the hitbox.
+	
+	# Enable the collision shape for hit detection.
+	var collision_shape = damage_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if is_instance_valid(collision_shape): 
+		collision_shape.disabled = false
+	else:
+		push_warning("WARNING (VineWhipAttack): CollisionShape2D not found. Hitbox may not activate.")
 
-	animated_sprite.play(SLASH_ANIMATION_NAME)
+	animated_sprite.play(SLASH_ANIMATION_NAME) # Play the attack animation.
+	
+	# Set a one-shot timer to queue_free this attack instance after its calculated duration.
+	# This ensures the hitbox is active for the full attack duration and then cleaned up.
 	var duration_finish_timer = get_tree().create_timer(_current_attack_duration, true, false, true)
 	duration_finish_timer.timeout.connect(Callable(self, "queue_free"))
 
+# Called when the attack animation finishes (e.g., if it's a non-looping animation).
 func _on_animation_finished():
 	if is_instance_valid(animated_sprite) and animated_sprite.animation == SLASH_ANIMATION_NAME:
+		# For the Vine Whip, the duration_finish_timer handles the full lifecycle,
+		# so specific logic here might not be necessary unless you have unique post-animation effects.
 		pass
 
-func _on_damage_area_body_entered(body: Node2D):
+# Handles collision when a body enters the `damage_area`.
+func _on_body_entered(body: Node2D):
+	# Only process if the attack is active, the body is valid, and hasn't been hit yet by this specific attack instance.
 	if not _is_attack_active or not is_instance_valid(body) or _enemies_hit_this_sweep.has(body): return 
 	
+	# Check if the collided body is an enemy and can take damage.
 	if body.is_in_group("enemies") and body is BaseEnemy:
 		var enemy_target = body as BaseEnemy
-		if enemy_target.is_dead(): return
-		_enemies_hit_this_sweep.append(enemy_target)
-		
-		if not is_instance_valid(owner_player_stats): return
+		if not is_instance_valid(enemy_target) or enemy_target.is_dead(): return # Do not hit dead enemies.
 
-		var player_base_damage = float(owner_player_stats.get_current_base_numerical_damage())
-		var player_global_mult = float(owner_player_stats.get_current_global_damage_multiplier())
-		var weapon_damage_percent = float(specific_stats.get("weapon_damage_percentage", 1.1)) # 110% base
+		_enemies_hit_this_sweep.append(enemy_target) # Mark this enemy as hit by this attack instance.
 		
-		var final_damage = (player_base_damage * weapon_damage_percent) * player_global_mult
-		var final_damage_to_deal = int(round(max(1.0, final_damage)))
+		if not is_instance_valid(owner_player_stats): 
+			push_error("ERROR (VineWhipAttack): Owner PlayerStats node is invalid! Cannot deal damage."); return
+
+		# --- Damage Calculation (Leveraging unified PlayerStats method) ---
+		# Retrieve weapon-specific damage percentage from received stats.
+		var weapon_damage_percent = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.1)) # Default to 110% of player's numerical damage.
 		
-		var owner_player = owner_player_stats.get_parent() if is_instance_valid(owner_player_stats) else null
-		enemy_target.take_damage(final_damage_to_deal, owner_player)
+		# Calculate the final damage using the player's overall damage formula.
+		var final_damage_to_deal_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent)
+		var final_damage_to_deal_int = int(round(max(1.0, final_damage_to_deal_float))) # Ensure minimum 1 damage and round to int.
+		
+		var owner_player_char = owner_player_stats.get_parent() if is_instance_valid(owner_player_stats) else null
+		
+		# Prepare attack-specific stats to pass to the enemy's take_damage method.
+		# This includes armor penetration from the player's stats for accurate damage calculation.
+		var attack_stats_for_enemy: Dictionary = {
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
+			# Add any other relevant attack properties here (e.g., lifesteal, status application chance)
+		}
+
+		enemy_target.take_damage(final_damage_to_deal_int, owner_player_char, attack_stats_for_enemy)
+
+		# Apply Status Effects on Hit if defined in specific_stats (passed from WeaponManager).
+		if specific_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
+			var status_apps: Array = specific_stats.get(&"on_hit_status_applications", [])
+			for app_data_res in status_apps:
+				var app_data = app_data_res as StatusEffectApplicationData
+				if is_instance_valid(app_data) and randf() < app_data.application_chance:
+					enemy_target.status_effect_component.apply_effect(
+						load(app_data.status_effect_resource_path) as StatusEffectData,
+						owner_player_char, # Source of the effect.
+						specific_stats, # Weapon stats for scaling of the status effect.
+						app_data.duration_override,
+						app_data.potency_override
+					)
+					# print("VineWhipAttack: Applied status from '", app_data.status_effect_resource_path, "' to enemy.") # Debug print.

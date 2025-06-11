@@ -3,7 +3,9 @@
 # It reads an "attack_sequence" array from its stats and executes each hit
 # by spawning instances of the DaggerStrikeAttack scene with appropriate timing and properties.
 #
-# No major logic changes are needed here, as its data passing aligns with WeaponManager.gd's output.
+# UPDATED: Passes weapon tags to the individual DaggerStrikeAttack instances.
+# UPDATED: Applies PlayerStats.AOE_AREA_MULTIPLIER to the controller's visual scale.
+# UPDATED: Uses PlayerStatKeys for stat lookups.
 
 class_name DaggerStrikeController
 extends Node2D
@@ -11,7 +13,6 @@ extends Node2D
 @export var hitbox_scene: PackedScene # The PackedScene for the individual DaggerStrikeAttack (e.g., DaggerStrikeAttack.tscn)
 
 # --- Node References ---
-# Added: Reference to the AnimatedSprite2D on this controller node.
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 # --- Internal State ---
@@ -51,7 +52,8 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 		# Apply scale for the overall attack visual (e.g., if the controller has a sprite)
 		# Use the already calculated AREA_SCALE from _specific_stats, and player's AOE multiplier
 		var attack_area_scale = float(_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE], 1.0))
-		animated_sprite.scale = Vector2.ONE * attack_area_scale * _owner_player_stats.current_aoe_area_multiplier # Use cached current_ stat
+		var player_aoe_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER) # Use get_final_stat
+		self.scale = Vector2.ONE * attack_area_scale * player_aoe_multiplier
 		
 		# Set rotation of the controller's sprite (if it has one)
 		if _base_direction != Vector2.ZERO:
@@ -82,7 +84,8 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 	var total_lifetime = float(_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION], 0.3)) 
 	
 	# Factor in player's effect duration multiplier for the controller's lifetime
-	total_lifetime *= _owner_player_stats.current_effect_duration_multiplier # Use cached current_ stat
+	var effect_duration_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER) # Use get_final_stat
+	total_lifetime *= effect_duration_multiplier
 
 	var cleanup_timer = get_tree().create_timer(total_lifetime, true, false, true)
 	cleanup_timer.timeout.connect(Callable(self, "queue_free")) # Queue free the controller after its lifetime
@@ -147,6 +150,10 @@ func _spawn_hitbox(hit_data: Dictionary):
 	# We use the current calculated weapon_damage_percentage from _specific_stats
 	var current_weapon_damage_percent = float(hit_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.0))
 	hit_specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = current_weapon_damage_percent * hit_damage_mult
+
+	# Pass weapon tags to the individual attack instance
+	hit_specific_stats[&"tags"] = _specific_stats.get(&"tags", []).duplicate(true)
+
 
 	# Call the standardized initialization function on the individual hitbox instance.
 	# This passes all necessary data for the hitbox to calculate its own damage, scale, etc.

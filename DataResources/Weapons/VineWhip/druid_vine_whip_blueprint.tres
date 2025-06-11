@@ -10,20 +10,22 @@ id = &"druid_vine_whip"
 title = "Vine Whip"
 description = "Lash out with a thorny vine in front of you."
 weapon_scene = ExtResource("3_fi54i")
-tags = Array[String](["melee", "physical", "nature"])
+tags = Array[StringName]([&"melee", &"physical", &"nature"])
 class_tag_restrictions = Array[int]([5])
 cooldown = 1.5
 max_level = 10
 base_lifetime = 0.3
 spawn_as_child = false
 requires_direction = true
-targeting_type = "mouse"
+targeting_type = &"mouse_direction"
 initial_specific_stats = {
+"area_scale": 1.0,
 "base_attack_duration": 0.3,
-"inherent_visual_scale_x": 1.2,
-"inherent_visual_scale_y": 1.0,
+"inherent_visual_scale_x": 1.0,
+"inherent_visual_scale_y": 0.9,
 "pierce_count": 0,
 "projectile_speed": 200.0,
+"weapon_attack_speed_mod": 1.0,
 "weapon_damage_percentage": 1.1
 }
 available_upgrades = Array[ExtResource("1_yf6fc")]([])

@@ -755,34 +755,26 @@ func _on_shaman_heal_pulse_timer_timeout():
 # Called by StatusEffectComponent when its active effects change.
 func on_status_effects_changed(_owner_node: Node):
 	# DEBUG PRINT: Confirm function call
-	print("BaseEnemy '", name, "': on_status_effects_changed called.")
 	
 	if not is_instance_valid(animated_sprite) or not is_instance_valid(status_effect_component): return
 	
 	# Start applied_tint from the combined scene/EnemyData/elite color
 	var applied_tint: Color = _final_base_modulate_color 
 	
-	# DEBUG PRINT: Show _final_base_modulate_color and initial tint before applying status tints
-	print("BaseEnemy '", name, "': _final_base_modulate_color: ", _final_base_modulate_color)
-	print("BaseEnemy '", name, "': Sprite modulate BEFORE status tint application: ", animated_sprite.modulate)
-	print("BaseEnemy '", name, "': Is Slowed Flag: ", status_effect_component.has_flag(&"is_slowed")) # DEBUG
+
 
 	# Apply tints based on active status effect flags (order matters for visual priority)
 	if status_effect_component.has_flag(&"is_stunned"):
 		applied_tint *= Color(0.5, 0.5, 0.5, 1.0) # Darken
-		print("BaseEnemy '", name, "': Applying STUN tint.")
 	elif status_effect_component.has_flag(&"is_frozen"):
 		applied_tint *= Color(0.7, 0.9, 1.0, 1.0) # Icy blue
-		print("BaseEnemy '", name, "': Applying FROZEN tint.")
 	elif status_effect_component.has_flag(&"is_slowed"):
 		applied_tint *= SLOW_TINT_COLOR # Light blue tint for slow
-		print("BaseEnemy '", name, "': Applying SLOW tint.")
 	# Add more tints for other effects as needed (e.g., Burn, Poison)
 	
 	animated_sprite.modulate = applied_tint
 
 	# DEBUG PRINT: Show final modulate color
-	print("BaseEnemy '", name, "': Sprite modulate AFTER status tint application: ", animated_sprite.modulate)
 
 	# Update movement behavior based on status effects that impair movement.
 	set_physics_process(true) # Ensure physics process is running to re-evaluate movement

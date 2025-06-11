@@ -3,6 +3,11 @@
 # It allows real-time inspection and modification of game parameters, player stats,
 # weapons, and enemy spawning.
 # It now fully integrates with the standardized stat system via PlayerStatKeys.
+#
+# UPDATED: Added UI elements and logic for all new global player stats.
+# FIXED: Ensured all stat LineEdits properly display/apply float/int values.
+# FIXED: Improved error handling for missing nodes/methods.
+# FIXED: Removed 'set_text_filter' calls as they are deprecated in Godot 4.x.
 
 extends CanvasLayer
 
@@ -53,9 +58,27 @@ var ps_numerical_damage_edit: LineEdit
 var ps_global_flat_damage_edit: LineEdit
 var ps_attack_speed_mult_edit: LineEdit
 var ps_armor_edit: LineEdit
+var ps_armor_penetration_edit: LineEdit
 var ps_move_speed_edit: LineEdit
 var ps_luck_edit: LineEdit
-var ps_armor_penetration_edit: LineEdit # New: for armor penetration
+var ps_global_percent_dmg_reduction_edit: LineEdit # NEW
+var ps_global_status_chance_add_edit: LineEdit # NEW
+var ps_global_proj_fork_count_edit: LineEdit # NEW
+var ps_global_proj_bounce_count_edit: LineEdit # NEW
+var ps_global_proj_explode_chance_edit: LineEdit # NEW
+var ps_global_chain_lightning_edit: LineEdit # NEW
+var ps_global_lifesteal_percent_edit: LineEdit # NEW
+var ps_global_flat_dmg_reduction_edit: LineEdit # NEW
+var ps_invuln_duration_add_edit: LineEdit # NEW
+var ps_global_gold_gain_mult_edit: LineEdit # NEW
+var ps_item_drop_chance_add_edit: LineEdit # NEW
+var ps_global_summon_dmg_mult_edit: LineEdit # NEW
+var ps_global_summon_lifetime_mult_edit: LineEdit # NEW
+var ps_global_summon_count_add_edit: LineEdit # NEW
+var ps_global_summon_cdr_percent_edit: LineEdit # NEW
+var ps_enemy_debuff_resist_reduction_edit: LineEdit # NEW
+var ps_dodge_chance_edit: LineEdit # NEW
+
 var apply_player_stats_button: Button
 var reset_player_stats_button: Button
 
@@ -100,14 +123,20 @@ const UI_UPDATE_INTERVAL: float = 0.25 # How often the UI elements update
 
 
 # --- Helper function for Player Stats Tab (creating LineEdit for stat) ---
-# p_stats_node_ref: Reference to PlayerStats node.
+# p_grid: The GridContainer to add the editor to.
+# label_text: The display text for the stat.
+# placeholder: Placeholder text for the LineEdit.
 # stat_key_enum: The PlayerStatKeys.Keys enum value for the stat.
-func _add_stat_editor_to_grid(p_grid: GridContainer, label_text: String, placeholder: String, stat_key_enum: PlayerStatKeys.Keys) -> LineEdit:
+# is_int: True if the stat should be treated as an integer, false for float.
+func _add_stat_editor_to_grid(p_grid: GridContainer, label_text: String, placeholder: String, stat_key_enum: PlayerStatKeys.Keys, is_int: bool = false) -> LineEdit:
 	p_grid.add_child(Label.new()) # Placeholder for spacing if needed
 	var lbl = Label.new(); lbl.text = label_text; p_grid.add_child(lbl)
 	var line_edit = LineEdit.new(); line_edit.name = "PSEdit" + str(stat_key_enum).capitalize()
 	line_edit.placeholder_text = placeholder
 	
+	# Removed line_edit.set_text_filter() - This function is deprecated in Godot 4.x
+	# Input validation will occur when values are parsed from the text.
+
 	if is_instance_valid(player_stats_node):
 		# Display the current FINAL value of the stat for quick reference
 		line_edit.text = str(player_stats_node.get_final_stat(stat_key_enum))
@@ -126,29 +155,38 @@ func _update_line_edit_from_stat(le: LineEdit, stat_key_enum: PlayerStatKeys.Key
 		le.text = default_val_str + " (no stats)"
 
 # --- Helper function for getting values from LineEdits (used by Player Stats & Game Tuning) ---
-func _get_float_from_line_edit(le: LineEdit, p_target_node: Node, current_val_property_name: String, is_property: bool = false) -> float:
+# Improved robustness for parsing values.
+func _get_float_from_line_edit(le: LineEdit, p_target_node: Node = null, current_val_property_name: String = "", is_property: bool = false) -> float:
 	if is_instance_valid(le) and le.text.is_valid_float(): return float(le.text)
-	elif is_instance_valid(p_target_node) and is_property and current_val_property_name in p_target_node:
-		return float(p_target_node.get(current_val_property_name))
-	elif is_instance_valid(p_target_node) and not is_property and p_target_node.has_method(current_val_property_name):
-		return float(p_target_node.call(current_val_property_name))
+	# Fallback to existing property/method value if LineEdit is invalid or empty.
+	elif is_instance_valid(p_target_node):
+		if is_property and p_target_node.has(current_val_property_name):
+			return float(p_target_node.get(current_val_property_name))
+		elif not is_property and p_target_node.has_method(current_val_property_name):
+			return float(p_target_node.call(current_val_property_name))
 	return 0.0 # Default to 0.0 if unable to get a valid float
 
-func _get_int_from_line_edit(le: LineEdit, p_target_node: Node, current_val_property_name: String, is_property: bool = false) -> int:
+func _get_int_from_line_edit(le: LineEdit, p_target_node: Node = null, current_val_property_name: String = "", is_property: bool = false) -> int:
 	if is_instance_valid(le) and le.text.is_valid_int(): return int(le.text)
-	elif is_instance_valid(p_target_node) and is_property and current_val_property_name in p_target_node:
-		return int(p_target_node.get(current_val_property_name))
-	elif is_instance_valid(p_target_node) and not is_property and p_target_node.has_method(current_val_property_name):
-		return int(p_target_node.call(current_val_property_name))
+	# Fallback to existing property/method value if LineEdit is invalid or empty.
+	elif is_instance_valid(p_target_node):
+		if is_property and p_target_node.has(current_val_property_name):
+			return int(p_target_node.get(current_val_property_name))
+		elif not is_property and p_target_node.has_method(current_val_property_name):
+			return int(p_target_node.call(current_val_property_name))
 	return 0 # Default to 0 if unable to get a valid int
 
 # --- Helper function for Game Tuning Tab (creating LineEdit for tuning parameter) ---
-func _add_tuning_editor(p_grid: GridContainer, label_text: String, placeholder: String, param_key: String, target_node_ref: Node) -> LineEdit:
+func _add_tuning_editor(p_grid: GridContainer, label_text: String, placeholder: String, param_key: String, target_node_ref: Node, is_int: bool = false) -> LineEdit:
 	p_grid.add_child(Label.new())
 	var lbl = Label.new(); lbl.text = label_text; p_grid.add_child(lbl)
 	var line_edit = LineEdit.new(); line_edit.name = "GTE" + param_key.capitalize()
 	line_edit.placeholder_text = placeholder
-	if is_instance_valid(target_node_ref) and param_key in target_node_ref:
+	
+	# Removed line_edit.set_text_filter() - This function is deprecated in Godot 4.x
+	# Input validation will occur when values are parsed from the text.
+
+	if is_instance_valid(target_node_ref) and target_node_ref.has(param_key):
 		line_edit.text = str(target_node_ref.get(param_key))
 	else: line_edit.text = "N/A"
 	p_grid.add_child(line_edit)
@@ -478,21 +516,46 @@ func _on_adjust_dds_button_pressed(amount: float):
 # Sets up the Player Stats tab content.
 func _setup_player_stats_tab():
 	player_stats_tab_content = VBoxContainer.new(); player_stats_tab_content.name = "PlayerStatsTabContent"
-	var grid = GridContainer.new(); grid.columns = 2; player_stats_tab_content.add_child(grid)
-	
+	var scroll_container = ScrollContainer.new()
+	scroll_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	player_stats_tab_content.add_child(scroll_container)
+
+	var grid = GridContainer.new(); grid.columns = 2; scroll_container.add_child(grid) # Grid is now inside scroll container
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL # Allow grid to expand in scroll container
+	grid.size_flags_vertical = Control.SIZE_SHRINK_CENTER # Allow grid to shrink content
+
 	# Create LineEdits for each player stat, using the PlayerStatKeys enum
-	ps_max_health_edit = _add_stat_editor_to_grid(grid, "Max Health:", "e.g., 100", PlayerStatKeys.Keys.MAX_HEALTH)
+	ps_max_health_edit = _add_stat_editor_to_grid(grid, "Max Health:", "e.g., 100", PlayerStatKeys.Keys.MAX_HEALTH, true)
 	ps_health_regen_edit = _add_stat_editor_to_grid(grid, "Health Regen:", "e.g., 0.5", PlayerStatKeys.Keys.HEALTH_REGENERATION)
-	ps_numerical_damage_edit = _add_stat_editor_to_grid(grid, "Numerical Dmg:", "e.g., 10", PlayerStatKeys.Keys.NUMERICAL_DAMAGE)
-	ps_global_flat_damage_edit = _add_stat_editor_to_grid(grid, "Global Flat Dmg Add:", "e.g., 5", PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD)
+	ps_numerical_damage_edit = _add_stat_editor_to_grid(grid, "Numerical Dmg:", "e.g., 10", PlayerStatKeys.Keys.NUMERICAL_DAMAGE, true)
+	ps_global_flat_damage_edit = _add_stat_editor_to_grid(grid, "Global Flat Dmg Add:", "e.g., 5", PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD, true)
 	ps_attack_speed_mult_edit = _add_stat_editor_to_grid(grid, "Atk Speed Mult:", "e.g., 1.0", PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
-	ps_armor_edit = _add_stat_editor_to_grid(grid, "Armor:", "e.g., 0", PlayerStatKeys.Keys.ARMOR)
-	ps_armor_penetration_edit = _add_stat_editor_to_grid(grid, "Armor Penetration:", "e.g., 0", PlayerStatKeys.Keys.ARMOR_PENETRATION) # New field
+	ps_armor_edit = _add_stat_editor_to_grid(grid, "Armor:", "e.g., 0", PlayerStatKeys.Keys.ARMOR, true)
+	ps_armor_penetration_edit = _add_stat_editor_to_grid(grid, "Armor Penetration:", "e.g., 0", PlayerStatKeys.Keys.ARMOR_PENETRATION)
 	ps_move_speed_edit = _add_stat_editor_to_grid(grid, "Move Speed:", "e.g., 60", PlayerStatKeys.Keys.MOVEMENT_SPEED)
-	ps_luck_edit = _add_stat_editor_to_grid(grid, "Luck:", "e.g., 0", PlayerStatKeys.Keys.LUCK)
+	ps_luck_edit = _add_stat_editor_to_grid(grid, "Luck:", "e.g., 0", PlayerStatKeys.Keys.LUCK, true)
+	
+	ps_global_percent_dmg_reduction_edit = _add_stat_editor_to_grid(grid, "Global % Dmg Red:", "e.g., 0.1 (10%)", PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
+	ps_global_status_chance_add_edit = _add_stat_editor_to_grid(grid, "Global Status % Add:", "e.g., 0.05", PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
+	ps_global_proj_fork_count_edit = _add_stat_editor_to_grid(grid, "Global Proj Fork Add:", "e.g., 1", PlayerStatKeys.Keys.GLOBAL_PROJECTILE_FORK_COUNT_ADD, true)
+	ps_global_proj_bounce_count_edit = _add_stat_editor_to_grid(grid, "Global Proj Bounce Add:", "e.g., 1", PlayerStatKeys.Keys.GLOBAL_PROJECTILE_BOUNCE_COUNT_ADD, true)
+	ps_global_proj_explode_chance_edit = _add_stat_editor_to_grid(grid, "Global Proj Explode %:", "e.g., 0.1", PlayerStatKeys.Keys.GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE)
+	ps_global_chain_lightning_edit = _add_stat_editor_to_grid(grid, "Global Chain Light. Add:", "e.g., 1", PlayerStatKeys.Keys.GLOBAL_CHAIN_LIGHTNING_COUNT, true)
+	ps_global_lifesteal_percent_edit = _add_stat_editor_to_grid(grid, "Global Lifesteal %:", "e.g., 0.05", PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
+	ps_global_flat_dmg_reduction_edit = _add_stat_editor_to_grid(grid, "Global Flat Dmg Red:", "e.g., 2", PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_REDUCTION, true)
+	ps_invuln_duration_add_edit = _add_stat_editor_to_grid(grid, "Invuln Duration Add:", "e.g., 0.5", PlayerStatKeys.Keys.INVULNERABILITY_DURATION_ADD)
+	ps_global_gold_gain_mult_edit = _add_stat_editor_to_grid(grid, "Global Gold Mult:", "e.g., 1.2", PlayerStatKeys.Keys.GLOBAL_GOLD_GAIN_MULTIPLIER)
+	ps_item_drop_chance_add_edit = _add_stat_editor_to_grid(grid, "Item Drop % Add:", "e.g., 0.02", PlayerStatKeys.Keys.ITEM_DROP_CHANCE_ADD)
+	ps_global_summon_dmg_mult_edit = _add_stat_editor_to_grid(grid, "Global Summon Dmg Mult:", "e.g., 1.5", PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+	ps_global_summon_lifetime_mult_edit = _add_stat_editor_to_grid(grid, "Global Summon Lifetime Mult:", "e.g., 1.2", PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
+	ps_global_summon_count_add_edit = _add_stat_editor_to_grid(grid, "Global Summon Count Add:", "e.g., 1", PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD, true)
+	ps_global_summon_cdr_percent_edit = _add_stat_editor_to_grid(grid, "Global Summon CDR %:", "e.g., 0.1", PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT)
+	ps_enemy_debuff_resist_reduction_edit = _add_stat_editor_to_grid(grid, "Enemy Debuff Resist Red:", "e.g., 0.05", PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION)
+	ps_dodge_chance_edit = _add_stat_editor_to_grid(grid, "Dodge Chance:", "e.g., 0.1", PlayerStatKeys.Keys.DODGE_CHANCE)
 	
 	var button_hbox = HBoxContainer.new(); button_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
-	player_stats_tab_content.add_child(button_hbox)
+	player_stats_tab_content.add_child(button_hbox) # Add buttons outside scroll container
 	
 	apply_player_stats_button = Button.new(); apply_player_stats_button.text = "Apply Player Stats"
 	apply_player_stats_button.pressed.connect(Callable(self, "_on_apply_player_stats_button_pressed"))
@@ -516,38 +579,142 @@ func _update_player_stats_display_fields():
 	_update_line_edit_from_stat(ps_global_flat_damage_edit, PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD)
 	_update_line_edit_from_stat(ps_attack_speed_mult_edit, PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
 	_update_line_edit_from_stat(ps_armor_edit, PlayerStatKeys.Keys.ARMOR)
-	_update_line_edit_from_stat(ps_armor_penetration_edit, PlayerStatKeys.Keys.ARMOR_PENETRATION) # New field
+	_update_line_edit_from_stat(ps_armor_penetration_edit, PlayerStatKeys.Keys.ARMOR_PENETRATION)
 	_update_line_edit_from_stat(ps_move_speed_edit, PlayerStatKeys.Keys.MOVEMENT_SPEED)
 	_update_line_edit_from_stat(ps_luck_edit, PlayerStatKeys.Keys.LUCK)
+	
+	_update_line_edit_from_stat(ps_global_percent_dmg_reduction_edit, PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
+	_update_line_edit_from_stat(ps_global_status_chance_add_edit, PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
+	_update_line_edit_from_stat(ps_global_proj_fork_count_edit, PlayerStatKeys.Keys.GLOBAL_PROJECTILE_FORK_COUNT_ADD)
+	_update_line_edit_from_stat(ps_global_proj_bounce_count_edit, PlayerStatKeys.Keys.GLOBAL_PROJECTILE_BOUNCE_COUNT_ADD)
+	_update_line_edit_from_stat(ps_global_proj_explode_chance_edit, PlayerStatKeys.Keys.GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE)
+	_update_line_edit_from_stat(ps_global_chain_lightning_edit, PlayerStatKeys.Keys.GLOBAL_CHAIN_LIGHTNING_COUNT)
+	_update_line_edit_from_stat(ps_global_lifesteal_percent_edit, PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
+	_update_line_edit_from_stat(ps_global_flat_dmg_reduction_edit, PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_REDUCTION)
+	_update_line_edit_from_stat(ps_invuln_duration_add_edit, PlayerStatKeys.Keys.INVULNERABILITY_DURATION_ADD)
+	_update_line_edit_from_stat(ps_global_gold_gain_mult_edit, PlayerStatKeys.Keys.GLOBAL_GOLD_GAIN_MULTIPLIER)
+	_update_line_edit_from_stat(ps_item_drop_chance_add_edit, PlayerStatKeys.Keys.ITEM_DROP_CHANCE_ADD)
+	_update_line_edit_from_stat(ps_global_summon_dmg_mult_edit, PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+	_update_line_edit_from_stat(ps_global_summon_lifetime_mult_edit, PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
+	_update_line_edit_from_stat(ps_global_summon_count_add_edit, PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD)
+	_update_line_edit_from_stat(ps_global_summon_cdr_percent_edit, PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT)
+	_update_line_edit_from_stat(ps_enemy_debuff_resist_reduction_edit, PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION)
+	_update_line_edit_from_stat(ps_dodge_chance_edit, PlayerStatKeys.Keys.DODGE_CHANCE)
+
 
 # Applies changes from the Player Stats tab LineEdits to player_stats_node.
 func _on_apply_player_stats_button_pressed():
 	if not is_instance_valid(player_stats_node): push_error("DebugPanel ERROR: PlayerStatsComponent not found."); return
 	
 	# Call debug setter methods on PlayerStats.gd (these methods need to be implemented there)
-	# Use the _get_float_from_line_edit / _get_int_from_line_edit helpers.
+	# Only apply the stat if the LineEdit contains valid numerical input.
 	if player_stats_node.has_method("debug_set_stat_base_value"):
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.MAX_HEALTH, _get_int_from_line_edit(ps_max_health_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.HEALTH_REGENERATION, _get_float_from_line_edit(ps_health_regen_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.NUMERICAL_DAMAGE, _get_int_from_line_edit(ps_numerical_damage_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD, _get_int_from_line_edit(ps_global_flat_damage_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER, _get_float_from_line_edit(ps_attack_speed_mult_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ARMOR, _get_int_from_line_edit(ps_armor_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ARMOR_PENETRATION, _get_float_from_line_edit(ps_armor_penetration_edit, player_stats_node, "", false)) # New field
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.MOVEMENT_SPEED, _get_float_from_line_edit(ps_move_speed_edit, player_stats_node, "", false))
-		player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.LUCK, _get_int_from_line_edit(ps_luck_edit, player_stats_node, "", false))
+		var text_val: String
+		
+		# Max Health (int)
+		text_val = ps_max_health_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.MAX_HEALTH, int(text_val))
+		
+		# Health Regeneration (float)
+		text_val = ps_health_regen_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.HEALTH_REGENERATION, float(text_val))
+		
+		# Numerical Damage (int)
+		text_val = ps_numerical_damage_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.NUMERICAL_DAMAGE, int(text_val))
+		
+		# Global Flat Damage Add (int)
+		text_val = ps_global_flat_damage_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_ADD, int(text_val))
+		
+		# Attack Speed Multiplier (float)
+		text_val = ps_attack_speed_mult_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER, float(text_val))
+		
+		# Armor (int)
+		text_val = ps_armor_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ARMOR, int(text_val))
+		
+		# Armor Penetration (float)
+		text_val = ps_armor_penetration_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ARMOR_PENETRATION, float(text_val))
+		
+		# Movement Speed (float)
+		text_val = ps_move_speed_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.MOVEMENT_SPEED, float(text_val))
+		
+		# Luck (int)
+		text_val = ps_luck_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.LUCK, int(text_val))
+		
+		# Global Percent Damage Reduction (float)
+		text_val = ps_global_percent_dmg_reduction_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION, float(text_val))
+		
+		# Global Status Effect Chance Add (float)
+		text_val = ps_global_status_chance_add_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD, float(text_val))
+		
+		# Global Projectile Fork Count Add (int)
+		text_val = ps_global_proj_fork_count_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_FORK_COUNT_ADD, int(text_val))
+		
+		# Global Projectile Bounce Count Add (int)
+		text_val = ps_global_proj_bounce_count_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_BOUNCE_COUNT_ADD, int(text_val))
+		
+		# Global Projectile Explode On Death Chance (float)
+		text_val = ps_global_proj_explode_chance_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE, float(text_val))
+		
+		# Global Chain Lightning Count (int)
+		text_val = ps_global_chain_lightning_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_CHAIN_LIGHTNING_COUNT, int(text_val))
+		
+		# Global Lifesteal Percent (float)
+		text_val = ps_global_lifesteal_percent_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT, float(text_val))
+		
+		# Global Flat Damage Reduction (int)
+		text_val = ps_global_flat_dmg_reduction_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_REDUCTION, int(text_val))
+		
+		# Invulnerability Duration Add (float)
+		text_val = ps_invuln_duration_add_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.INVULNERABILITY_DURATION_ADD, float(text_val))
+		
+		# Global Gold Gain Multiplier (float)
+		text_val = ps_global_gold_gain_mult_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_GOLD_GAIN_MULTIPLIER, float(text_val))
+		
+		# Item Drop Chance Add (float)
+		text_val = ps_item_drop_chance_add_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ITEM_DROP_CHANCE_ADD, float(text_val))
+		
+		# Global Summon Damage Multiplier (float)
+		text_val = ps_global_summon_dmg_mult_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER, float(text_val))
+		
+		text_val = ps_global_summon_lifetime_mult_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER, float(text_val))
+		
+		text_val = ps_global_summon_count_add_edit.text
+		if text_val.is_valid_int(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD, int(text_val))
+		
+		text_val = ps_global_summon_cdr_percent_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT, float(text_val))
+		
+		text_val = ps_enemy_debuff_resist_reduction_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION, float(text_val))
+		
+		text_val = ps_dodge_chance_edit.text
+		if text_val.is_valid_float(): player_stats_node.debug_set_stat_base_value(PlayerStatKeys.Keys.DODGE_CHANCE, float(text_val))
+
 	else:
 		push_error("DebugPanel: PlayerStatsComponent missing 'debug_set_stat_base_value' method. Cannot apply changes.")
 	
 	print("DebugPanel: Applied player stat changes."); call_deferred("_update_player_stats_display_fields")
 
-func _on_reset_player_stats_button_pressed():
-	if not is_instance_valid(player_stats_node): push_error("DebugPanel ERROR: PlayerStatsComponent not found."); return
-	if is_instance_valid(player_stats_node) and player_stats_node.has_method("debug_reset_to_class_defaults"):
-		player_stats_node.debug_reset_to_class_defaults()
-		print("DebugPanel: Player stats reset."); call_deferred("_update_player_stats_display_fields")
-	else:
-		push_error("DebugPanel ERROR: PlayerStatsComponent missing 'debug_reset_to_class_defaults' method.")
 
 # --- WEAPONS TAB ---
 func _setup_weapons_tab():
@@ -792,8 +959,7 @@ func _setup_enemy_spawner_tab():
 func _populate_enemy_spawn_list():
 	if not is_instance_valid(game_node) or not game_node.has_method("get_loaded_enemy_definitions_for_debug"):
 		if is_instance_valid(enemy_type_option_button):
-			enemy_type_option_button.clear()
-			enemy_type_option_button.add_item("GameNode error for enemy defs.")
+			enemy_type_option_button.clear(); enemy_type_option_button.add_item("GameNode error for enemy defs.")
 		return
 	if not is_instance_valid(enemy_type_option_button): return
 	
@@ -894,11 +1060,11 @@ func _setup_game_tuning_tab():
 	gt_hc_spawn_mult_edit = _add_tuning_editor(gamelogic_grid, "HC Spawn Mult:", "e.g., 1.75", "hardcore_spawn_rate_multiplier", game_node)
 	gt_base_spawn_int_edit = _add_tuning_editor(gamelogic_grid, "Base Spawn Int (s):", "e.g., 3.5", "base_spawn_interval", game_node)
 	gt_min_spawn_int_edit = _add_tuning_editor(gamelogic_grid, "Min Spawn Int (s):", "e.g., 0.25", "min_spawn_interval", game_node)
-	gt_enemies_batch_edit = _add_tuning_editor(gamelogic_grid, "Enemies/Batch:", "e.g., 3", "base_enemies_per_batch", game_node) # Using base_enemies_per_batch
+	gt_enemies_batch_edit = _add_tuning_editor(gamelogic_grid, "Enemies/Batch:", "e.g., 3", "base_enemies_per_batch", game_node, true) # Added is_int=true
 	gt_active_pool_refresh_edit = _add_tuning_editor(gamelogic_grid, "Active Pool Refresh DDS:", "e.g., 20", "active_pool_refresh_dds_interval", game_node)
-	gt_max_active_types_edit = _add_tuning_editor(gamelogic_grid, "Max Active Types:", "e.g., 7", "max_active_enemy_types", game_node)
+	gt_max_active_types_edit = _add_tuning_editor(gamelogic_grid, "Max Active Types:", "e.g., 7", "max_active_enemy_types", game_node, true) # Added is_int=true
 	gt_enemy_count_update_dds_edit = _add_tuning_editor(gamelogic_grid, "Enemy Count Update DDS:", "e.g., 35", "enemy_count_update_dds_interval", game_node)
-	gt_threat_threshold_edit = _add_tuning_editor(gamelogic_grid, "Threat Threshold:", "e.g., 25", "threat_pool_spawn_threshold", game_node)
+	gt_threat_threshold_edit = _add_tuning_editor(gamelogic_grid, "Threat Threshold:", "e.g., 25", "threat_pool_spawn_threshold", game_node, true) # Added is_int=true
 	gt_threat_batch_mult_edit = _add_tuning_editor(gamelogic_grid, "Threat Batch Mult:", "e.g., 1.5", "threat_pool_batch_multiplier", game_node)
 	gt_culling_time_edit = _add_tuning_editor(gamelogic_grid, "Culling Time (s):", "e.g., 3.0", "culling_timer_wait_time", game_node)
 	gt_event_interval_edit = _add_tuning_editor(gamelogic_grid, "Event Interval (s):", "e.g., 35", "random_event_check_interval", game_node)
@@ -991,10 +1157,10 @@ func _on_apply_game_tuning_button_pressed():
 	if game_node.has_method("debug_set_min_spawn_interval"): game_node.debug_set_min_spawn_interval(_get_float_from_line_edit(gt_min_spawn_int_edit, game_node, "min_spawn_interval", true))
 	if game_node.has_method("debug_set_enemies_per_batch"): game_node.debug_set_enemies_per_batch(_get_int_from_line_edit(gt_enemies_batch_edit, game_node, "base_enemies_per_batch", true)) # Use base_enemies_per_batch
 	if game_node.has_method("debug_set_active_pool_refresh_dds_interval"): game_node.debug_set_active_pool_refresh_dds_interval(_get_float_from_line_edit(gt_active_pool_refresh_edit, game_node, "active_pool_refresh_dds_interval", true))
-	if game_node.has_method("debug_set_max_active_enemy_types"): game_node.debug_set_max_active_types(_get_int_from_line_edit(gt_max_active_types_edit, game_node, "max_active_enemy_types", true))
+	if game_node.has_method("debug_set_max_active_types"): game_node.debug_set_max_active_types(_get_int_from_line_edit(gt_max_active_types_edit, game_node, "max_active_enemy_types", true))
 	if game_node.has_method("debug_set_enemy_count_update_dds_interval"): game_node.debug_set_enemy_count_update_dds_interval(_get_float_from_line_edit(gt_enemy_count_update_dds_edit, game_node, "enemy_count_update_dds_interval", true))
-	if game_node.has_method("debug_set_threat_pool_spawn_threshold"): game_node.debug_set_threat_pool_spawn_threshold(_get_int_from_line_edit(gt_threat_threshold_edit, game_node, "threat_pool_spawn_threshold", true))
-	if game_node.has_method("debug_set_threat_pool_batch_multiplier"): game_node.debug_set_threat_pool_batch_multiplier(_get_float_from_line_edit(gt_threat_batch_mult_edit, game_node, "threat_pool_batch_multiplier", true))
+	if game_node.has_method("debug_set_threat_threshold_edit"): game_node.debug_set_threat_threshold(_get_int_from_line_edit(gt_threat_threshold_edit, game_node, "threat_pool_spawn_threshold", true))
+	if game_node.has_method("debug_set_threat_batch_mult_edit"): game_node.debug_set_threat_batch_multiplier(_get_float_from_line_edit(gt_threat_batch_mult_edit, game_node, "threat_pool_batch_multiplier", true))
 	if game_node.has_method("debug_set_culling_timer_wait_time"): game_node.debug_set_culling_timer_wait_time(_get_float_from_line_edit(gt_culling_time_edit, game_node, "culling_timer_wait_time", true))
 	if game_node.has_method("debug_set_random_event_check_interval"): game_node.debug_set_random_event_check_interval(_get_float_from_line_edit(gt_event_interval_edit, game_node, "random_event_check_interval", true))
 	if game_node.has_method("debug_set_forward_spawn_bias_chance"): game_node.debug_set_forward_spawn_bias_chance(_get_float_from_line_edit(gt_fwd_spawn_bias_edit, game_node, "forward_spawn_bias_chance", true))

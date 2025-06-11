@@ -8,6 +8,7 @@
 # FIXED: Declared 'is_dead_flag' variable.
 # FIXED: Resolved "parameter named 'new_max_health' declared in this scope" error.
 # FIXED: Ensured _last_known_max_health is initialized correctly.
+# ADDED: get_current_basic_class_id() for PlayerStats debug reset.
 
 extends CharacterBody2D
 class_name PlayerCharacter
@@ -57,6 +58,7 @@ enum BasicClass {
 	NONE, WARRIOR, KNIGHT, ROGUE, WIZARD, DRUID, CONJURER
 }
 var current_basic_class_enum_val: PlayerCharacter.BasicClass = BasicClass.NONE
+var _current_basic_class_string_id: StringName = &"none" # NEW: Stores StringName ID for PlayerStats debug reset
 var basic_class_levels: Dictionary = {
 	BasicClass.WARRIOR: 0, BasicClass.KNIGHT: 0, BasicClass.ROGUE: 0,
 	BasicClass.WIZARD: 0, BasicClass.DRUID: 0, BasicClass.CONJURER: 0
@@ -70,7 +72,7 @@ var prefer_current_sprite_after_first_advanced: bool = false
 var _initial_chosen_class_enum: PlayerCharacter.BasicClass = PlayerCharacter.BasicClass.NONE
 var _initial_chosen_weapon_id: StringName = &""
 var _initial_weapon_equipped: bool = false
-var game_node_ref: Node # Reference to the global Game node (e.g., Main scene's root)
+var game_node_ref: Node # Reference to the global Game node (Main scene's root)
 
 
 func _ready():
@@ -136,9 +138,10 @@ func _initialize_player_class_and_stats(p_class_enum: BasicClass):
 		push_error("PlayerCharacter: PlayerStats node is not valid for initialization!"); return
 
 	current_basic_class_enum_val = p_class_enum
-	var class_name_str = BasicClass.keys()[p_class_enum].to_lower()
+	# Store the StringName ID of the basic class for use (e.g., by PlayerStats debug reset)
+	_current_basic_class_string_id = BasicClass.keys()[p_class_enum].to_lower()
 
-	var class_data_path = "res://Data/Classes/" + class_name_str + "_class_data.tres"
+	var class_data_path = "res://Data/Classes/" + _current_basic_class_string_id + "_class_data.tres"
 
 	var class_data_res: PlayerClassData = null
 	if ResourceLoader.exists(class_data_path):
@@ -343,6 +346,10 @@ func calculate_exp_for_next_level(player_curr_level: int) -> int:
 func take_damage(amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}): # Changed amount to float for consistency
 	if current_health <= 0 or is_dead_flag: return # Do not take damage if dead or already dying
 	
+	# Apply global flat damage reduction first (from player's current_global_flat_damage_reduction)
+	var incoming_damage = amount - player_stats.current_global_flat_damage_reduction
+	incoming_damage = maxf(0.0, incoming_damage) # Ensure damage doesn't go below zero after flat reduction
+
 	var current_armor = player_stats.current_armor # Use cached current_ stat
 	var armor_penetration_value = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0)) # Get penetration from incoming attack
 
@@ -350,12 +357,17 @@ func take_damage(amount: float, attacker: Node2D = null, p_attack_stats: Diction
 	var effective_armor = maxf(0.0, current_armor - armor_penetration_value)
 	
 	# Basic damage reduction: raw damage - effective armor
-	var actual_damage = maxf(0.0, amount - effective_armor)
+	var actual_damage = maxf(0.0, incoming_damage - effective_armor)
 
 	# Apply DAMAGE_REDUCTION_MULTIPLIER (from player's own buffs or debuffs)
 	var damage_reduction_mult_val = player_stats.get_final_stat(PlayerStatKeys.Keys.DAMAGE_REDUCTION_MULTIPLIER)
 	actual_damage *= (1.0 - damage_reduction_mult_val) # Assuming this is a reduction, so (1.0 - value)
 	actual_damage = maxf(0.0, actual_damage) # Ensure damage doesn't go negative after reduction
+
+	# Apply GLOBAL_PERCENT_DAMAGE_REDUCTION
+	var global_percent_reduction = player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
+	actual_damage *= (1.0 - global_percent_reduction)
+	actual_damage = maxf(0.0, actual_damage)
 
 	current_health = maxf(0.0, current_health - actual_damage)
 	
@@ -523,6 +535,10 @@ func get_acquired_advanced_classes_for_level_up() -> Array[StringName]:
 
 func get_current_basic_class_enum() -> PlayerCharacter.BasicClass:
 	return current_basic_class_enum_val
+
+# NEW: Helper to get the StringName ID of the current basic class
+func get_current_basic_class_id() -> StringName:
+	return _current_basic_class_string_id
 
 func heal(amount: float):
 	if current_health <= 0: return

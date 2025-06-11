@@ -4,6 +4,13 @@
 # and restores the specific logic for Scythe upgrades.
 # It now fully integrates with the standardized stat system via PlayerStatKeys
 # and applies weapon-specific stat modifications consistently with PlayerStats.gd.
+#
+# UPDATED: Passes weapon tags to attack instances for tag-specific damage multipliers.
+# UPDATED: Integrates new global summon stats (damage, lifetime, count).
+# FIXED: Ensured PROJECTILE_MAX_RANGE_ADD is initialized in weapon_entry modifier dictionaries.
+# FIXED: Removed redundant owner_player declaration in _spawn_persistent_summon.
+# FIXED: Explicitly calling self.get_weapon_cooldown_value to resolve "Function not found" error.
+# CRITICAL FIX: Re-inserted missing functions: get_weapon_cooldown_value, _calculate_final_weapon_stat, and get_active_weapons_data_for_level_up.
 
 class_name WeaponManager
 extends Node
@@ -59,9 +66,10 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 		"weapon_level": 1, # New weapons start at level 1
 		"blueprint_resource": blueprint_data,
 		"acquired_upgrade_ids": [], # List of upgrade IDs applied to this weapon
+		"tags": blueprint_data.tags.duplicate(true), # NEW: Store weapon tags for later use (e.g., tag-specific multipliers)
 
 		# NEW: Initialize separate dictionaries for weapon-specific stat modifiers
-		# This mirrors the structure in PlayerStats.gd for consistency.
+		# This mirrors the structure in PlayerStats.gd's base_stat_values
 		"specific_stats": blueprint_data.initial_specific_stats.duplicate(true), # Base stats for the weapon
 		"_flat_mods": {}, 		   # Flat additions (e.g., +5 Pierce)
 		"_percent_add_mods": {}, 	   # Percentage additions to base (e.g., +10% Projectile Size)
@@ -69,11 +77,11 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 	}
 
 	# Initialize all modifier dictionaries with default values for every known weapon stat key
+	# This loop ensures that all potential weapon-specific stats (even those not explicitly in initial_specific_stats
+	# for a given blueprint) have their modifier tracking initialized to a neutral value.
 	for key_enum_value in PlayerStatKeys.Keys.values():
 		var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum_value]
-		# Only initialize for keys that might be weapon stats (you can refine this if needed)
-		# This ensures that any stat that *can* be a weapon stat has its modifier dictionaries initialized.
-		# You might want to refine this list to only include actual weapon-specific stats.
+		# Only initialize for keys that are *likely* to be weapon stats or are common non-player stats
 		if key_string in [
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT],
@@ -89,13 +97,23 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS],
-			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_DAMAGE_PER_HIT], # Added for consistency
-			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS] # Added for consistency
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_DAMAGE_PER_HIT],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD], # FIXED: Added to explicit initialization
+			&"weapon_attack_speed_mod", # Vine Whip specific, as a direct StringName key.
+			&"rotation_duration", # For Frozen Territory
+			# Common summon stats (if not already handled by PlayerStatKeys.Keys)
+			&"attack_cooldown",
+			&"attack_range",
+			&"movement_speed",
+			&"follow_distance",
+			&"base_visual_scale",
+			&"scale_increase_per_level",
 		]:
 			weapon_entry._flat_mods[key_string] = 0.0
 			weapon_entry._percent_add_mods[key_string] = 0.0
 			weapon_entry._percent_mult_final_mods[key_string] = 1.0 # Default to 1.0 for multipliers
-		# Also initialize if the base stat is already provided in initial_specific_stats
+		# Also initialize if the base stat is already provided in initial_specific_stats but not in the above list
 		elif weapon_entry.specific_stats.has(key_string):
 			weapon_entry._flat_mods[key_string] = 0.0
 			weapon_entry._percent_add_mods[key_string] = 0.0
@@ -117,7 +135,8 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 			var cooldown_timer = Timer.new()
 			cooldown_timer.name = str(blueprint_data.id) + "CooldownTimer"
 			# Set initial cooldown based on player stats
-			cooldown_timer.wait_time = get_weapon_cooldown_value(weapon_entry)
+			# FIXED: Explicitly calling self.get_weapon_cooldown_value
+			cooldown_timer.wait_time = self.get_weapon_cooldown_value(weapon_entry)
 			cooldown_timer.one_shot = true # Timer fires once per attack cycle
 			add_child(cooldown_timer) # Add as child to manage automatically
 			weapon_entry["cooldown_timer"] = cooldown_timer
@@ -222,6 +241,9 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0):
 				direction = (world_mouse_pos - owner_player.global_position).normalized()
 				# Clamp spawn position within a max cast range if specified
 				var max_range = float(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE]))
+				# NEW: Add PROJECTILE_MAX_RANGE_ADD to max_range calculation
+				max_range += owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD)
+
 				if owner_player.global_position.distance_to(world_mouse_pos) > max_range:
 					spawn_position = owner_player.global_position + direction * max_range
 				else:
@@ -273,6 +295,7 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0):
 	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WHIRLWIND_COUNT])
 	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
 	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
+	calculated_weapon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD]) # NEW: Projectile max range add
 
 	# Add dagger-specific properties that are not "calculated" but are passed as data
 	calculated_weapon_stats[&"attack_sequence"] = weapon_entry.specific_stats.get(&"attack_sequence", []).duplicate(true)
@@ -294,6 +317,10 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0):
 		# Reset the stored bonus in the weapon entry's specific_stats after use
 		# FIX: Use REAPING_MOMENTUM_ACCUMULATED_BONUS for the key
 		weapon_entry.specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS]] = 0 
+
+	# NEW: Pass weapon tags to the attack instance
+	calculated_weapon_stats[&"tags"] = weapon_entry.tags.duplicate(true)
+
 
 	# DEBUG PRINT: Added to show calculated_weapon_stats being passed to the instance
 	print("WeaponManager: Spawning attack for ", weapon_entry.id, ". Passed specific_stats to instance: ", calculated_weapon_stats)
@@ -332,10 +359,26 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0):
 # weapon_entry: Dictionary containing weapon details and its specific stats.
 func _spawn_persistent_summon(weapon_entry: Dictionary):
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
-	# FIX: Declare owner_player here
 	var owner_player = get_parent() as PlayerCharacter 
-	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player): # Use owner_player here
+	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player):
 		push_error("WeaponManager: Cannot spawn persistent summon. Invalid blueprint or owner."); return
+
+	# Calculate max summons considering GLOBAL_SUMMON_COUNT_ADD
+	var base_max_summons_of_type = int(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]))
+	var player_global_summon_count_add = int(owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD))
+	var final_max_summons = base_max_summons_of_type + player_global_summon_count_add
+	
+	# Filter out any invalid (freed) summons from the tracking array
+	if _active_summons.has(blueprint_data.id):
+		_active_summons[blueprint_data.id] = _active_summons[blueprint_data.id].filter(func(s): return is_instance_valid(s))
+	else:
+		_active_summons[blueprint_data.id] = []
+
+	var current_summon_count = _active_summons[blueprint_data.id].size()
+	
+	if current_summon_count >= final_max_summons:
+		# print("WeaponManager: Max summons for ", blueprint_data.id, " reached (", current_summon_count, "/", final_max_summons, "). Not spawning.")
+		return # Max summons reached, do not spawn more
 
 	var summon_instance = blueprint_data.weapon_scene.instantiate()
 	if not is_instance_valid(summon_instance):
@@ -348,26 +391,44 @@ func _spawn_persistent_summon(weapon_entry: Dictionary):
 	# Spawn near player with slight random offset
 	summon_instance.global_position = owner_player.global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
 	
-	if summon_instance.has_method("initialize"):
-		# Pass fully calculated weapon stats to the summon
-		var calculated_summon_stats: Dictionary = {}
-		# Populate with all relevant weapon stats that the summon instance might need
-		# (e.g., summon damage, duration, count, etc.)
-		# Example:
-		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
-		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION])
-		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])
-		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
-		calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
+	# Pass fully calculated weapon stats to the summon (including global summon multipliers)
+	var calculated_summon_stats: Dictionary = {}
+	
+	# Apply global summon damage multiplier to summon's weapon damage percentage
+	var base_summon_damage_percent = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+	var global_summon_damage_mult = owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = base_summon_damage_percent * global_summon_damage_mult
 
-		calculated_summon_stats[&"weapon_level"] = weapon_entry.weapon_level # Pass weapon level as a stat to the summon
+	# Apply global summon lifetime multiplier to summon's base lifetime
+	var base_summon_lifetime = blueprint_data.base_lifetime # Blueprint's base_lifetime
+	var global_summon_lifetime_mult = owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
+	calculated_summon_stats[&"base_lifetime"] = base_summon_lifetime * global_summon_lifetime_mult # Pass as specific_stat
+
+	# Pass other relevant stats directly from weapon_entry
+	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION])
+	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = final_max_summons # Pass the final max_summons
+	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
+	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
+
+	calculated_summon_stats[&"weapon_level"] = weapon_entry.weapon_level # Pass weapon level as a stat to the summon
+	
+	# Summon-specific stats that are directly from blueprint.initial_specific_stats (no PlayerStats multiplier)
+	calculated_summon_stats[&"attack_cooldown"] = _calculate_final_weapon_stat(weapon_entry, &"attack_cooldown") # Common summon stat
+	calculated_summon_stats[&"attack_range"] = _calculate_final_weapon_stat(weapon_entry, &"attack_range") # Common summon stat
+	calculated_summon_stats[&"movement_speed"] = _calculate_final_weapon_stat(weapon_entry, &"movement_speed") # Common summon stat
+	calculated_summon_stats[&"follow_distance"] = _calculate_final_weapon_stat(weapon_entry, &"follow_distance") # Common summon stat
+	calculated_summon_stats[&"base_visual_scale"] = _calculate_final_weapon_stat(weapon_entry, &"base_visual_scale") # Common summon stat
+	calculated_summon_stats[&"scale_increase_per_level"] = _calculate_final_weapon_stat(weapon_entry, &"scale_increase_per_level") # Common summon stat
+	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED]) # Projectile speed for summons
+
+	# Pass weapon tags (for summons that might have tag-specific behaviors or effects)
+	calculated_summon_stats[&"tags"] = weapon_entry.tags.duplicate(true)
+
+	if summon_instance.has_method("initialize"):
 		summon_instance.initialize(owner_player, calculated_summon_stats) # Pass player reference and weapon stats
 	else:
 		push_warning("WeaponManager: Summon instance '", summon_instance.name, "' for '", blueprint_data.id, "' is missing 'initialize' method.")
 	
-	# Track active summons
-	if not _active_summons.has(blueprint_data.id):
-		_active_summons[blueprint_data.id] = []
 	_active_summons[blueprint_data.id].append(summon_instance)
 	
 	# Connect to the summon's tree_exiting signal to clean up tracking
@@ -444,11 +505,11 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 			# Custom flags can be applied to weapon-specific stats or behaviors
 			# FIX: Match patterns must be constant literals or identifiers.
 			if flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_SPECIFIC_STATS] or \
-			   flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_BEHAVIOR]: # Corrected to use KEY_NAMES
+				flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_BEHAVIOR]: # Corrected to use KEY_NAMES
 				weapon_entry.specific_stats[flag_mod.flag_key] = flag_mod.flag_value
 			elif flag_mod.target_scope == PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PLAYER_BEHAVIOR]: # Corrected to use KEY_NAMES
 				# FIX: Declare owner_player here
-				var owner_player = get_parent() as PlayerCharacter 
+				var owner_player = get_parent() as PlayerCharacter
 				if is_instance_valid(owner_player) and owner_player.player_stats.has_method("apply_custom_flag"):
 					owner_player.player_stats.apply_custom_flag(flag_mod)
 			else:
@@ -477,34 +538,67 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data_resource: WeaponUp
 	
 	# If it's a summon weapon, handle potential increase in max summons or stat updates for existing summons
 	if blueprint_data.tags.has("summon"):
-		var max_summons = int(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])) # Use calculated stat
+		var owner_player = get_parent() as PlayerCharacter
+		var player_stats_node = owner_player.player_stats
+		
+		# Recalculate max summons considering GLOBAL_SUMMON_COUNT_ADD
+		var base_max_summons_of_type = int(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]))
+		var player_global_summon_count_add = int(player_stats_node.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD))
+		var final_max_summons = base_max_summons_of_type + player_global_summon_count_add
+
 		var current_summon_list = _active_summons.get(weapon_id, [])
+		if _active_summons.has(weapon_id):
+			_active_summons[weapon_id] = _active_summons[weapon_id].filter(func(s): return is_instance_valid(s))
+		else:
+			_active_summons[weapon_id] = []
+		current_summon_list = _active_summons[weapon_id] # Update reference after filter
 		var current_summon_count = current_summon_list.size()
 		
 		# Spawn new summons if max_summons increased
-		if max_summons > current_summon_count:
-			for i in range(max_summons - current_summon_count):
+		if final_max_summons > current_summon_count:
+			for i in range(final_max_summons - current_summon_count):
 				_spawn_persistent_summon(weapon_entry)
 		
 		# Update stats of ALL active summons of this type
-		# FIX: Declare owner_player here
-		var owner_player = get_parent() as PlayerCharacter
 		if is_instance_valid(owner_player):
 			for summon_instance in current_summon_list:
 				if is_instance_valid(summon_instance) and summon_instance.has_method("update_stats"):
 					# Pass fully calculated weapon stats to the summon for update
 					var calculated_summon_stats: Dictionary = {}
-					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+					
+					# Apply global summon damage multiplier to summon's weapon damage percentage
+					var base_summon_damage_percent = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE])
+					var global_summon_damage_mult = player_stats_node.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = base_summon_damage_percent * global_summon_damage_mult
+
+					# Apply global summon lifetime multiplier to summon's base lifetime
+					var base_summon_lifetime = blueprint_data.base_lifetime # Blueprint's base_lifetime
+					var global_summon_lifetime_mult = player_stats_node.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
+					calculated_summon_stats[&"base_lifetime"] = base_summon_lifetime * global_summon_lifetime_mult # Pass as specific_stat
+
+					# Pass other relevant stats directly from weapon_entry
 					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION])
-					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE])
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]] = final_max_summons # Pass the final max_summons
 					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ORBIT_RADIUS])
 					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS])
 
 					calculated_summon_stats[&"weapon_level"] = weapon_entry.weapon_level
+					
+					# Summon-specific stats that are directly from blueprint.initial_specific_stats (no PlayerStats multiplier)
+					calculated_summon_stats[&"attack_cooldown"] = _calculate_final_weapon_stat(weapon_entry, &"attack_cooldown") # Common summon stat
+					calculated_summon_stats[&"attack_range"] = _calculate_final_weapon_stat(weapon_entry, &"attack_range") # Common summon stat
+					calculated_summon_stats[&"movement_speed"] = _calculate_final_weapon_stat(weapon_entry, &"movement_speed") # Common summon stat
+					calculated_summon_stats[&"follow_distance"] = _calculate_final_weapon_stat(weapon_entry, &"follow_distance") # Common summon stat
+					calculated_summon_stats[&"base_visual_scale"] = _calculate_final_weapon_stat(weapon_entry, &"base_visual_scale") # Common summon stat
+					calculated_summon_stats[&"scale_increase_per_level"] = _calculate_final_weapon_stat(weapon_entry, &"scale_increase_per_level") # Common summon stat
+					calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED]] = _calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED]) # Projectile speed for summons
+
+					# Pass weapon tags (for summons that might have tag-specific behaviors or effects)
+					calculated_summon_stats[&"tags"] = weapon_entry.tags.duplicate(true)
+
 					summon_instance.update_stats(owner_player, calculated_summon_stats) # Pass player ref and updated calculated stats
 	
 	# Increment basic class level if the weapon has class restrictions
-	# FIX: Declare owner_player here
 	var owner_player = get_parent() as PlayerCharacter
 	if is_instance_valid(owner_player) and owner_player.has_method("increment_basic_class_level"):
 		if not blueprint_data.class_tag_restrictions.is_empty():
@@ -546,7 +640,32 @@ func _on_summon_destroyed(weapon_id: StringName, summon_instance: Node):
 func _restart_weapon_cooldown(weapon_entry: Dictionary):
 	var timer = weapon_entry.get("cooldown_timer") as Timer
 	if is_instance_valid(timer):
-		timer.wait_time = get_weapon_cooldown_value(weapon_entry)
+		var owner_player = get_parent() as PlayerCharacter
+		var player_stats_node = owner_player.player_stats if is_instance_valid(owner_player) else null
+
+		var final_cooldown = weapon_entry.blueprint_resource.cooldown # Start with blueprint's base cooldown
+
+		if is_instance_valid(player_stats_node):
+			# Apply player's Attack Speed Multiplier
+			var atk_speed_mult = player_stats_node.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+			if atk_speed_mult > 0: # Prevent division by zero
+				final_cooldown /= atk_speed_mult
+
+			# Apply player's Flat Cooldown Reduction
+			var global_cdr_flat = player_stats_node.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_FLAT)
+			final_cooldown -= global_cdr_flat
+
+			# Apply player's Percentage Cooldown Reduction
+			var global_cdr_mult = player_stats_node.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
+			# This multiplier reduces the remaining cooldown (e.g., 0.1 for 10% reduction)
+			final_cooldown *= (1.0 - global_cdr_mult)
+			
+			# NEW: Apply GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT if this is a summon weapon
+			if weapon_entry.tags.has("summon"):
+				var global_summon_cdr_percent = player_stats_node.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT)
+				final_cooldown *= (1.0 - global_summon_cdr_percent)
+
+		timer.wait_time = maxf(0.05, final_cooldown) # Ensure cooldown doesn't go below a minimum threshold
 		timer.start()
 
 # Calculates the effective cooldown time for a weapon based on player stats.
@@ -574,7 +693,6 @@ func get_weapon_cooldown_value(weapon_entry: Dictionary) -> float:
 		final_cooldown *= (1.0 - global_cdr_mult)
 	
 	return maxf(0.05, final_cooldown) # Ensure cooldown doesn't go below a minimum threshold
-
 
 # NEW HELPER: Calculates the final value of a weapon-specific stat
 # by applying its base value and all modifiers stored within the weapon_entry.

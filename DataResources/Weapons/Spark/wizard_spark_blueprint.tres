@@ -10,14 +10,14 @@ id = &"wizard_spark"
 title = "Spark"
 description = "Fires a small, firey ball of magical energy."
 weapon_scene = ExtResource("3_hspf8")
-tags = Array[StringName]([&"projectile", &"magical"])
+tags = Array[StringName]([&"projectile", &"magical", &"fire"])
 class_tag_restrictions = Array[int]([4])
 cooldown = 1.7
 max_level = 10
 base_lifetime = 1.5
 spawn_as_child = false
 requires_direction = true
-targeting_type = &"mouse_location"
+targeting_type = &"mouse_direction"
 initial_specific_stats = {
 "inherent_visual_scale_x": 0.4,
 "inherent_visual_scale_y": 0.4,
