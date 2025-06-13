@@ -1,9 +1,8 @@
-[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://lflgujtymu6v"]
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://lflgujtymu6v"]
 
 [ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_451rp"]
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_6r4m7"]
 [ext_resource type="Resource" uid="uid://6spyjywjnavj" path="res://DataResources/Weapons/Scythe/Effects/scythe_se3_dmg_effect.tres" id="2_gc3xu"]
-[ext_resource type="Resource" uid="uid://8jx4yu14wnlg" path="res://DataResources/Weapons/Scythe/Effects/scythe_se3_acquired_flag_effect.tres" id="3_gd2x2"]
 [ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="4_fyehi"]
 
 [resource]
@@ -12,9 +11,9 @@ upgrade_id = &"scythe_se3"
 title = "Sharpened Edge III"
 description = "Further increase weapon damage by 100%."
 icon = ExtResource("4_fyehi")
-prerequisites_on_this_weapon = Array[StringName]([&"scythe_sharpened_edge_2_acquired"])
+prerequisites_on_this_weapon = Array[StringName]([&"scythe_se2"])
 weight = 100.0
 max_stacks = 1
-effects = Array[ExtResource("1_451rp")]([ExtResource("2_gc3xu"), ExtResource("3_gd2x2")])
-set_acquired_flag_on_weapon = &"scythe_sharpened_edge_3_acquired"
+effects = Array[ExtResource("1_451rp")]([ExtResource("2_gc3xu")])
+set_acquired_flag_on_weapon = &"scythe_se3_acquired"
 metadata/_custom_type_script = "uid://brliif27uf0ym"

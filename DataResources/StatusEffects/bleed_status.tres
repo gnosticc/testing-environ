@@ -9,6 +9,7 @@ script = ExtResource("2_r7ndk")
 id = &"bleed"
 display_name = "Bleed"
 duration = 2.0
+is_stackable = false
 max_stacks = 1
 refresh_duration_on_reapply = true
 tick_interval = 0.1

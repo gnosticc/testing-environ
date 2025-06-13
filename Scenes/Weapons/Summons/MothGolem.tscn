@@ -62,7 +62,7 @@ radius = 75.0
 height = 150.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ux4fk"]
-radius = 3876.21
+radius = 6250.0
 
 [node name="CharacterBody2D" type="CharacterBody2D"]
 collision_layer = 512
@@ -82,7 +82,7 @@ shape = SubResource("CapsuleShape2D_771e2")
 [node name="MeleeAttackArea" type="Area2D" parent="."]
 scale = Vector2(0.04, 0.04)
 collision_layer = 0
-collision_mask = 8
+collision_mask = 136
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeAttackArea"]
 position = Vector2(0, 25)
@@ -90,3 +90,4 @@ scale = Vector2(0.04, 0.04)
 shape = SubResource("CircleShape2D_ux4fk")
 
 [node name="AttackCooldownTimer" type="Timer" parent="."]
+one_shot = true

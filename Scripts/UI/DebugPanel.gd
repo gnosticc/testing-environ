@@ -199,9 +199,9 @@ func _update_tuning_line_edit_from_property(le: LineEdit, target_node_ref: Node,
 	elif is_instance_valid(le): le.text = default_val_str
 
 func _ready():
-	process_mode = Node.PROCESS_MODE_ALWAYS # Ensure the debug panel processes even if game is paused
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	if not is_instance_valid(main_panel): push_error("DebugPanel ERROR: MainPanel node not found!"); return
-	main_panel.visible = false # Start hidden
+	main_panel.visible = false
 	
 	if not is_instance_valid(tab_container):
 		push_warning("DebugPanel WARNING: TabContainer node missing! Attempting to create dynamically.")
@@ -210,31 +210,23 @@ func _ready():
 			main_panel.add_child(tab_container); tab_container.set_anchors_preset(Control.PRESET_FULL_RECT)
 		else: push_error("DebugPanel ERROR: Cannot create TabContainer, MainPanel is invalid."); return
 	
-	_setup_all_tabs() # Set up all UI tabs and their elements
+	_setup_all_tabs()
 	
 	ui_update_timer = Timer.new(); ui_update_timer.name = "DebugUIRefreshTimer"
 	ui_update_timer.wait_time = UI_UPDATE_INTERVAL; ui_update_timer.one_shot = false
-	ui_update_timer.timeout.connect(Callable(self, "_update_new_game_state_labels"))
-	add_child(ui_update_timer); ui_update_timer.start() # Start periodic UI updates
+	ui_update_timer.timeout.connect(_update_new_game_state_labels)
+	add_child(ui_update_timer); ui_update_timer.start()
 	
-	call_deferred("_attempt_initial_reference_gathering_and_update") # Defer initial setup to ensure game world is ready
-	_update_new_game_state_labels() # Initial manual update
+	call_deferred("_attempt_initial_reference_gathering_and_update")
+	_update_new_game_state_labels()
 
 # Attempts to gather references to core game world nodes.
 func _attempt_initial_reference_gathering_and_update():
-	await get_tree().process_frame # Wait a frame
-	await get_tree().process_frame # Wait another frame to ensure all _ready are called
-	
-	_get_all_game_world_references() # Try to get references
-
-	if _are_references_valid():
-		is_initialized_and_ready = true
-		print("DebugPanel: All essential game references successfully obtained and validated.")
-	else:
-		is_initialized_and_ready = false
-		push_warning("DebugPanel: Initial references are NOT fully valid after defer. Some debug tabs may not function correctly.")
-	
-	_full_panel_content_update() # Update all tabs once references are established
+	await get_tree().process_frame; await get_tree().process_frame
+	_get_all_game_world_references()
+	if _are_references_valid(): is_initialized_and_ready = true
+	else: is_initialized_and_ready = false; push_warning("DebugPanel: Initial references NOT valid.")
+	_full_panel_content_update()
 
 
 # Gathers references to key game nodes for interaction.
@@ -362,31 +354,17 @@ func _unhandled_input(event: InputEvent):
 	if event.is_action_pressed(DEBUG_TOGGLE_ACTION):
 		if not is_instance_valid(main_panel): return
 		main_panel.visible = not main_panel.visible
-		if main_panel.visible:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE) # Show mouse cursor
-			get_tree().paused = true # Pause the game when debug panel is open
-			call_deferred("_initialize_panel_on_open_fully") # Ensure panel content is fresh
-		else:
-			get_tree().paused = false # Unpause game
-			Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN) # Hide mouse cursor
-		get_viewport().set_input_as_handled() # Mark event as handled to prevent further processing
-
+		get_tree().paused = main_panel.visible
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if main_panel.visible else Input.MOUSE_MODE_HIDDEN)
+		if main_panel.visible: call_deferred("_initialize_panel_on_open_fully")
+		get_viewport().set_input_as_handled()
+		
 # Ensures all content is refreshed when the panel is opened.
 func _initialize_panel_on_open_fully():
-	# Re-attempt reference gathering if any are invalid (e.g., scene changed)
-	if not _are_all_world_nodes_valid():
-		_get_all_game_world_references()
-	
-	if _are_references_valid():
-		is_initialized_and_ready = true
-	else:
-		is_initialized_and_ready = false
-
-	# Setup tabs if they haven't been created yet (should be on _ready)
-	if is_instance_valid(tab_container) and tab_container.get_tab_count() == 0 :
-		_setup_all_tabs()
-	
-	_full_panel_content_update() # Full refresh
+	if not _are_all_world_nodes_valid(): _get_all_game_world_references()
+	is_initialized_and_ready = _are_references_valid()
+	if is_instance_valid(tab_container) and tab_container.get_tab_count() == 0: _setup_all_tabs()
+	_full_panel_content_update()
 
 # Checks if all essential game world node references are valid.
 func _are_all_world_nodes_valid() -> bool:
@@ -877,9 +855,8 @@ func _update_available_upgrades_display(selected_weapon_instance_data_dict: Dict
 
 # Applies the selected upgrade to the selected active weapon.
 func _on_apply_upgrade_button_pressed():
-	if not _are_references_valid() or \
-	   not is_instance_valid(player_active_weapons_list) or \
-	   not is_instance_valid(available_upgrades_list): return
+	if not _are_references_valid() or not is_instance_valid(player_active_weapons_list) or not is_instance_valid(available_upgrades_list):
+		return
 	
 	var active_sel_indices = player_active_weapons_list.get_selected_items()
 	var upgrade_sel_indices = available_upgrades_list.get_selected_items()
@@ -887,17 +864,19 @@ func _on_apply_upgrade_button_pressed():
 	if active_sel_indices.is_empty() or upgrade_sel_indices.is_empty():
 		push_warning("DebugPanel ApplyUpgrade: Select an active weapon AND an upgrade to apply."); return
 	
-	var selected_weapon_instance_data_dict = player_active_weapons_list.get_item_metadata(active_sel_indices[0]) as Dictionary
+	# --- CORRECTED LOGIC ---
+	# 1. Store the index of the selected weapon BEFORE making changes.
+	var selected_weapon_index = active_sel_indices[0]
+
+	var selected_weapon_instance_data_dict = player_active_weapons_list.get_item_metadata(selected_weapon_index) as Dictionary
 	var selected_upgrade_resource = available_upgrades_list.get_item_metadata(upgrade_sel_indices[0]) as WeaponUpgradeData
 
-	# Check for valid selected data
 	if selected_weapon_instance_data_dict == null or not is_instance_valid(selected_upgrade_resource):
-		push_error("ERROR (DebugPanel ApplyUpgrade): Invalid weapon (dict is null or metadata wrong) or upgrade resource selected."); return
+		push_error("ERROR (DebugPanel ApplyUpgrade): Invalid weapon data or upgrade resource selected."); return
 
 	if is_instance_valid(player_node) and player_node.has_method("apply_upgrade"):
 		var weapon_id_to_upgrade = selected_weapon_instance_data_dict.get("id") as StringName
 		
-		# Create the dictionary wrapper for apply_upgrade
 		var upgrade_application_data = {
 			"type": "weapon_upgrade",
 			"weapon_id_to_upgrade": weapon_id_to_upgrade,
@@ -905,16 +884,23 @@ func _on_apply_upgrade_button_pressed():
 		}
 		player_node.apply_upgrade(upgrade_application_data)
 		
-		# Refresh UI lists after applying upgrade
-		call_deferred("_update_player_active_weapons_display")
-		var current_active_selection_indices = player_active_weapons_list.get_selected_items()
-		if current_active_selection_indices.size() > 0:
-			var updated_weapon_data = player_active_weapons_list.get_item_metadata(current_active_selection_indices[0]) as Dictionary
-			call_deferred("_update_available_upgrades_display", updated_weapon_data if updated_weapon_data != null else {})
-		else:
-			call_deferred("_update_available_upgrades_display")
-	else: push_error("DebugPanel ApplyUpgrade ERROR: player_node invalid or missing apply_upgrade method.")
+		# 2. Defer the UI refresh process to ensure all data is updated first.
+		call_deferred("_refresh_weapon_ui_after_upgrade", selected_weapon_index)
+	else:
+		push_error("DebugPanel ApplyUpgrade ERROR: player_node invalid or missing apply_upgrade method.")
 
+func _refresh_weapon_ui_after_upgrade(weapon_index_to_reselect: int):
+	# 3. Refresh the list of active weapons. This rebuilds the list.
+	_update_player_active_weapons_display()
+	
+	# 4. Re-select the same weapon in the now-updated list.
+	if weapon_index_to_reselect < player_active_weapons_list.item_count:
+		player_active_weapons_list.select(weapon_index_to_reselect)
+		# Manually trigger the selection signal to force the upgrade list to update.
+		_on_player_active_weapon_selected(weapon_index_to_reselect)
+	else:
+		# If the list size changed, just refresh with no selection.
+		_update_available_upgrades_display()
 
 # Sets up the Enemy Spawner tab content.
 func _setup_enemy_spawner_tab():

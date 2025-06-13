@@ -4,12 +4,13 @@
 
 [resource]
 script = ExtResource("1_jl3ay")
-stat_key = &"aoe_area_multiplier"
-modification_type = &"flat_add"
-value_type = 0
+id = &"increase_scythe_arc"
+modification_type = &"percent_add_to_base"
+stat_key = &"area_scale"
+value_type = 1
 value_float = 0.3
 value_int = 0
 effect_type_id = &"stat_mod"
-target_scope = &"player_stats"
+target_scope = &"weapon_specific_stats"
 developer_note = ""
 metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

@@ -4,9 +4,10 @@
 
 [resource]
 script = ExtResource("1_s5vgb")
+id = &""
 modification_type = &"flat_add"
 stat_key = &"weapon_damage_percentage"
-value_type = 0
+value_type = 1
 value_float = 1.0
 value_int = 0
 effect_type_id = &"stat_mod"

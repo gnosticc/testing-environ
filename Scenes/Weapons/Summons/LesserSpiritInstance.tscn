@@ -15,15 +15,14 @@ animations = [{
 "texture": SubResource("AtlasTexture_pcspa")
 }],
 "loop": true,
-"name": &"orbit_loop",
+"name": &"default",
 "speed": 5.0
 }]
 
 [node name="Node2D" type="Node2D"]
+z_index = 6
 script = ExtResource("1_1emst")
 projectile_scene = ExtResource("2_guqa5")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-scale = Vector2(0.05, 0.05)
 sprite_frames = SubResource("SpriteFrames_m3rpg")
-animation = &"orbit_loop"

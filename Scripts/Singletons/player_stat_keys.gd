@@ -68,6 +68,7 @@ enum Keys {
 	GLOBAL_BUFF_POTENCY_MULT, # Multiplier for the strength/potency of buffs applied to player/allies
 	GLOBAL_STATUS_EFFECT_CHANCE_ADD, # NEW: Adds a flat bonus to the chance of applying any status effect.
 	GLOBAL_PROJECTILE_FORK_COUNT_ADD, # NEW: Adds a flat number of extra projectiles that split off.
+	GLOBAL_PROJECTILE_PIERCE_COUNT_ADD,
 	GLOBAL_PROJECTILE_BOUNCE_COUNT_ADD, # NEW: Adds a flat number of extra bounces for projectiles.
 	GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE, # NEW: Chance for any projectile to explode in a small AoE when it despawns.
 	GLOBAL_CHAIN_LIGHTNING_COUNT, # NEW: Adds a flat number of chain targets for chaining projectiles.
@@ -239,6 +240,7 @@ const KEY_NAMES: Dictionary = {
 	Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD: &"global_status_effect_chance_add",
 	Keys.GLOBAL_PROJECTILE_FORK_COUNT_ADD: &"global_projectile_fork_count_add",
 	Keys.GLOBAL_PROJECTILE_BOUNCE_COUNT_ADD: &"global_projectile_bounce_count_add",
+	Keys.GLOBAL_PROJECTILE_PIERCE_COUNT_ADD: &"global_projectile_pierce_count_add",
 	Keys.GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE: &"global_projectile_explode_on_death_chance",
 	Keys.GLOBAL_CHAIN_LIGHTNING_COUNT: &"global_chain_lightning_count",
 	Keys.GLOBAL_LIFESTEAL_PERCENT: &"global_lifesteal_percent",

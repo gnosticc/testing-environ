@@ -21,50 +21,31 @@ title = "Scythe"
 description = "A terrifying modified agricultural tool."
 weapon_scene = ExtResource("13_abgv2")
 icon = ExtResource("11_e8rf4")
-tags = Array[StringName]([&"centered_melee", &"aoe", &"warrior weapon", &"Melee"])
+tags = Array[StringName]([&"centered_melee", &"aoe", &"warrior weapon", &"Melee", &"physical"])
 class_tag_restrictions = Array[int]([1])
 cooldown = 2.0
 max_level = 10
-base_lifetime = 0.0
+base_lifetime = 0.5
 spawn_as_child = true
-requires_direction = false
-targeting_type = "mouse"
+requires_direction = true
+targeting_type = &"mouse_direction"
 initial_specific_stats = {
-&"applies_bleed": false,
-&"applies_vulnerable": false,
+&"area_scale": 1.0,
 &"base_attack_duration": 0.5,
-&"bleed_details ": {
-"damage_percent_of_hit": 1.0,
-"duration": 2.0,
-"tick_interval": 0.1
-},
 &"has_reaping_momentum": false,
 &"has_soul_siphon": false,
 &"has_whirlwind": false,
 &"inherent_visual_scale_x": 0.7,
 &"inherent_visual_scale_y": 0.7,
-"player_damage_scale_percent": 1.0,
-&"reaping_momentum_bonus": 1,
-"reaping_momentum_bonus_to_apply": 1,
-"reaping_momentum_dmg_per_hit": 1,
-&"scythe_cursed_edge_acquired": false,
-&"scythe_reaping_momentum_acquired": false,
-&"scythe_serrated_blade_acquired": false,
-&"scythe_sharpened_edge_1_acquired": false,
-&"scythe_sharpened_edge_2_acquired": false,
-&"scythe_sharpened_edge_3_acquired": false,
-&"scythe_soul_siphon_acquired": false,
-&"scythe_whirlwind_technique_acquired": false,
-&"scythe_wider_arc_acquired": false,
+&"on_hit_status_applications": [],
+&"reaping_momentum_accumulated_bonus": 0,
+&"reaping_momentum_damage_per_hit": 1,
 &"soul_siphon_details": {
 "base_heal": 3,
 "chance": 0.1
 },
-&"vulnerable_details": {
-"damage_increased_percent": 0.2,
-"duration": 3.0
-},
 &"weapon_damage_percentage": 1.5,
+&"whirlwind_count": 1,
 &"whirlwind_delay": 0.1
 }
 available_upgrades = Array[ExtResource("1_krmoi")]([ExtResource("2_rakci"), ExtResource("3_v5dlj"), ExtResource("4_vbko4"), ExtResource("5_8nhpv"), ExtResource("6_w5vti"), ExtResource("7_ajc1l"), ExtResource("8_m2fk0"), ExtResource("9_ifw1o"), ExtResource("10_uktk8")])

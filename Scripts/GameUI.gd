@@ -5,6 +5,9 @@
 # Updated error reporting and consistency.
 #
 # FIXED: UI positioning logic for health/exp bars using correct world-to-canvas transform.
+# ADDED: Extensive debug prints to _process to diagnose UI positioning issues.
+# FIXED: Corrected Transform2D multiplication for Vector2.
+# FIXED: Changed world-to-screen conversion to use Camera2D.get_viewport_position().
 
 extends Control
 
@@ -124,29 +127,39 @@ func _process(delta: float): # UI Positioning Logic (e.g., health bar above play
 	if not is_instance_valid(player_node) or not is_instance_valid(player_health_bar): return
 	
 	var current_cam: Camera2D = get_viewport().get_camera_2d()
-	if not is_instance_valid(current_cam): return
+	if not is_instance_valid(current_cam):
+		print("GameUI DEBUG: Camera is invalid in _process, cannot position UI.")
+		return
 
 	var anchor_world_pos: Vector2
 	if player_node.has_method("get_ui_anchor_global_position"):
 		anchor_world_pos = player_node.get_ui_anchor_global_position()
 	else:
-		anchor_world_pos = player_node.global_position # Fallback if anchor method is missing
+		# Fallback if anchor method is missing. This assumes player's global_position is center-bottom or center.
+		anchor_world_pos = player_node.global_position
 
-	# --- FIXED: World-to-Canvas Conversion for UI Anchoring ---
-	# This uses the Camera2D's transform and the Viewport's canvas transform
-	# to correctly convert a world position to a screen (CanvasLayer) position.
-	# This should work robustly across different Godot versions and camera setups.
-	var anchor_screen_pos: Vector2 = current_cam.get_canvas_transform().affine_inverse() * anchor_world_pos
 	
+	# FIXED: Use Camera2D.get_viewport_transform() for correct world-to-viewport pixel conversion.
+	# This Transformation handles camera position, zoom, and rotation relative to the world.
+	# The output is in viewport (screen) coordinates.
+	var anchor_screen_pos: Vector2 = current_cam.get_viewport_transform() * anchor_world_pos
+	
+
 	# Position health bar relative to the player's screen position.
+	# health_bar_pos_x calculates the X position to center the bar horizontally.
+	# health_bar_pos_y calculates the Y position to place the bar above the anchor point,
+	# considering its own height.
 	var health_bar_pos_x = anchor_screen_pos.x - (player_health_bar.size.x / 2.0) + HEALTH_BAR_X_OFFSET
 	var health_bar_pos_y = anchor_screen_pos.y + HEALTH_BAR_Y_OFFSET - player_health_bar.size.y
-	player_health_bar.global_position = Vector2(health_bar_pos_x, health_bar_pos_y)
+	
+	var final_health_bar_position = Vector2(health_bar_pos_x, health_bar_pos_y)
+	player_health_bar.global_position = final_health_bar_position
 
 	# Position temporary EXP bar if visible.
 	if is_instance_valid(temp_exp_bar) and temp_exp_bar.visible:
 		var exp_bar_pos_x = anchor_screen_pos.x - (temp_exp_bar.size.x / 2.0) + HEALTH_BAR_X_OFFSET
-		var exp_bar_pos_y = player_health_bar.global_position.y + player_health_bar.size.y + EXP_BAR_Y_OFFSET_FROM_HEALTH
+		# Position below health bar. Use the calculated bottom of the health bar as a reference.
+		var exp_bar_pos_y = final_health_bar_position.y + player_health_bar.size.y + EXP_BAR_Y_OFFSET_FROM_HEALTH
 		temp_exp_bar.global_position = Vector2(exp_bar_pos_x, exp_bar_pos_y)
 
 

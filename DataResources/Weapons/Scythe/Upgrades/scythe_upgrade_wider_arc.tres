@@ -1,21 +1,9 @@
-[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://dh6ylhvy6lkdq"]
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dh6ylhvy6lkdq"]
 
 [ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_wevd1"]
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_akfia"]
-[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="2_ghern"]
+[ext_resource type="Resource" uid="uid://cwjfen2pmmhox" path="res://DataResources/Weapons/Scythe/Effects/scythe_wider_arc_aoe_effect.tres" id="2_ghern"]
 [ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="4_34txu"]
-
-[sub_resource type="Resource" id="Resource_es6qy"]
-script = ExtResource("2_ghern")
-modification_type = &"flat_add"
-stat_key = &"aoe_area_multiplier"
-value_type = 0
-value_float = 1.3
-value_int = 0
-effect_type_id = &"stat_mod"
-target_scope = &"weapon_specific_stats"
-developer_note = ""
-metadata/_custom_type_script = "uid://cjbws8tjtb3m8"
 
 [resource]
 script = ExtResource("2_akfia")
@@ -26,6 +14,6 @@ icon = ExtResource("4_34txu")
 prerequisites_on_this_weapon = Array[StringName]([])
 weight = 100.0
 max_stacks = 1
-effects = Array[ExtResource("1_wevd1")]([SubResource("Resource_es6qy")])
+effects = Array[ExtResource("1_wevd1")]([ExtResource("2_ghern")])
 set_acquired_flag_on_weapon = &"scythe_wider_arc_acquired"
 metadata/_custom_type_script = "uid://brliif27uf0ym"

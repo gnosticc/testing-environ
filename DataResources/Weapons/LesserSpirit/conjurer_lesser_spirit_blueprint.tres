@@ -10,18 +10,20 @@ id = &"conjurer_lesser_spirit"
 title = "Lesser Spirit"
 description = "Summons an orbiting spirit that follows you and attacks neaby enemies."
 weapon_scene = ExtResource("3_ds0vv")
-tags = Array[String](["summon", "magical"])
+tags = Array[StringName]([&"magical", &"orbital", &"summon"])
 class_tag_restrictions = Array[int]([6])
 cooldown = 0.0
 max_level = 10
-base_lifetime = -1.0
-spawn_as_child = true
+base_lifetime = 1.0
+spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
 initial_specific_stats = {
 "attack_cooldown": 0.8,
 "attack_range": 180.0,
-"max_summons_of_type": 1.0,
+"inherent_visual_scale_x": 0.08,
+"inherent_visual_scale_y": 0.08,
+"max_summons_of_type": 1,
 "orbit_radius": 20.0,
 "pierce_count": 0,
 "projectile_speed": 400.0,

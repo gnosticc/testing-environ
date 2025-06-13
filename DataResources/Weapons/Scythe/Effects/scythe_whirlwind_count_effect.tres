@@ -4,9 +4,10 @@
 
 [resource]
 script = ExtResource("1_66if6")
-stat_key = &"whirlwind_count"
+id = &"add_whirlwind_spin"
 modification_type = &"flat_add"
-value_type = 1
+stat_key = &"whirlwind_count"
+value_type = 0
 value_float = 0.0
 value_int = 1
 effect_type_id = &"stat_mod"

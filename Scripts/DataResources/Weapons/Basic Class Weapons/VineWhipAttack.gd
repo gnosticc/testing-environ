@@ -2,13 +2,11 @@
 # Behavior for the Druid's Vine Whip attack.
 # A fast, aimed melee attack with a longer reach.
 #
-# UPDATED: Standardized stat key access using PlayerStatKeys.
-# UPDATED: Leverages PlayerStats.get_calculated_player_damage for unified damage calculation.
-# UPDATED: Uses PlayerStats.get_final_stat for global player stat lookups.
-# UPDATED: Uses push_error and push_warning for consistent error reporting.
-# UPDATED: Passes attack_stats_for_enemy (including ARMOR_PENETRATION) to enemy's take_damage.
-# UPDATED: Ensures specific_stats is a deep copy to prevent unintended modifications.
-# REFACTORED: Renamed on_stats_or_upgrades_changed to _apply_all_stats_and_start_animation for clarity and consistency.
+# UPDATED: Passes weapon tags to PlayerStats.get_calculated_player_damage for tag-specific damage multipliers.
+# UPDATED: Integrates GLOBAL_LIFESTEAL_PERCENT for healing.
+# UPDATED: Integrates GLOBAL_STATUS_EFFECT_CHANCE_ADD for status effect application.
+# FIXED: Ensures a minimum of 1 damage is dealt.
+# UPDATED: Uses PlayerStatKeys for all stat lookups.
 
 class_name VineWhipAttack
 extends Node2D
@@ -102,7 +100,6 @@ func _apply_all_stats_and_start_animation():
 	
 	# The blueprint currently has "weapon_attack_speed_mod" as a direct key.
 	# If this is a weapon-specific multiplier (not a PlayerStatKeys enum), keep it as is.
-	# Otherwise, consider adding it to PlayerStatKeys.
 	var weapon_attack_speed_mod = float(specific_stats.get(&"weapon_attack_speed_mod", 1.0)) 
 	
 	var final_attack_speed_multiplier = player_attack_speed_multiplier * weapon_attack_speed_mod
@@ -165,33 +162,49 @@ func _on_body_entered(body: Node2D):
 		# --- Damage Calculation (Leveraging unified PlayerStats method) ---
 		# Retrieve weapon-specific damage percentage from received stats.
 		var weapon_damage_percent = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.1)) # Default to 110% of player's numerical damage.
-		
-		# Calculate the final damage using the player's overall damage formula.
-		var final_damage_to_deal_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent)
-		var final_damage_to_deal_int = int(round(max(1.0, final_damage_to_deal_float))) # Ensure minimum 1 damage and round to int.
+		# Retrieve weapon tags to pass to the damage calculation.
+		var weapon_tags: Array[StringName] = specific_stats.get(&"tags", [])
+
+		# Calculate the final damage using the player's overall damage formula, including tags.
+		var calculated_damage_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
+		var final_damage_to_deal = int(round(maxf(1.0, calculated_damage_float))) # Ensure minimum 1 damage and round to int.
 		
 		var owner_player_char = owner_player_stats.get_parent() if is_instance_valid(owner_player_stats) else null
 		
 		# Prepare attack-specific stats to pass to the enemy's take_damage method.
-		# This includes armor penetration from the player's stats for accurate damage calculation.
+		# This includes armor penetration from the player's stats.
 		var attack_stats_for_enemy: Dictionary = {
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 			# Add any other relevant attack properties here (e.g., lifesteal, status application chance)
 		}
 
-		enemy_target.take_damage(final_damage_to_deal_int, owner_player_char, attack_stats_for_enemy)
+		enemy_target.take_damage(final_damage_to_deal, owner_player_char, attack_stats_for_enemy)
 
-		# Apply Status Effects on Hit if defined in specific_stats (passed from WeaponManager).
+		# --- Apply Lifesteal ---
+		var global_lifesteal_percent = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
+		if global_lifesteal_percent > 0:
+			var heal_amount = final_damage_to_deal * global_lifesteal_percent
+			if is_instance_valid(owner_player_char) and owner_player_char.has_method("heal"):
+				owner_player_char.heal(heal_amount)
+
+		# --- Apply Status Effects on Hit ---
 		if specific_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
 			var status_apps: Array = specific_stats.get(&"on_hit_status_applications", [])
+			var global_status_effect_chance_add = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
+
 			for app_data_res in status_apps:
 				var app_data = app_data_res as StatusEffectApplicationData
-				if is_instance_valid(app_data) and randf() < app_data.application_chance:
-					enemy_target.status_effect_component.apply_effect(
-						load(app_data.status_effect_resource_path) as StatusEffectData,
-						owner_player_char, # Source of the effect.
-						specific_stats, # Weapon stats for scaling of the status effect.
-						app_data.duration_override,
-						app_data.potency_override
-					)
-					# print("VineWhipAttack: Applied status from '", app_data.status_effect_resource_path, "' to enemy.") # Debug print.
+				if is_instance_valid(app_data):
+					# Combine base application chance with global status effect chance addition.
+					var final_application_chance = app_data.application_chance + global_status_effect_chance_add
+					final_application_chance = clampf(final_application_chance, 0.0, 1.0) # Clamp between 0 and 1.
+					
+					if randf() < final_application_chance:
+						enemy_target.status_effect_component.apply_effect(
+							load(app_data.status_effect_resource_path) as StatusEffectData,
+							owner_player_char, # Source of the effect.
+							specific_stats, # Weapon stats for scaling of the status effect.
+							app_data.duration_override,
+							app_data.potency_override
+						)
+						# print("VineWhipAttack: Applied status from '", app_data.status_effect_resource_path, "' to enemy.") # Debug print.
