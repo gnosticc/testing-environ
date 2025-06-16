@@ -1,8 +1,17 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://dm588na72y7j5"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://dm588na72y7j5"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_dcudt"]
+[ext_resource type="Resource" uid="uid://drwng42i7ut85" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_balanced_hilt.tres" id="2_87sci"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ebrbk"]
 [ext_resource type="PackedScene" uid="uid://snbqkv5o3phl" path="res://Scenes/Weapons/LongswordAttack.tscn" id="3_ebrbk"]
+[ext_resource type="Resource" uid="uid://1rke3ka00ts3" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_blade_flurry.tres" id="3_qho3v"]
+[ext_resource type="Resource" uid="uid://b5wu5orsi8n2o" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_extended_reach.tres" id="4_ly74q"]
+[ext_resource type="Resource" uid="uid://bi7t7qla5rlj3" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_holy_infusion.tres" id="5_y05n2"]
+[ext_resource type="Resource" uid="uid://bxbtxkihgly1k" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_honed_edge.tres" id="6_dti6m"]
+[ext_resource type="Resource" uid="uid://batr3to6srv36" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_knights_resolve.tres" id="7_s6pvr"]
+[ext_resource type="Resource" uid="uid://dnasepxwjkq8p" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_parry_riposte.tres" id="8_kj3ld"]
+[ext_resource type="Resource" uid="uid://bu2k12ysw02r7" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_power_lunge.tres" id="9_kyjp6"]
+[ext_resource type="Resource" uid="uid://cnlbgdm3ekrpy" path="res://DataResources/Weapons/Longsword/Upgrades/longsword_upgrade_tempered_steel.tres" id="10_d05sr"]
 
 [resource]
 script = ExtResource("2_ebrbk")
@@ -19,13 +28,23 @@ spawn_as_child = true
 requires_direction = true
 targeting_type = &"mouse_direction"
 initial_specific_stats = {
+"area_scale": 1.0,
+"attack_speed_multiplier": 1.0,
 "base_attack_duration": 0.2,
+"blade_flurry_chance": 0.35,
+"crit_chance": 0.0,
+"has_blade_flurry": false,
+"has_holy_infusion": false,
+"has_knights_resolve": false,
+"has_parry_riposte": false,
 "inherent_visual_scale_x": 0.6,
 "inherent_visual_scale_y": 0.6,
+"length_scale": 1.0,
+"parry_riposte_bonus_active": false,
 "pierce_count": 0,
 "projectile_speed": 200.0,
 "weapon_attack_speed_mod": 1.0,
 "weapon_damage_percentage": 2.0
 }
-available_upgrades = Array[ExtResource("1_dcudt")]([])
+available_upgrades = Array[ExtResource("1_dcudt")]([ExtResource("2_87sci"), ExtResource("3_qho3v"), ExtResource("4_ly74q"), ExtResource("5_y05n2"), ExtResource("6_dti6m"), ExtResource("7_s6pvr"), ExtResource("8_kj3ld"), ExtResource("9_kyjp6"), ExtResource("10_d05sr")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

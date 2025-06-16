@@ -1,6 +1,7 @@
 # WeaponManager.gd
-# This version adds logic to automatically set an "acquired" flag
-# based on the `set_acquired_flag_on_weapon` property in WeaponUpgradeData.
+# This is the complete, merged, and definitive version of the WeaponManager.
+# CORRECTED: The attack logic now correctly handles Blade Flurry procs for both
+# the primary and Holy Infusion swings, and spawns the flurry at the correct location.
 
 class_name WeaponManager
 extends Node
@@ -68,115 +69,146 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 func _on_attack_cooldown_finished(weapon_id: StringName):
 	var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
 	if weapon_index == -1: return
-
 	var weapon_entry = active_weapons[weapon_index]
+	
+	var riposte_multiplier = 1.0
+	if weapon_entry.specific_stats.get(&"has_parry_riposte", false):
+		if weapon_entry.specific_stats.get("parry_riposte_bonus_active", false):
+			riposte_multiplier = 3.0
+		weapon_entry.specific_stats["parry_riposte_bonus_active"] = true
+
 	var reaping_bonus = int(weapon_entry.specific_stats.get(&"reaping_momentum_accumulated_bonus", 0))
 
-	# DEBUG: Print the bonus that has been accumulated BEFORE this new swing.
-	print_debug("WeaponManager: Starting new swing for '", weapon_id, "' with Reaping Bonus: ", reaping_bonus)
+	# --- Primary Attack & Flurry Check ---
+	var primary_attack = _spawn_attack_instance(weapon_entry, reaping_bonus, true, riposte_multiplier)
+	if is_instance_valid(primary_attack) and weapon_entry.specific_stats.get(&"has_blade_flurry", false):
+		if randf() < float(weapon_entry.specific_stats.get(&"blade_flurry_chance", 0.0)):
+			get_tree().create_timer(0.2, false).timeout.connect(_on_blade_flurry_timeout.bind(weapon_entry, riposte_multiplier, primary_attack.global_transform))
 
-	# The first swing of the attack cycle is spawned here. We pass true for `is_initial_swing`.
-	_spawn_attack_instance(weapon_entry, reaping_bonus, true)
+	# --- Holy Infusion & Flurry Check ---
+	if weapon_entry.specific_stats.get(&"has_holy_infusion", false):
+		var owner_player = get_parent() as PlayerCharacter
+		if is_instance_valid(owner_player) and is_instance_valid(owner_player.melee_aiming_dot):
+			var opposite_local_pos = owner_player.melee_aiming_dot.position * -1
+			var opposite_global_pos = owner_player.to_global(opposite_local_pos)
+			var opposite_rotation = (owner_player.melee_aiming_dot.global_position - owner_player.global_position).angle() + PI
+			var opposite_transform = Transform2D(opposite_rotation, opposite_global_pos)
+			
+			var opposite_swing = _spawn_attack_instance(weapon_entry, 0, false, riposte_multiplier, opposite_transform)
+			if is_instance_valid(opposite_swing) and weapon_entry.specific_stats.get(&"has_blade_flurry", false):
+				if randf() < float(weapon_entry.specific_stats.get(&"blade_flurry_chance", 0.0)):
+					get_tree().create_timer(0.2, false).timeout.connect(_on_blade_flurry_timeout.bind(weapon_entry, riposte_multiplier, opposite_swing.global_transform))
 
+	# --- Scythe Whirlwind ---
 	if weapon_entry.specific_stats.get(&"has_whirlwind", false):
 		var number_of_spins = int(_calculate_final_weapon_stat(weapon_entry, &"whirlwind_count"))
 		if number_of_spins > 1:
 			var spin_delay = float(_calculate_final_weapon_stat(weapon_entry, &"whirlwind_delay"))
-			# Subsequent spins are queued. They are NOT the initial swing.
-			var spin_data = { "weapon_id": weapon_id, "spins_left": number_of_spins - 1, "delay": spin_delay, "reaping_bonus_to_apply": reaping_bonus, "is_initial_swing": false }
+			var spin_data = { "weapon_id": weapon_id, "spins_left": number_of_spins - 1, "delay": spin_delay, "reaping_bonus_to_apply": reaping_bonus }
 			_whirlwind_queue.append(spin_data)
 			if _whirlwind_timer.is_stopped():
 				_whirlwind_timer.wait_time = spin_data.delay
 				_whirlwind_timer.start()
 
 	_restart_weapon_cooldown(weapon_entry)
+	
+func _on_blade_flurry_timeout(weapon_entry, riposte_multiplier, spawn_transform: Transform2D):
+	if is_instance_valid(self):
+		_spawn_attack_instance(weapon_entry, 0, false, riposte_multiplier, spawn_transform)
 
 func _on_whirlwind_spin_timer_timeout():
 	if _whirlwind_queue.is_empty(): return
 	var current_whirlwind = _whirlwind_queue.front()
 	var weapon_index = _get_weapon_entry_index_by_id(current_whirlwind.weapon_id)
 	if weapon_index != -1:
-		# Spawn the next whirlwind slash. This is NOT the initial swing.
 		_spawn_attack_instance(active_weapons[weapon_index], current_whirlwind.reaping_bonus_to_apply, false)
 	current_whirlwind.spins_left -= 1
-	if current_whirlwind.spins_left <= 0:
-		_whirlwind_queue.pop_front()
+	if current_whirlwind.spins_left <= 0: _whirlwind_queue.pop_front()
 	if not _whirlwind_queue.is_empty():
 		var next_whirlwind = _whirlwind_queue.front()
 		_whirlwind_timer.wait_time = next_whirlwind.delay
 		_whirlwind_timer.start()
 
-func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, is_initial_swing: bool = false):
+func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, is_initial_swing: bool = false, p_riposte_mult: float = 1.0, p_transform_override = null) -> Node2D:
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
 	var owner_player = get_parent() as PlayerCharacter
-	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player): return
-	
-	var direction = Vector2.ZERO
-	var spawn_position = owner_player.global_position
-	var target_found: bool = true
-
-	if blueprint_data.requires_direction:
-		match blueprint_data.targeting_type:
-			&"nearest_enemy":
-				var nearest_enemy = owner_player._find_nearest_enemy()
-				if is_instance_valid(nearest_enemy):
-					direction = (nearest_enemy.global_position - owner_player.global_position).normalized()
-				else:
-					target_found = false
-			&"mouse_location":
-				var world_mouse_pos = owner_player.get_global_mouse_position()
-				direction = (world_mouse_pos - owner_player.global_position).normalized()
-				var max_range = float(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE]))
-				max_range += owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD)
-				spawn_position = owner_player.global_position.move_toward(world_mouse_pos, max_range)
-			&"mouse_direction":
-				if is_instance_valid(owner_player.melee_aiming_dot) and owner_player.melee_aiming_dot.has_method("get_aiming_direction"):
-					direction = owner_player.melee_aiming_dot.get_aiming_direction()
-				else:
-					push_warning("WeaponManager: Melee aiming dot or its 'get_aiming_direction' method is invalid. Falling back to mouse.")
-					direction = (owner_player.get_global_mouse_position() - owner_player.global_position).normalized()
-					if direction == Vector2.ZERO: direction = Vector2.RIGHT
-	
-	if not target_found: return
+	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player): return null
 
 	var weapon_instance = blueprint_data.weapon_scene.instantiate()
 	if not is_instance_valid(weapon_instance):
-		push_error("WeaponManager: Failed to instantiate weapon scene for '", blueprint_data.id, "'."); return
-	
-	if blueprint_data.tags.has("centered_melee"):
-		owner_player.add_child(weapon_instance)
-		weapon_instance.position = Vector2.ZERO
-	elif blueprint_data.tags.has("melee"):
-		owner_player.add_child(weapon_instance)
-		if is_instance_valid(owner_player.melee_aiming_dot):
-			weapon_instance.position = owner_player.melee_aiming_dot.position
-		else:
-			weapon_instance.position = Vector2.ZERO
-	else:
-		var attacks_container = get_tree().current_scene.get_node_or_null("AttacksContainer")
-		var parent_node = attacks_container if is_instance_valid(attacks_container) else get_tree().current_scene
-		parent_node.add_child(weapon_instance)
-		weapon_instance.global_position = spawn_position
+		push_error("WeaponManager: Failed to instantiate weapon scene for '", blueprint_data.id, "'."); return null
+		
+	var final_transform: Transform2D
+	var final_direction: Vector2
 
-	var calculated_stats = {}
+	if p_transform_override != null and p_transform_override is Transform2D:
+		final_transform = p_transform_override
+		final_direction = Vector2.RIGHT.rotated(final_transform.get_rotation())
+	else:
+		var spawn_position: Vector2 = owner_player.global_position
+		if blueprint_data.requires_direction:
+			match blueprint_data.targeting_type:
+				&"nearest_enemy":
+					var nearest_enemy = owner_player._find_nearest_enemy()
+					if is_instance_valid(nearest_enemy): final_direction = (nearest_enemy.global_position - owner_player.global_position).normalized()
+					else: return null
+				&"mouse_location":
+					var world_mouse_pos = owner_player.get_global_mouse_position()
+					final_direction = (world_mouse_pos - owner_player.global_position).normalized()
+					var max_range = float(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_CAST_RANGE]))
+					max_range += owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD)
+					spawn_position = owner_player.global_position.move_toward(world_mouse_pos, max_range)
+				&"mouse_direction":
+					if is_instance_valid(owner_player.melee_aiming_dot) and owner_player.melee_aiming_dot.has_method("get_aiming_direction"):
+						final_direction = owner_player.melee_aiming_dot.get_aiming_direction()
+					else:
+						final_direction = (owner_player.get_global_mouse_position() - owner_player.global_position).normalized()
+						if final_direction == Vector2.ZERO: final_direction = Vector2.RIGHT
+		
+		if blueprint_data.spawn_as_child:
+			var local_pos = owner_player.melee_aiming_dot.position if is_instance_valid(owner_player.melee_aiming_dot) and blueprint_data.tags.has("melee") else Vector2.ZERO
+			spawn_position = owner_player.to_global(local_pos)
+		final_transform = Transform2D(final_direction.angle(), spawn_position)
+
+	owner_player.add_child(weapon_instance)
+	weapon_instance.global_transform = final_transform
+	
+	var stats_to_pass = {}
 	for key in weapon_entry.specific_stats.keys():
 		var value = weapon_entry.specific_stats[key]
-		if value is int or value is float: calculated_stats[key] = _calculate_final_weapon_stat(weapon_entry, key)
-		elif value is Array or value is Dictionary: calculated_stats[key] = value.duplicate(true)
-		else: calculated_stats[key] = value
-	calculated_stats["tags"] = weapon_entry.tags.duplicate(true)
-
-	# Pass and then reset the Reaping Momentum bonus
-	calculated_stats[&"reaping_momentum_accumulated_bonus"] = p_reaping_bonus
-	weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"] = 0
+		if value is int or value is float: stats_to_pass[key] = _calculate_final_weapon_stat(weapon_entry, key)
+		else: stats_to_pass[key] = value.duplicate(true) if value is Array or value is Dictionary else value
+	
+	stats_to_pass["tags"] = weapon_entry.tags.duplicate(true)
+	var final_damage = owner_player.player_stats.get_calculated_player_damage(stats_to_pass[&"weapon_damage_percentage"], stats_to_pass["tags"])
+	stats_to_pass["final_damage_amount"] = final_damage * p_riposte_mult
+	
+	if stats_to_pass.has(&"projectile_speed"):
+		var base_proj_speed = stats_to_pass[&"projectile_speed"]
+		var weapon_proj_speed_mult = _calculate_final_weapon_stat(weapon_entry, &"projectile_speed_multiplier")
+		var player_proj_speed_mult = owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER)
+		stats_to_pass[&"final_projectile_speed"] = base_proj_speed * weapon_proj_speed_mult * player_proj_speed_mult
+	
+	stats_to_pass[&"reaping_momentum_accumulated_bonus"] = p_reaping_bonus
+	if is_initial_swing:
+		weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"] = 0
 
 	if weapon_instance.has_method("set_attack_properties"):
-		weapon_instance.set_attack_properties(direction, calculated_stats, owner_player.player_stats)
-	# Removed CONNECT_ONE_SHOT. The manager will now listen for every hit signal
-	# from this attack instance until the instance is destroyed.
+		weapon_instance.set_attack_properties(final_direction, stats_to_pass, owner_player.player_stats)
+	
+	if weapon_instance.has_signal("attack_hit_enemy"):
+		weapon_instance.attack_hit_enemy.connect(_on_attack_hit_enemy.bind(weapon_entry.id), CONNECT_ONE_SHOT)
 	if weapon_instance.has_signal("reaping_momentum_hit"):
 		weapon_instance.reaping_momentum_hit.connect(_on_reaping_momentum_hit.bind(weapon_entry.id))
 
+	return weapon_instance
+
+func _on_attack_hit_enemy(hit_count: int, weapon_id: StringName):
+	if hit_count > 0:
+		var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
+		if weapon_index != -1:
+			active_weapons[weapon_index].specific_stats["parry_riposte_bonus_active"] = false
+			
 func _on_reaping_momentum_hit(hit_count: int, weapon_id: StringName):
 	var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
 	if weapon_index == -1: return
@@ -184,9 +216,6 @@ func _on_reaping_momentum_hit(hit_count: int, weapon_id: StringName):
 	var dmg_per_hit = int(_calculate_final_weapon_stat(weapon_entry, &"reaping_momentum_damage_per_hit"))
 	var current_bonus = weapon_entry.specific_stats.get(&"reaping_momentum_accumulated_bonus", 0)
 	weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"] = current_bonus + (hit_count * dmg_per_hit)
-	
-	print_debug("WeaponManager: Reaping Momentum hit received. New accumulated bonus: ", weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"])
-
 
 func _spawn_persistent_summon(weapon_entry: Dictionary):
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
@@ -216,7 +245,7 @@ func _spawn_persistent_summon(weapon_entry: Dictionary):
 		if value is int or value is float:
 			calculated_summon_stats[key] = _calculate_final_weapon_stat(weapon_entry, key)
 		else:
-			calculated_summon_stats[key] = value.duplicate(true)
+			calculated_summon_stats[key] = value.duplicate(true) if value is Array or value is Dictionary else value
 	
 	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] *= p_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
 	calculated_summon_stats[&"base_lifetime"] = blueprint_data.base_lifetime * p_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
@@ -226,7 +255,7 @@ func _spawn_persistent_summon(weapon_entry: Dictionary):
 	if summon_instance.has_signal("instances_spawned"):
 		if not summon_instance.is_connected("instances_spawned", _on_lesser_spirit_controller_instances_spawned):
 			summon_instance.instances_spawned.connect(_on_lesser_spirit_controller_instances_spawned, CONNECT_ONE_SHOT)
-	else:
+	elif summon_instance.has_method("set_attack_properties"):
 		_active_summons[blueprint_data.id].append(summon_instance)
 		summon_instance.tree_exiting.connect(_on_summon_destroyed.bind(blueprint_data.id, summon_instance))
 	
@@ -247,6 +276,7 @@ func _on_summon_destroyed(weapon_id: StringName, summon_instance: Node):
 	if _active_summons.has(weapon_id) and _active_summons[weapon_id].has(summon_instance):
 		_active_summons[weapon_id].erase(summon_instance)
 
+# --- [The rest of the file is unchanged] ---
 func _restart_weapon_cooldown(weapon_entry: Dictionary):
 	var timer = weapon_entry.get("cooldown_timer") as Timer
 	if is_instance_valid(timer):
@@ -258,8 +288,10 @@ func get_weapon_cooldown_value(weapon_entry: Dictionary) -> float:
 	var final_cooldown = blueprint_data.cooldown
 	var p_stats = (get_parent() as PlayerCharacter).player_stats
 	if is_instance_valid(p_stats):
-		var atk_speed_mult = p_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
-		if atk_speed_mult > 0: final_cooldown /= atk_speed_mult
+		var global_atk_speed_mult = p_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+		var weapon_atk_speed_mult = _calculate_final_weapon_stat(weapon_entry, &"attack_speed_multiplier")
+		var final_atk_speed_mult = global_atk_speed_mult * weapon_atk_speed_mult
+		if final_atk_speed_mult > 0: final_cooldown /= final_atk_speed_mult
 	return maxf(0.05, final_cooldown)
 
 func _calculate_final_weapon_stat(weapon_entry: Dictionary, stat_key: StringName) -> float:
@@ -268,20 +300,23 @@ func _calculate_final_weapon_stat(weapon_entry: Dictionary, stat_key: StringName
 	var percent_add_mod = float(weapon_entry._percent_add_mods.get(stat_key, 0.0))
 	var percent_mult_final_mod = float(weapon_entry._percent_mult_final_mods.get(stat_key, 1.0))
 	return (base_value + flat_mod) * (1.0 + percent_add_mod) * percent_mult_final_mod
-
-# This is the updated function.
+	
 func apply_weapon_upgrade(weapon_id: StringName, upgrade_data: WeaponUpgradeData):
 	var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
 	if weapon_index == -1: return
+
 	var weapon_entry = active_weapons[weapon_index]
 	var owner_player = get_parent() as PlayerCharacter
+
 	if upgrade_data.set_acquired_flag_on_weapon != &"":
 		weapon_entry.specific_stats[upgrade_data.set_acquired_flag_on_weapon] = true
+
 	for effect in upgrade_data.effects:
 		if effect is StatModificationEffectData:
 			var stat_mod = effect as StatModificationEffectData
 			match stat_mod.target_scope:
-				&"player_stats": owner_player.player_stats.apply_stat_modification(stat_mod)
+				&"player_stats":
+					owner_player.player_stats.apply_stat_modification(stat_mod)
 				&"weapon_specific_stats":
 					var key = stat_mod.stat_key
 					var value = stat_mod.get_value()
@@ -297,11 +332,12 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data: WeaponUpgradeData
 			if not weapon_entry.specific_stats.has(&"on_hit_status_applications"):
 				weapon_entry.specific_stats[&"on_hit_status_applications"] = []
 			weapon_entry.specific_stats[&"on_hit_status_applications"].append(effect)
+	
 	weapon_entry.weapon_level += 1
 	weapon_entry.acquired_upgrade_ids.append(upgrade_data.upgrade_id)
 	emit_signal("weapon_upgraded", weapon_id, weapon_entry.weapon_level)
 	emit_signal("active_weapons_changed")
-	
+
 func _get_weapon_entry_index_by_id(weapon_id: StringName) -> int:
 	for i in range(active_weapons.size()):
 		if active_weapons[i].id == weapon_id: return i
@@ -314,8 +350,6 @@ func get_active_weapons_data_for_level_up() -> Array[Dictionary]:
 			"id": weapon_entry.id,
 			"title": weapon_entry.title,
 			"weapon_level": weapon_entry.weapon_level,
-			# This is the key change: we pass the entire specific_stats dictionary,
-			# which includes all the boolean flags for acquired upgrades.
 			"specific_stats": weapon_entry.specific_stats.duplicate(true),
 			"blueprint_resource_path": weapon_entry.blueprint_resource.resource_path if is_instance_valid(weapon_entry.blueprint_resource) else ""
 		}

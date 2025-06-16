@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://csnedt7bpowk3"]
+
+[ext_resource type="Script" uid="uid://ygwegtjsymch" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/CrossbowAttackController.gd" id="1_kpx58"]
+[ext_resource type="PackedScene" uid="uid://bf8qkgjsfh4vs" path="res://Scenes/Weapons/crossbow_bolt_attack.tscn" id="2_jaiwo"]
+
+[node name="CrossbowAttackController" type="Node2D"]
+script = ExtResource("1_kpx58")
+bolt_scene = ExtResource("2_jaiwo")

@@ -29,6 +29,10 @@ var flat_modifiers: Dictionary = {} 		   # For flat additions (e.g., +5 Health)
 var percent_add_modifiers: Dictionary = {} 	   # For percentage additions to base (e.g., +10% Movement Speed)
 var percent_mult_final_modifiers: Dictionary = {} # For final percentage multipliers (e.g., +20% Global Damage)
 
+# Reference to the StatusEffectComponent to query for temporary buffs/debuffs.
+@onready var status_effect_component: StatusEffectComponent = get_parent().get_node_or_null("StatusEffectComponent")
+
+
 # --- CURRENT CALCULATED STATS ---
 # These variables hold the final, fully calculated values of key stats, updated
 # every time recalculate_all_stats() is called. This provides quick access
@@ -89,11 +93,15 @@ var current_dodge_chance: float = 0.0
 
 # --- Initialization ---
 func _ready():
-	# PlayerStats should be initialized externally by PlayerCharacter.gd
-	# after PlayerCharacter has loaded the PlayerClassData.tres resource.
-	# So, _ready() here just ensures dictionaries are ready.
-	pass
+	if not is_instance_valid(status_effect_component):
+		push_error("PlayerStats ERROR: StatusEffectComponent not found on parent. Temporary buffs will not work.")
+	else:
+		if not status_effect_component.is_connected("status_effects_changed", _on_status_effects_changed):
+			status_effect_component.status_effects_changed.connect(_on_status_effects_changed)
 
+func _on_status_effects_changed(_owner_node):
+	recalculate_all_stats()
+	
 # This method sets the initial base stats for the player,
 # based on the chosen PlayerClassData.
 # It should be called once by PlayerCharacter.gd during player setup.
@@ -243,38 +251,31 @@ func initialize_base_stats_with_raw_dict(raw_stats_dict: Dictionary):
 # This function is called by PlayerCharacter.gd or WeaponManager.gd
 # when a StatModificationEffectData is applied to "player_stats".
 func apply_stat_modification(effect_data: StatModificationEffectData):
-	# Assuming effect_data.modification_type is already a StringName (e.g., &"flat_add")
-	# If not, ensure StatModificationEffectData exposes it as StringName.
-	var modification_type_string_name: StringName = effect_data.modification_type
-	var target_stat_key_string: StringName = effect_data.stat_key
+	if not is_instance_valid(effect_data): return
+	
+	var key = effect_data.stat_key
 	var value = effect_data.get_value()
 
-	# Validate if the target_stat_key_string is a recognized player stat.
-	# It's good to also check if it exists in base_stat_values as a quick check.
-	if not PlayerStatKeys.KEY_NAMES.values().has(target_stat_key_string):
-		push_error("PlayerStats: Attempted to modify unrecognized player stat key: ", target_stat_key_string)
-		return
-	
-	# Only modify if the stat is intended to be modified (e.g., if it's in our base_stat_values,
-	# which it should be after initialize_base_stats).
-	if not base_stat_values.has(target_stat_key_string):
-		push_error("PlayerStats: Stat '", target_stat_key_string, "' not properly initialized in base_stat_values. Cannot apply modification.")
-		return
-
-	match modification_type_string_name:
-		&"flat_add": # Use StringName literals for match
-			base_stat_values[target_stat_key_string] += value
-		&"percent_add_to_base": # Use StringName literals for match
-			percent_add_modifiers[target_stat_key_string] += value
-		&"percent_mult_final": # Use StringName literals for match
-			percent_mult_final_modifiers[target_stat_key_string] *= (1.0 + value)
-		&"override_value": # Use StringName literals for match
-			base_stat_values[target_stat_key_string] = value
+	# CORRECTED: Modifications are now applied to the modifier dictionaries, not the base stats.
+	# This keeps the base values clean and makes the system more robust.
+	match effect_data.modification_type:
+		&"flat_add":
+			flat_modifiers[key] = flat_modifiers.get(key, 0.0) + value
+		&"percent_add_to_base":
+			percent_add_modifiers[key] = percent_add_modifiers.get(key, 0.0) + value
+		&"percent_mult_final":
+			percent_mult_final_modifiers[key] = percent_mult_final_modifiers.get(key, 1.0) * (1.0 + value)
+		&"override_value":
+			# An override sets the base value directly, wiping out other modifiers for that stat.
+			base_stat_values[key] = value
+			flat_modifiers[key] = 0.0
+			percent_add_modifiers[key] = 0.0
+			percent_mult_final_modifiers[key] = 1.0
 		_:
-			push_error("PlayerStats: Unknown modification type: '", modification_type_string_name, "' for stat '", target_stat_key_string, "'.")
+			push_error("PlayerStats: Unknown modification type: '", effect_data.modification_type, "'.")
 
-	print("PlayerStats: Applied stat modification to '", target_stat_key_string, "'. Type: '", modification_type_string_name, "', Value: ", value)
 	recalculate_all_stats()
+
 
 
 # --- Handling Custom Flags (Boolean states) ---
@@ -298,9 +299,27 @@ func get_flag(flag_key_enum: PlayerStatKeys.Keys) -> bool: # Use PlayerStatKeys
 
 # --- Getting Final Stat Value ---
 # This function calculates the final value of a stat after applying all modifiers.
-func get_final_stat(key_enum: PlayerStatKeys.Keys) -> float: # Use PlayerStatKeys
-	var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum] # Use PlayerStatKeys
-	return get_final_stat_by_string(key_string)
+func get_final_stat(key_enum: PlayerStatKeys.Keys) -> float:
+	var key_string = PlayerStatKeys.KEY_NAMES[key_enum]
+	
+	# 1. Get permanent stats stored in this node.
+	var base_val = float(base_stat_values.get(key_string, 0.0))
+	var permanent_flat_mod = float(flat_modifiers.get(key_string, 0.0))
+	var permanent_percent_add_mod = float(percent_add_modifiers.get(key_string, 0.0))
+	var permanent_percent_mult_final_mod = float(percent_mult_final_modifiers.get(key_string, 1.0))
+	
+	# 2. Get temporary modifiers from active status effects (e.g., Knight's Resolve).
+	var temp_additive_mod = 0.0
+	var temp_multiplicative_mod = 1.0
+	if is_instance_valid(status_effect_component):
+		temp_additive_mod = status_effect_component.get_sum_of_additive_modifiers(key_string)
+		temp_multiplicative_mod = status_effect_component.get_product_of_multiplicative_modifiers(key_string)
+
+	# 3. Combine all stats in the correct order of operations.
+	# Formula: (Base + FlatPermanent + TempAdditive) * (1 + PercentAddPermanent) * FinalMultPermanent * TempFinalMult
+	var final_value = (base_val + permanent_flat_mod + temp_additive_mod) * (1.0 + permanent_percent_add_mod) * permanent_percent_mult_final_mod * temp_multiplicative_mod
+	
+	return final_value
 
 func get_final_stat_by_string(key_string: StringName) -> float:
 	if not base_stat_values.has(key_string):

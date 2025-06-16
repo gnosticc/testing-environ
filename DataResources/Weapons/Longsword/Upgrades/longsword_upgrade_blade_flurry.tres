@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://1rke3ka00ts3"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_j5kut"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_i42ga"]
+[ext_resource type="Resource" uid="uid://detfy63s114te" path="res://DataResources/Weapons/Longsword/Effects/longsword_blade_flurry_effect.tres" id="2_j3ev3"]
+
+[resource]
+script = ExtResource("2_i42ga")
+upgrade_id = &"longsword_blade_flurry"
+title = "Blade Flurry"
+description = "Swings have a 35% chance to trigger an additional, identical swing shortly after."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_j5kut")]([ExtResource("2_j3ev3")])
+set_acquired_flag_on_weapon = &"longsword_blade_flurry_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

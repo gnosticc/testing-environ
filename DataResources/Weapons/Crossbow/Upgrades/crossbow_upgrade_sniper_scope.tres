@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://beq430r5v46q2"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_lxu8u"]
+[ext_resource type="Resource" uid="uid://3ae161o0ht40" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_sniper_crit_effect.tres" id="2_0flkm"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_w575n"]
+[ext_resource type="Resource" uid="uid://dlcd5xncg3sgp" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_sniper_speed_effect.tres" id="3_d7ygy"]
+
+[resource]
+script = ExtResource("2_w575n")
+upgrade_id = &"crossbow_sniper_scope"
+title = "Sniper Scope"
+description = "Bolts fly faster and have a 10% increased critical hit chance."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_lxu8u")]([ExtResource("2_0flkm"), ExtResource("3_d7ygy")])
+set_acquired_flag_on_weapon = &"crossbow_sniper_scope_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

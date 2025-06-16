@@ -212,8 +212,8 @@ func _ready():
 	
 	_setup_all_tabs()
 	
-	ui_update_timer = Timer.new(); ui_update_timer.name = "DebugUIRefreshTimer"
-	ui_update_timer.wait_time = UI_UPDATE_INTERVAL; ui_update_timer.one_shot = false
+	var ui_update_timer = Timer.new(); ui_update_timer.name = "DebugUIRefreshTimer"
+	ui_update_timer.wait_time = 0.25; ui_update_timer.one_shot = false
 	ui_update_timer.timeout.connect(_update_new_game_state_labels)
 	add_child(ui_update_timer); ui_update_timer.start()
 	
@@ -351,12 +351,21 @@ func _update_new_game_state_labels():
 
 # Handles input events to toggle the debug panel.
 func _unhandled_input(event: InputEvent):
-	if event.is_action_pressed(DEBUG_TOGGLE_ACTION):
+	if event.is_action_pressed("debug_panel_toggle"): # Use your defined input action
 		if not is_instance_valid(main_panel): return
 		main_panel.visible = not main_panel.visible
-		get_tree().paused = main_panel.visible
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if main_panel.visible else Input.MOUSE_MODE_HIDDEN)
-		if main_panel.visible: call_deferred("_initialize_panel_on_open_fully")
+		get_tree().paused = main_panel.visible # Pause/unpause the game tree
+
+		if main_panel.visible:
+			# When opening the panel, ensure the mouse is visible.
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			call_deferred("_initialize_panel_on_open_fully")
+		else:
+			# FIXED: When closing the panel, also ensure the mouse is visible.
+			# Your game's main script should handle setting the desired gameplay mouse mode
+			# (e.g., confined or captured), but for now, this ensures it doesn't disappear.
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			
 		get_viewport().set_input_as_handled()
 		
 # Ensures all content is refreshed when the panel is opened.

@@ -1,9 +1,7 @@
 # StatusEffectComponent.gd
 # This component manages active status effects (buffs/debuffs) on an owner node (e.g., Player, Enemy).
-# It handles their duration, ticking effects, and applying their modifiers.
-# REVISED: Implemented dynamic damage calculation for DoT effects like Bleed.
-# REVISED: Implemented full logic for stacking effects.
-# REVISED: Added extensive comments for clarity on new and existing systems.
+# It handles their duration, ticking effects, stacking, and applying their modifiers.
+# CORRECTED: The dynamic damage calculation for DoTs now uses a more robust method for creating typed arrays, preventing a parser error.
 
 class_name StatusEffectComponent
 extends Node
@@ -15,17 +13,20 @@ signal status_effects_changed(owner_node: Node)
 # Value: { data, duration_timer, tick_timer, stacks, source, weapon_stats, potency_override, stored_tick_damage }
 var active_effects: Dictionary = {}
 
+# Dictionaries to aggregate stat modifications from all active effects.
 var _additive_modifiers: Dictionary = {}
 var _multiplicative_modifiers: Dictionary = {}
 var _active_flags: Dictionary = {}
 
 
-func _ready():
-	if not get_parent() is Node2D and not get_parent() is Node3D:
-		push_warning("StatusEffectComponent WARNING: Owner is not a Node2D/3D.")
-
 # Applies a status effect to the owner of this component.
-func apply_effect(effect_data: StatusEffectData, source_node: Node = null, p_weapon_stats_for_scaling: Dictionary = {}, duration_override: float = -1.0, potency_override: float = -1.0):
+func apply_effect(
+		effect_data: StatusEffectData,
+		source_node: Node = null,
+		p_weapon_stats_for_scaling: Dictionary = {},
+		duration_override: float = -1.0,
+		potency_override: float = -1.0
+	):
 	if not is_instance_valid(effect_data) or effect_data.id == &"":
 		push_error("StatusEffectComponent: Invalid StatusEffectData provided."); return
 
@@ -36,16 +37,15 @@ func apply_effect(effect_data: StatusEffectData, source_node: Node = null, p_wea
 		# --- HANDLE RE-APPLICATION OF AN EXISTING EFFECT ---
 		var existing_effect = active_effects[effect_id]
 		
-		# Stacking logic
+		# Stacking logic: Increment stacks if the effect is stackable and not at max stacks.
 		if effect_data.is_stackable and existing_effect.stacks < effect_data.max_stacks:
 			existing_effect.stacks += 1
 		
-		# Refresh duration if applicable
+		# Refresh duration if the effect is configured to do so.
 		if effect_data.refresh_duration_on_reapply:
 			existing_effect.source = source_node
 			existing_effect.weapon_stats = p_weapon_stats_for_scaling.duplicate(true)
 			existing_effect.potency_override = potency_override
-
 			if final_duration > 0 and is_instance_valid(existing_effect.duration_timer):
 				existing_effect.duration_timer.wait_time = final_duration
 				existing_effect.duration_timer.start()
@@ -55,20 +55,31 @@ func apply_effect(effect_data: StatusEffectData, source_node: Node = null, p_wea
 			"data": effect_data, "duration_timer": null, "tick_timer": null, "stacks": 1,
 			"source": source_node, "weapon_stats": p_weapon_stats_for_scaling.duplicate(true),
 			"potency_override": potency_override,
-			"stored_tick_damage": 0.0 # Initialize damage for DoTs
+			"stored_tick_damage": 0.0 # This will store the base damage for DoT calculations.
 		}
 		
 		# --- DYNAMIC DAMAGE CALCULATION (for DoTs like Bleed) ---
-		# If the effect is a damage-over-time, calculate the initial hit's damage now and store it.
-		var source_player_stats = source_node.get_node_or_null("PlayerStats") if is_instance_valid(source_node) else null
-		if is_instance_valid(source_player_stats):
-			var weapon_dmg_percent = float(p_weapon_stats_for_scaling.get(&"weapon_damage_percentage", 1.0))
-			var weapon_tags = p_weapon_stats_for_scaling.get(&"tags", []) as Array[StringName]
-			# Calculate the total damage of the single hit that applied this effect.
-			var total_hit_damage = source_player_stats.get_calculated_player_damage(weapon_dmg_percent, weapon_tags)
-			new_effect_entry.stored_tick_damage = total_hit_damage
+		# "Snapshot" the damage of the initial hit to ensure the DoT scales correctly.
+		var is_dot_effect = false
+		for effect in effect_data.effects_while_active:
+			if effect is StatModificationEffectData and effect.stat_key == &"health":
+				is_dot_effect = true
+				break
+		
+		if is_dot_effect:
+			var source_player_stats = source_node.player_stats if is_instance_valid(source_node) and "player_stats" in source_node else null
+			if is_instance_valid(source_player_stats):
+				var weapon_dmg_percent = float(p_weapon_stats_for_scaling.get(&"weapon_damage_percentage", 1.0))
+				
+				# FIXED: Use a more robust method to create the typed array to avoid parser errors.
+				var weapon_tags: Array[StringName] = []
+				var retrieved_tags = p_weapon_stats_for_scaling.get(&"tags", [])
+				if retrieved_tags is Array:
+					weapon_tags.assign(retrieved_tags)
+
+				new_effect_entry.stored_tick_damage = source_player_stats.get_calculated_player_damage(weapon_dmg_percent, weapon_tags)
 			
-		# Create and start duration timer
+		# Create and start duration timer if the effect is not permanent.
 		if final_duration > 0:
 			var duration_timer_node = Timer.new()
 			duration_timer_node.name = "DurationTimer_" + str(effect_id)
@@ -79,7 +90,7 @@ func apply_effect(effect_data: StatusEffectData, source_node: Node = null, p_wea
 			duration_timer_node.start()
 			new_effect_entry.duration_timer = duration_timer_node
 		
-		# Create and start tick timer
+		# Create and start tick timer for effects that apply over time.
 		if effect_data.tick_interval > 0:
 			var tick_timer_node = Timer.new()
 			tick_timer_node.name = "TickTimer_" + str(effect_id)
@@ -94,13 +105,14 @@ func apply_effect(effect_data: StatusEffectData, source_node: Node = null, p_wea
 
 		active_effects[effect_id] = new_effect_entry
 	
-	# Recalculate stats and notify owner of changes
+	# After any change, recalculate all modifiers and notify the owner.
 	_recalculate_and_apply_stat_modifiers() 
 	var owner_node = get_parent()
 	if is_instance_valid(owner_node) and owner_node.has_method("on_status_effects_changed"):
 		owner_node.on_status_effects_changed(owner_node)
 	emit_signal("status_effects_changed", owner_node)
 
+# Called repeatedly by a status effect's tick_timer.
 func _on_status_effect_tick(effect_id: StringName):
 	if not active_effects.has(effect_id): return
 	
@@ -114,13 +126,11 @@ func _on_status_effect_tick(effect_id: StringName):
 		if effect is StatModificationEffectData:
 			var stat_mod = effect as StatModificationEffectData
 			
+			# This specifically handles ticking damage effects like Bleed.
 			if stat_mod.stat_key == &"health" and stat_mod.modification_type == &"flat_add":
-				# --- REVISED: DYNAMIC BLEED DAMAGE LOGIC ---
-				# Calculate how much damage this single tick should do.
-				# For a 2-second bleed with 0.1s tick interval, there are 20 ticks.
-				# Each tick should do 1/20th of the initial stored damage.
 				var damage_per_tick = 0.0
 				if status_data.duration > 0 and status_data.tick_interval > 0:
+					# Divide the total stored damage by the number of ticks to get damage per tick.
 					var num_ticks = status_data.duration / status_data.tick_interval
 					damage_per_tick = effect_entry.stored_tick_damage / num_ticks
 
@@ -128,7 +138,6 @@ func _on_status_effect_tick(effect_id: StringName):
 				if actual_potency_override >= 0.0:
 					damage_per_tick *= actual_potency_override
 
-				# Apply stacks multiplier to the tick damage
 				damage_per_tick *= effect_entry.stacks
 
 				var final_tick_damage = absf(damage_per_tick)
@@ -137,6 +146,7 @@ func _on_status_effect_tick(effect_id: StringName):
 				if owner.has_method("take_damage"):
 					owner.take_damage(final_tick_damage, effect_entry.source)
 
+# Called when an effect's duration timer expires.
 func _on_effect_expired(effect_id_expired: StringName, duration_timer_ref: Timer):
 	if active_effects.has(effect_id_expired):
 		var effect_entry = active_effects[effect_id_expired]
@@ -165,11 +175,13 @@ func _on_effect_expired(effect_id_expired: StringName, duration_timer_ref: Timer
 	if is_instance_valid(duration_timer_ref):
 		duration_timer_ref.queue_free()
 
+# Recalculates the aggregated stat modifiers from all currently active effects.
 func _recalculate_and_apply_stat_modifiers():
 	_additive_modifiers.clear()
 	_multiplicative_modifiers.clear()
 	_active_flags.clear()
 
+	# Initialize all modifier dictionaries to neutral values.
 	for key_enum_value in PlayerStatKeys.Keys.values():
 		_multiplicative_modifiers[PlayerStatKeys.KEY_NAMES[key_enum_value]] = 1.0
 		_additive_modifiers[PlayerStatKeys.KEY_NAMES[key_enum_value]] = 0.0
@@ -189,7 +201,6 @@ func _recalculate_and_apply_stat_modifiers():
 					var potency_override = effect_entry.get("potency_override", -1.0)
 					if potency_override >= 0.0: mod_value *= potency_override
 					
-					# REVISED: Apply stacks to the modifier value.
 					if status_effect_data_res.is_stackable:
 						mod_value *= effect_entry.stacks
 					

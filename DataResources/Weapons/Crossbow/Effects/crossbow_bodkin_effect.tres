@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://qycswpj6il3l"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_yvyhi"]
+
+[resource]
+script = ExtResource("1_yvyhi")
+id = &""
+modification_type = &"flat_add"
+stat_key = &"pierce_count"
+value_type = 0
+value_float = 0.0
+value_int = 2
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

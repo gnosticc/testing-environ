@@ -16,8 +16,8 @@ const LEVEL_UP_SCREEN_SCENE = preload("res://Scenes/UI/NewLevelUpScreen.tscn")
 @onready var boss_container: Node2D = $BossContainer
 var camera: Camera2D
 var game_ui_node: Node # Type hint for the GameUI node
-var game_over_screen_instance: Control # Instance of the game over UI
-var level_up_screen_instance: Control # Instance of the level up UI
+var game_over_screen_instance: CanvasLayer # Instance of the game over UI
+var level_up_screen_instance: CanvasLayer
 var player_node: PlayerCharacter # Reference to the player character
 
 # --- Spawn Configuration (Tunable) ---
@@ -742,19 +742,20 @@ func _on_player_level_up(_new_level: int):
 # Generates a list of upgrade options for the player to choose from.
 # This function aims to prevent duplicate upgrades in the same selection.
 func _get_upgrade_options_for_player() -> Array:
-	var options_pool: Array = [] # Temporary pool of all possible upgrade options
-	var offered_ids_this_run: Array = [] # IDs of options already offered in THIS level-up selection
+	var options_pool: Array = []
+	var offered_ids_this_run: Array = []
 
 	# 1. Get General Upgrades
 	for card_res in loaded_general_upgrades:
-		if is_instance_valid(card_res) and not offered_ids_this_run.has(card_res.id): # Prevent duplicates from existing
+		if is_instance_valid(card_res) and not offered_ids_this_run.has(card_res.id):
 			var card_presentation = {
-				"id_for_card_selection": card_res.id, # Use StringName for ID
+				"id_for_card_selection": card_res.id,
 				"title": card_res.title,
 				"description": card_res.description,
+				# FIXED: Check if the icon is valid before accessing its resource_path.
 				"icon_path": card_res.icon.resource_path if is_instance_valid(card_res.icon) else "",
 				"type": "general_upgrade",
-				"resource_data": card_res # Pass the full resource
+				"resource_data": card_res
 			}
 			options_pool.append(card_presentation)
 			offered_ids_this_run.append(card_res.id)
@@ -768,17 +769,17 @@ func _get_upgrade_options_for_player() -> Array:
 			
 			var next_upgrades: Array[WeaponUpgradeData] = get_weapon_next_level_upgrades(str(weapon_id_sname), active_weapon_dict)
 			for upgrade_res in next_upgrades:
-				# Use a unique ID for selection to prevent offering the same weapon upgrade for different weapons
 				var unique_selection_id = str(weapon_id_sname) + "_" + str(upgrade_res.upgrade_id)
 				if not offered_ids_this_run.has(unique_selection_id):
 					var upgrade_card_presentation = {
 						"id_for_card_selection": unique_selection_id,
 						"title": upgrade_res.title,
 						"description": upgrade_res.description,
+						# FIXED: Check if the icon is valid before accessing its resource_path.
 						"icon_path": upgrade_res.icon.resource_path if is_instance_valid(upgrade_res.icon) else "",
 						"type": "weapon_upgrade",
-						"weapon_id_to_upgrade": weapon_id_sname, # Pass StringName
-						"resource_data": upgrade_res # Pass the full resource
+						"weapon_id_to_upgrade": weapon_id_sname,
+						"resource_data": upgrade_res
 					}
 					options_pool.append(upgrade_card_presentation)
 					offered_ids_this_run.append(unique_selection_id)
@@ -786,45 +787,39 @@ func _get_upgrade_options_for_player() -> Array:
 	# 3. Get New Weapons if slots are available
 	if is_instance_valid(player_node) and player_node.has_method("get_active_weapons_data_for_level_up"):
 		var current_player_weapons = player_node.get_active_weapons_data_for_level_up()
-		# Access weapon_manager's max_weapons property directly from player_node's reference
 		if current_player_weapons.size() < player_node.weapon_manager.max_weapons:
 			var potential_new_weapons_pool : Array = []
 			for bp_data in all_loaded_weapon_blueprints:
 				if not is_instance_valid(bp_data): continue
 				var bp_id_sname = bp_data.id
 				var already_have_it = false
-				# Check if player already has this weapon
 				for p_wep_dict in current_player_weapons:
 					if p_wep_dict.get("id") == bp_id_sname: already_have_it = true; break
 				
 				if not already_have_it and not offered_ids_this_run.has(bp_id_sname):
 					var new_weapon_offer_presentation = {
-						"id_for_card_selection": bp_id_sname, # Use StringName for ID
+						"id_for_card_selection": bp_id_sname,
 						"type": "new_weapon",
 						"title": bp_data.title,
 						"description": bp_data.description,
+						# FIXED: Check if the icon is valid before accessing its resource_path.
 						"icon_path": bp_data.icon.resource_path if is_instance_valid(bp_data.icon) else "",
-						"resource_data": bp_data # Pass the full resource
+						"resource_data": bp_data
 					}
 					potential_new_weapons_pool.append(new_weapon_offer_presentation)
-					offered_ids_this_run.append(bp_id_sname) # Mark as offered
+					offered_ids_this_run.append(bp_id_sname)
 			
-			# If there are potential new weapons, pick one randomly and add to options_pool
 			if not potential_new_weapons_pool.is_empty():
 				options_pool.append(potential_new_weapons_pool.pick_random())
 
-	# --- Final Selection Logic: Shuffle and pick 3 unique options ---
+	# Final Selection Logic
 	options_pool.shuffle()
 	var final_chosen_options: Array = []
-	# 'offered_ids_this_selection' is already used above to prevent duplicates from the full pool
-	# so we just need to pick the first 3.
-	
 	for option_data_dict in options_pool:
 		if final_chosen_options.size() >= 3: break
 		final_chosen_options.append(option_data_dict)
 			
 	if final_chosen_options.is_empty():
-		# Fallback if no valid options were generated (should ideally not happen with current logic)
 		final_chosen_options.append({"title": "Continue", "description": "No new upgrades this level.", "type": "skip"})
 	
 	return final_chosen_options

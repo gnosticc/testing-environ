@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://drwng42i7ut85"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_7e4cx"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_qak0d"]
+[ext_resource type="Resource" uid="uid://c1t6eepfwugca" path="res://DataResources/Weapons/Longsword/Effects/longsword_balanced_hilt_effect.tres" id="2_v4iep"]
+
+[resource]
+script = ExtResource("2_qak0d")
+upgrade_id = &"longsword_balanced_hilt"
+title = "Balanced Hilt"
+description = "Allows for quicker, more frequent swings, increasing Longsword attack speed by 25%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_7e4cx")]([ExtResource("2_v4iep")])
+set_acquired_flag_on_weapon = &"longsword_balanced_hilt_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

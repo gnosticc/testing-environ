@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bxbtxkihgly1k"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_84xrd"]
+[ext_resource type="Resource" uid="uid://dqn4g0g0yst6i" path="res://DataResources/Weapons/Longsword/Effects/longsword_honed_edge_effect.tres" id="2_485qh"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_tpkvi"]
+
+[resource]
+script = ExtResource("2_tpkvi")
+upgrade_id = &"longsword_honed_edge"
+title = "Honed Edge"
+description = "Further enhances the longsword's cutting power. Increases damage by 125%."
+prerequisites_on_this_weapon = Array[StringName]([&"longsword_tempered_steel"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_84xrd")]([ExtResource("2_485qh")])
+set_acquired_flag_on_weapon = &"longsword_honed_edge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

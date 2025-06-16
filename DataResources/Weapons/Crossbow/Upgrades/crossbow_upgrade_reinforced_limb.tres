@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://ebnq1c5nbjij"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_5d6db"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_qud5d"]
+[ext_resource type="Resource" uid="uid://cs13jwsslluri" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_reinforced_limb_effect.tres" id="2_ugi2v"]
+
+[resource]
+script = ExtResource("2_qud5d")
+upgrade_id = &"crossbow_reinforced_limb"
+title = "Reinforced Limb"
+description = "Further increases bolt damage by 150%."
+prerequisites_on_this_weapon = Array[StringName]([&"crossbow_heavy_bolts"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_5d6db")]([ExtResource("2_ugi2v")])
+set_acquired_flag_on_weapon = &"crossbow_reinforced_limb_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://7bfftksdsbra"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_jor7s"]
+[ext_resource type="Resource" uid="uid://bmpl312k8ys82" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_greased_string_effect.tres" id="2_7il6g"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_xdafc"]
+
+[resource]
+script = ExtResource("2_xdafc")
+upgrade_id = &"crossbow_greased_string"
+title = "Greased String"
+description = "Increases crossbow attack speed by 20%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_jor7s")]([ExtResource("2_7il6g")])
+set_acquired_flag_on_weapon = &"crossbow_greased_string_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

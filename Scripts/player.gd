@@ -22,6 +22,7 @@ class_name PlayerCharacter
 var current_health: float = 0.0 # Initialized here, will be set from PlayerStats.MAX_HEALTH on init
 var current_pickup_magnet_radius: float = 0.0
 var is_dead_flag: bool = false # FIXED: Declared is_dead_flag here
+var is_invulnerable: bool = false
 
 # Store the last known max health to correctly scale current health percentage
 var _last_known_max_health: float = 0.0 # Initialize here to ensure it's always set
@@ -343,42 +344,54 @@ func calculate_exp_for_next_level(player_curr_level: int) -> int:
 	var exponential_part = BASE_FOR_EXPONENTIAL_PART * pow(EXPONENTIAL_SCALING_FACTOR, float(player_curr_level - 1))
 	return linear_part + int(exponential_part)
 	
-func take_damage(amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}): # Changed amount to float for consistency
-	if current_health <= 0 or is_dead_flag: return # Do not take damage if dead or already dying
+# This function is called when an enemy's attack hits the player.
+func take_damage(damage_amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}):
+	if is_invulnerable or is_dead_flag: return
+
+	# --- KNIGHT'S RESOLVE & DAMAGE REDUCTION LOGIC ---
+	# Get all relevant damage reduction stats from the PlayerStats node.
+	var percent_reduction = player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
+	var flat_reduction = player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_REDUCTION)
+	var armor = player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR)
+	var armor_pen = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0))
+
+	# --- DEBUGGING PRINTS ---
+	# These prints will show the entire calculation, making it clear if Knight's Resolve is working.
+	print_debug("--- Player Taking Damage ---")
+	print_debug("Initial Incoming Damage: ", damage_amount)
+	print_debug("Player Stats | Percent Reduction: ", percent_reduction, " (From Knight's Resolve, etc.)")
+	print_debug("Player Stats | Flat Reduction: ", flat_reduction)
+	print_debug("Player Stats | Armor: ", armor)
+	print_debug("Attacker Stats | Armor Penetration: ", armor_pen)
 	
-	# Apply global flat damage reduction first (from player's current_global_flat_damage_reduction)
-	var incoming_damage = amount - player_stats.current_global_flat_damage_reduction
-	incoming_damage = maxf(0.0, incoming_damage) # Ensure damage doesn't go below zero after flat reduction
-
-	var current_armor = player_stats.current_armor # Use cached current_ stat
-	var armor_penetration_value = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0)) # Get penetration from incoming attack
-
-	# Calculate effective armor after penetration
-	var effective_armor = maxf(0.0, current_armor - armor_penetration_value)
+	# --- DAMAGE CALCULATION PIPELINE ---
+	# 1. Apply flat reduction first.
+	var damage_after_flat_redux = max(0, damage_amount - flat_reduction)
 	
-	# Basic damage reduction: raw damage - effective armor
-	var actual_damage = maxf(0.0, incoming_damage - effective_armor)
+	# 2. Calculate effective armor after penetration.
+	var effective_armor = max(0, armor - armor_pen)
+	var damage_after_armor = max(0, damage_after_flat_redux - effective_armor)
 
-	# Apply DAMAGE_REDUCTION_MULTIPLIER (from player's own buffs or debuffs)
-	var damage_reduction_mult_val = player_stats.get_final_stat(PlayerStatKeys.Keys.DAMAGE_REDUCTION_MULTIPLIER)
-	actual_damage *= (1.0 - damage_reduction_mult_val) # Assuming this is a reduction, so (1.0 - value)
-	actual_damage = maxf(0.0, actual_damage) # Ensure damage doesn't go negative after reduction
-
-	# Apply GLOBAL_PERCENT_DAMAGE_REDUCTION
-	var global_percent_reduction = player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
-	actual_damage *= (1.0 - global_percent_reduction)
-	actual_damage = maxf(0.0, actual_damage)
-
-	current_health = maxf(0.0, current_health - actual_damage)
+	# 3. Apply percentage-based reduction last.
+	var final_damage = damage_after_armor * (1.0 - percent_reduction)
+	final_damage = max(0, final_damage) # Ensure damage never becomes negative.
 	
-	var current_max_hp = player_stats.current_max_health # Use cached current_ stat
-	emit_signal("health_changed", current_health, current_max_hp)
+	# --- FINAL DEBUG PRINT ---
+	print_debug("Final Calculated Damage to Player: ", final_damage)
+	print_debug("--------------------------")
+
+	current_health -= final_damage
+	
+	emit_signal("health_changed", current_health, player_stats.get_final_stat(PlayerStatKeys.Keys.MAX_HEALTH))
 	
 	if is_instance_valid(attacker):
-		emit_signal("player_took_damage_from", attacker)
 		emit_signal("attacked_by_enemy", attacker)
 		
-	if current_health <= 0: die()
+	if current_health <= 0:
+		die() # Assumes a _die() function exists
+
+	#else:
+		#start_invulnerability() # Assumes a start_invulnerability() function exists
 
 
 func die():
@@ -545,3 +558,4 @@ func heal(amount: float):
 	var actual_max_health = get_max_health_value()
 	current_health = clampf(current_health + amount, 0, actual_max_health)
 	emit_signal("health_changed", current_health, actual_max_health)
+	

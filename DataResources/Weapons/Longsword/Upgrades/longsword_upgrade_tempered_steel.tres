@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cnlbgdm3ekrpy"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_r2pq6"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_nrx25"]
+[ext_resource type="Resource" uid="uid://byno1c2je37rg" path="res://DataResources/Weapons/Longsword/Effects/longsword_tempered_steel_effect.tres" id="2_vwm2p"]
+
+[resource]
+script = ExtResource("2_nrx25")
+upgrade_id = &"longsword_tempered_steel"
+title = "Tempered Steel"
+description = "The longsword's blade is strengthened, increasing its damage by 125%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_r2pq6")]([ExtResource("2_vwm2p")])
+set_acquired_flag_on_weapon = &"longsword_tempered_steel_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

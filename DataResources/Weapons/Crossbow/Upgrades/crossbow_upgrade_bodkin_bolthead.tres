@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bamij5u8jiyc5"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_hkgw6"]
+[ext_resource type="Resource" uid="uid://qycswpj6il3l" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_bodkin_effect.tres" id="2_tywjn"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_xnb3r"]
+
+[resource]
+script = ExtResource("2_xnb3r")
+upgrade_id = &"crossbow_bodkin"
+title = "Bodkin Bolthead"
+description = "Bolts now pierce 2 additional targets."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_hkgw6")]([ExtResource("2_tywjn")])
+set_acquired_flag_on_weapon = &"crossbow_bodkin_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

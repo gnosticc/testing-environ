@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://4qgybsx6gmre"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_y2d6y"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_a7oyp"]
+[ext_resource type="Resource" uid="uid://b3m358h1vg51m" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_ballista_barrage_effect.tres" id="2_eqwiy"]
+
+[resource]
+script = ExtResource("2_a7oyp")
+upgrade_id = &"crossbow_ballista_barrage"
+title = "Ballista Barrage"
+description = "Crossbow now fires two bolts in rapid succession."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_y2d6y")]([ExtResource("2_eqwiy")])
+set_acquired_flag_on_weapon = &"crossbow_ballista_barrage_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

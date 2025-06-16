@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://djul2w3j0l01c"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ve2uo"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_00qxj"]
+[ext_resource type="Resource" uid="uid://b4or6xkvubwjd" path="res://DataResources/Weapons/Longsword/Effects/knights_resolve_buff_effect.tres" id="2_httwy"]
+
+[resource]
+script = ExtResource("2_00qxj")
+id = &"knights_resolve_buff"
+display_name = "Knight's Resolve"
+duration = 1.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_ve2uo")]([ExtResource("2_httwy")])
+next_status_effect_on_expire = &""
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

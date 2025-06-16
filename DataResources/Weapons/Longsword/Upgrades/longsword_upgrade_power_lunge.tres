@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bu2k12ysw02r7"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_jvgnj"]
+[ext_resource type="Resource" uid="uid://b4k51eg56ts17" path="res://DataResources/Weapons/Longsword/Effects/longsword_power_lunge_dmg_effect.tres" id="2_f0n2b"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_q0gwn"]
+[ext_resource type="Resource" uid="uid://4a8yap23tsxf" path="res://DataResources/Weapons/Longsword/Effects/longsword_power_lunge_crit_effect.tres" id="3_igh4v"]
+
+[resource]
+script = ExtResource("2_q0gwn")
+upgrade_id = &"longsword_power_lunge"
+title = "Power Lunge"
+description = "Adds a 10% chance for Longsword attacks to deal critical damage and increases damage by 175%."
+prerequisites_on_this_weapon = Array[StringName]([&"longsword_honed_edge"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_jvgnj")]([ExtResource("2_f0n2b"), ExtResource("3_igh4v")])
+set_acquired_flag_on_weapon = &"longsword_power_lunge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

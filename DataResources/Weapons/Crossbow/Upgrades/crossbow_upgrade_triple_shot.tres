@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bgos7usr6dqy4"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_5cqoq"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_qg228"]
+[ext_resource type="Resource" uid="uid://cjpsv5h8ipid2" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_triple_shot_effect.tres" id="2_ufklm"]
+
+[resource]
+script = ExtResource("2_qg228")
+upgrade_id = &"crossbow_triple_shot"
+title = "Triple Shot"
+description = "Fires a tight spread of three bolts instead of one."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_5cqoq")]([ExtResource("2_ufklm")])
+set_acquired_flag_on_weapon = &"crossbow_triple_shot_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

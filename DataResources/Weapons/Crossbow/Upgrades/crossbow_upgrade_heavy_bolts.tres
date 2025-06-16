@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dtgflh0glkiql"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_6a2ph"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_kvotr"]
+[ext_resource type="Resource" uid="uid://cwmes6264is8p" path="res://DataResources/Weapons/Crossbow/Effects/crossbow_heavy_bolts_effect.tres" id="2_wliru"]
+
+[resource]
+script = ExtResource("2_kvotr")
+upgrade_id = &"crossbow_heavy_bolts"
+title = "Heavy Bolts"
+description = "Bolts deal 150% increased weapon damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_6a2ph")]([ExtResource("2_wliru")])
+set_acquired_flag_on_weapon = &"crossbow_heavy_bolts_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

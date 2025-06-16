@@ -1,0 +1,68 @@
+[gd_scene load_steps=11 format=3 uid="uid://dy5x6j3ofqf8b"]
+
+[ext_resource type="Script" uid="uid://bc7rftcfpckid" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/explosion.gd" id="1_ei0u5"]
+[ext_resource type="Texture2D" uid="uid://d1wtico5edctf" path="res://Assets/SFX/explosion animation.png" id="2_kbwuv"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ei0u5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kbwuv"]
+atlas = ExtResource("2_kbwuv")
+region = Rect2(0, 0, 120, 130)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ufyqh"]
+atlas = ExtResource("2_kbwuv")
+region = Rect2(120, 0, 120, 130)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nclgr"]
+atlas = ExtResource("2_kbwuv")
+region = Rect2(240, 0, 120, 130)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r6nv0"]
+atlas = ExtResource("2_kbwuv")
+region = Rect2(360, 0, 120, 130)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ebven"]
+atlas = ExtResource("2_kbwuv")
+region = Rect2(480, 0, 120, 130)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8cytx"]
+atlas = ExtResource("2_kbwuv")
+region = Rect2(600, 0, 120, 130)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kbwuv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kbwuv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ufyqh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nclgr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r6nv0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ebven")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8cytx")
+}],
+"loop": false,
+"name": &"explosion",
+"speed": 18.0
+}]
+
+[node name="Explosion" type="Area2D"]
+collision_layer = 0
+collision_mask = 136
+script = ExtResource("1_ei0u5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ei0u5")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_kbwuv")
+animation = &"explosion"

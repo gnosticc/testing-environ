@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://4a8yap23tsxf"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_av68c"]
+
+[resource]
+script = ExtResource("1_av68c")
+id = &""
+modification_type = &"flat_add"
+stat_key = &"crit_chance"
+value_type = 1
+value_float = 0.1
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"
