@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://bjn7rcnqppqrr"]
+
+[ext_resource type="Script" uid="uid://cncco28wo37h3" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/FanOfKnivesController.gd" id="1_p1m05"]
+[ext_resource type="PackedScene" uid="uid://c3bh1w1v6fdy0" path="res://Scenes/Weapons/Projectiles/FanOfKnivesProjectile.tscn" id="2_d5gp8"]
+
+[node name="FanofKnivesController" type="Node2D"]
+script = ExtResource("1_p1m05")
+knife_projectile_scene = ExtResource("2_d5gp8")

@@ -33,6 +33,16 @@ func apply_effect(
 	var effect_id: StringName = effect_data.id
 	var final_duration = duration_override if duration_override >= 0.0 else effect_data.duration
 	
+	## NEW: Poison Stacking Logic
+	# For non-refreshing, stacking effects like poison, we need a unique key for each stack.
+	# We create one by appending a unique number.
+	var final_effect_key = effect_id
+	if effect_data.is_stackable and not effect_data.refresh_duration_on_reapply:
+		var stack_counter = 0
+		while active_effects.has(str(effect_id) + str(stack_counter)):
+			stack_counter += 1
+		final_effect_key = str(effect_id) + str(stack_counter)
+	
 	if active_effects.has(effect_id):
 		# --- HANDLE RE-APPLICATION OF AN EXISTING EFFECT ---
 		var existing_effect = active_effects[effect_id]
@@ -129,10 +139,14 @@ func _on_status_effect_tick(effect_id: StringName):
 			# This specifically handles ticking damage effects like Bleed.
 			if stat_mod.stat_key == &"health" and stat_mod.modification_type == &"flat_add":
 				var damage_per_tick = 0.0
-				if status_data.duration > 0 and status_data.tick_interval > 0:
-					# Divide the total stored damage by the number of ticks to get damage per tick.
-					var num_ticks = status_data.duration / status_data.tick_interval
-					damage_per_tick = effect_entry.stored_tick_damage / num_ticks
+				## NEW: Handle poison damage calculation
+				if status_data.id == &"poison":
+					# Per design: "dealing half of the arrow's total hit damage... every second"
+					damage_per_tick = effect_entry.stored_tick_damage * 0.5
+				else: # Existing bleed logic
+					if status_data.duration > 0 and status_data.tick_interval > 0:
+						var num_ticks = status_data.duration / status_data.tick_interval
+						damage_per_tick = effect_entry.stored_tick_damage / num_ticks
 
 				var actual_potency_override = effect_entry.get("potency_override", -1.0)
 				if actual_potency_override >= 0.0:

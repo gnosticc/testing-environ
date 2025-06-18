@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://be5mescqtv6d2"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_exgea"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_fiafe"]
+[ext_resource type="Resource" uid="uid://djn36io47k8cy" path="res://DataResources/Weapons/Shortbow/Effects/phantom_arrows_pierce_effect.tres" id="2_mkg22"]
+[ext_resource type="Resource" uid="uid://cvq12n4jfq504" path="res://DataResources/Weapons/Shortbow/Effects/phantom_arrows_damage_effect.tres" id="3_pawax"]
+[ext_resource type="Resource" uid="uid://bcu7orvsl3xy1" path="res://DataResources/Weapons/Shortbow/Effects/phantom_arrows_tag_effect.tres" id="4_nm8nl"]
+
+[resource]
+script = ExtResource("2_fiafe")
+upgrade_id = &"shortbow_phantom_arrows"
+title = "Phantom Arrows"
+description = "Shortbow arrows now pierce through 1 enemy. The shortbow deals 25% more damage and gains the 'Piercing' tag."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_exgea")]([ExtResource("4_nm8nl"), ExtResource("2_mkg22"), ExtResource("3_pawax")])
+set_acquired_flag_on_weapon = &"shortbow_phantom_arrows_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

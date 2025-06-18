@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://c3bh1w1v6fdy0"]
+
+[ext_resource type="Script" uid="uid://bwg0t4q7ocpu8" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/FanOfKnivesProjectile.gd" id="1_n632l"]
+[ext_resource type="Texture2D" uid="uid://ctc0rh5eaqos0" path="res://Assets/Weapons/Fan of Knives Sprite.png" id="2_7avt4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_65xks"]
+atlas = ExtResource("2_7avt4")
+region = Rect2(0, 0, 300, 70)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vbawk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_65xks")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yc77v"]
+size = Vector2(18, 6)
+
+[node name="FanOfKnivesProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_n632l")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.05, 0.05)
+sprite_frames = SubResource("SpriteFrames_vbawk")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_yc77v")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

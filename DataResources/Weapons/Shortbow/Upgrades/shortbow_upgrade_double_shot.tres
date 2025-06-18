@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://colcovx72oaec"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_h6e87"]
+[ext_resource type="Resource" uid="uid://c3qtg6aoeu2sw" path="res://DataResources/Weapons/Shortbow/Effects/double_shot_effect.tres" id="2_kcsq7"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_rj7j6"]
+
+[resource]
+script = ExtResource("2_rj7j6")
+upgrade_id = &"shortbow_double_shot"
+title = "Double Shot"
+description = "Fires an additional arrow with each volley."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_h6e87")]([ExtResource("2_kcsq7")])
+set_acquired_flag_on_weapon = &"shortbow_double_shot_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

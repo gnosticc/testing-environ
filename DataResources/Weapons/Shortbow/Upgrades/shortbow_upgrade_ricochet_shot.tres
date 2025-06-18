@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bm7b1dr3u5qii"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_1vqlr"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_qnfig"]
+[ext_resource type="Resource" uid="uid://besn775n3kkmp" path="res://DataResources/Weapons/Shortbow/Effects/ricochet_shot_count_effect.tres" id="2_sl3mo"]
+[ext_resource type="Resource" uid="uid://bbeoik2xbl43o" path="res://DataResources/Weapons/Shortbow/Effects/ricochet_shot_damage_effect.tres" id="3_8iteu"]
+
+[resource]
+script = ExtResource("2_qnfig")
+upgrade_id = &"shortbow_ricochet_shot"
+title = "Ricochet Shot"
+description = "Arrows now bounce to one additional nearby enemy. The Shortbow now deals 25% more damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_1vqlr")]([ExtResource("2_sl3mo"), ExtResource("3_8iteu")])
+set_acquired_flag_on_weapon = &"shortbow_ricochet_shot_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

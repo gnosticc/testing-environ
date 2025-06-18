@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AddTagEffectData" load_steps=2 format=3 uid="uid://bcu7orvsl3xy1"]
+
+[ext_resource type="Script" uid="uid://d2xsy8ik5lue5" path="res://Scripts/DataResources/Effects/AddTagEffectData.gd" id="1_2t0um"]
+
+[resource]
+script = ExtResource("1_2t0um")
+tag_to_add = &"piercing"
+effect_type_id = &"add_tag"
+target_scope = &"weapon_behavior"
+developer_note = ""
+metadata/_custom_type_script = "uid://d2xsy8ik5lue5"

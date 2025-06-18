@@ -1,8 +1,17 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://decefa1ksr1hc"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://decefa1ksr1hc"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_6w2lo"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_atqco"]
+[ext_resource type="Resource" uid="uid://ckt2e3xhws6ah" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_dance_of_death.tres" id="2_wy3bn"]
 [ext_resource type="PackedScene" uid="uid://b5tus7fojeofy" path="res://Scenes/Weapons/DaggerStrikeController.tscn" id="3_atqco"]
+[ext_resource type="Resource" uid="uid://2ol6mf5i4f6j" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_dancing_daggers.tres" id="3_vwiuw"]
+[ext_resource type="Resource" uid="uid://cjtht7flet713" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_fan_of_knives.tres" id="4_7kdam"]
+[ext_resource type="Resource" uid="uid://05cwk8umyva7" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_finishing_blow.tres" id="5_5bey6"]
+[ext_resource type="Resource" uid="uid://b4btpxn0m0plu" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_honed_edge.tres" id="6_0hp3h"]
+[ext_resource type="Resource" uid="uid://blvvlhefogj8u" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_keen_edge.tres" id="7_ywvo1"]
+[ext_resource type="Resource" uid="uid://cpcnt0jaoldru" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_opportunist.tres" id="8_vxcas"]
+[ext_resource type="Resource" uid="uid://m8s6mnfi5ggd" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_thousand_cuts.tres" id="9_73aaa"]
+[ext_resource type="Resource" uid="uid://b6olkkrcrd4jg" path="res://DataResources/Weapons/DaggerStrike/Upgrades/dagger_upgrade_triple_threat.tres" id="10_e62g5"]
 
 [resource]
 script = ExtResource("2_atqco")
@@ -20,6 +29,8 @@ requires_direction = true
 targeting_type = &"mouse_direction"
 initial_specific_stats = {
 "attack_area_scale": 1.0,
+"attack_area_scale_x": 1.0,
+"attack_area_scale_y": 1.0,
 "attack_sequence": [{
 "damage_multiplier": 1.0,
 "delay": 0.0,
@@ -27,14 +38,23 @@ initial_specific_stats = {
 }, {
 "damage_multiplier": 1.0,
 "delay": 0.1,
-"rotation_offset": 15.0
+"rotation_offset": 30.0
 }],
 "base_attack_duration": 0.25,
+"cleave_chance": 100.0,
+"cleave_radius": 100.0,
+"crit_chance": 0.0,
+"crit_damage_multiplier": 1.0,
+"has_cleave": false,
+"has_fan_of_knives": false,
+"has_thousand_cuts": false,
 "inherent_visual_scale_x": 1.0,
 "inherent_visual_scale_y": 1.0,
 "pierce_count": 0,
 "projectile_speed": 200.0,
+"rotation_offset": 15.0,
+"weapon_attack_speed_mod": 1.0,
 "weapon_damage_percentage": 0.7
 }
-available_upgrades = Array[ExtResource("1_6w2lo")]([])
+available_upgrades = Array[ExtResource("1_6w2lo")]([ExtResource("2_wy3bn"), ExtResource("3_vwiuw"), ExtResource("4_7kdam"), ExtResource("5_5bey6"), ExtResource("6_0hp3h"), ExtResource("7_ywvo1"), ExtResource("8_vxcas"), ExtResource("9_73aaa"), ExtResource("10_e62g5")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

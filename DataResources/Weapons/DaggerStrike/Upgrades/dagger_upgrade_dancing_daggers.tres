@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=7 format=3 uid="uid://2ol6mf5i4f6j"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_qf7bf"]
+[ext_resource type="Resource" uid="uid://cmmarq8idhtw0" path="res://DataResources/Weapons/DaggerStrike/Effects/dancing_daggers_speed_effect.tres" id="2_ks1op"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_rmoyu"]
+[ext_resource type="Resource" uid="uid://dx0er61vlsinh" path="res://DataResources/Weapons/DaggerStrike/Effects/dancing_daggers_cooldown_effect.tres" id="3_7mafg"]
+[ext_resource type="Resource" uid="uid://c8opg3kang3cm" path="res://DataResources/Weapons/DaggerStrike/Effects/dancing_daggers_cleave_flag_effect.tres" id="4_rxs4r"]
+[ext_resource type="Resource" uid="uid://cvpas8arlaqtc" path="res://DataResources/Weapons/DaggerStrike/Effects/dancing_daggers_cleave_chance_effect.tres" id="5_7mafg"]
+
+[resource]
+script = ExtResource("2_rmoyu")
+upgrade_id = &"dagger_dancing_daggers"
+title = "Dancing Daggers"
+description = "Reduces combo cooldown by 25% and increases slash speed. Each slash has a 35% chance to hit an additional nearby target."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_qf7bf")]([ExtResource("2_ks1op"), ExtResource("3_7mafg"), ExtResource("4_rxs4r"), ExtResource("5_7mafg")])
+set_acquired_flag_on_weapon = &"dagger_dancing_daggers_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

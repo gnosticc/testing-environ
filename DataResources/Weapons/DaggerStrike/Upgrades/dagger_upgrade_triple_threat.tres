@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b6olkkrcrd4jg"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_kpjb4"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_fmf6k"]
+[ext_resource type="Resource" uid="uid://bma7fg1roj744" path="res://DataResources/Weapons/DaggerStrike/Effects/triple_threat_effect.tres" id="2_ulyng"]
+
+[resource]
+script = ExtResource("2_fmf6k")
+upgrade_id = &"dagger_triple_threat"
+title = "Triple Threat"
+description = "Adds a third slash to the attack sequence."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_kpjb4")]([ExtResource("2_ulyng")])
+set_acquired_flag_on_weapon = &"dagger_triple_threat_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

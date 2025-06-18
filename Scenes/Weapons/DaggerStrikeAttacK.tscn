@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://byqjo2laxv1oh"]
+[gd_scene load_steps=6 format=3 uid="uid://byqjo2laxv1oh"]
 
 [ext_resource type="Texture2D" uid="uid://bisow2wldljxc" path="res://Assets/Weapons/Dagger Animation.png" id="1_by0da"]
 [ext_resource type="Script" uid="uid://d3cmcqt7fg6me" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/DaggerStrikeAttack.gd" id="1_m47rp"]
@@ -11,18 +11,11 @@ height = 92.4622
 atlas = ExtResource("1_by0da")
 region = Rect2(0, 0, 64, 256)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_6q4x5"]
-atlas = ExtResource("1_by0da")
-region = Rect2(64, 0, 64, 256)
-
 [sub_resource type="SpriteFrames" id="SpriteFrames_bhuf5"]
 animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_jxjxr")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_6q4x5")
 }],
 "loop": false,
 "name": &"slash",

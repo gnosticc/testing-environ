@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://ckt2e3xhws6ah"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_65dbn"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_d0c2t"]
+[ext_resource type="Resource" uid="uid://c7rlv4m01dp82" path="res://DataResources/Weapons/DaggerStrike/Effects/dance_of_death_effect.tres" id="2_evrks"]
+
+[resource]
+script = ExtResource("2_d0c2t")
+upgrade_id = &"dagger_dance_of_death"
+title = "Dance of Death"
+description = "Increases the length of dagger slashes by 40%, hitting more enemies in an arc."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_65dbn")]([ExtResource("2_evrks")])
+set_acquired_flag_on_weapon = &"dagger_dance_of_death_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

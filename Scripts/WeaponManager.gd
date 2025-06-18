@@ -40,6 +40,7 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 		"blueprint_resource": blueprint_data, "acquired_upgrade_ids": [],
 		"tags": blueprint_data.tags.duplicate(true),
 		"specific_stats": blueprint_data.initial_specific_stats.duplicate(true),
+		"shot_counter": 0,
 		"_flat_mods": {}, "_percent_add_mods": {}, "_percent_mult_final_mods": {}
 	}
 	for key_enum_value in PlayerStatKeys.Keys.values():
@@ -71,6 +72,17 @@ func _on_attack_cooldown_finished(weapon_id: StringName):
 	if weapon_index == -1: return
 	var weapon_entry = active_weapons[weapon_index]
 	
+	## NEW: Arrow Storm Logic
+	# If this weapon has the "Arrow Storm" upgrade, increment its shot counter.
+	if weapon_entry.specific_stats.get(&"has_arrow_storm", false):
+		weapon_entry.shot_counter += 1
+		# If this is the third shot, we will pass a flag to the spawn instance.
+		if weapon_entry.shot_counter >= 3:
+			weapon_entry.specific_stats["is_arrow_storm_shot"] = true
+			weapon_entry.shot_counter = 0 # Reset the counter
+		else:
+			weapon_entry.specific_stats["is_arrow_storm_shot"] = false
+				
 	var riposte_multiplier = 1.0
 	if weapon_entry.specific_stats.get(&"has_parry_riposte", false):
 		if weapon_entry.specific_stats.get("parry_riposte_bonus_active", false):
@@ -332,6 +344,21 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data: WeaponUpgradeData
 			if not weapon_entry.specific_stats.has(&"on_hit_status_applications"):
 				weapon_entry.specific_stats[&"on_hit_status_applications"] = []
 			weapon_entry.specific_stats[&"on_hit_status_applications"].append(effect)
+		## NEW: Handle the new AddTagEffectData type
+		elif effect is AddTagEffectData:
+			var add_tag_effect = effect as AddTagEffectData
+			if add_tag_effect.target_scope == &"weapon_behavior":
+				var tag_to_add: StringName = add_tag_effect.tag_to_add
+				if not weapon_entry.tags.has(tag_to_add):
+					weapon_entry.tags.append(tag_to_add)
+		## NEW: Handle the new AddToSequenceEffectData type
+		elif effect is AddToSequenceEffectData:
+			var seq_effect = effect as AddToSequenceEffectData
+			# Ensure the target key exists and is an array in the weapon's stats
+			if weapon_entry.specific_stats.has(seq_effect.array_key) and weapon_entry.specific_stats[seq_effect.array_key] is Array:
+				weapon_entry.specific_stats[seq_effect.array_key].append(seq_effect.dictionary_to_add)
+			else:
+				push_warning("WeaponManager: AddToSequenceEffectData failed. Key '", seq_effect.array_key, "' not found or not an Array in weapon stats.")
 	
 	weapon_entry.weapon_level += 1
 	weapon_entry.acquired_upgrade_ids.append(upgrade_data.upgrade_id)

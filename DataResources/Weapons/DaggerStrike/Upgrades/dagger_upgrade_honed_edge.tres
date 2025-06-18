@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b4btpxn0m0plu"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_g78c7"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_crt0s"]
+[ext_resource type="Resource" uid="uid://denejf8l63m0c" path="res://DataResources/Weapons/DaggerStrike/Effects/honed_edge_effect.tres" id="2_sn6g7"]
+
+[resource]
+script = ExtResource("2_crt0s")
+upgrade_id = &"dagger_honed_edge"
+title = "Honed Edge"
+description = "Daggers deal an additional 50% increased damage per hit."
+prerequisites_on_this_weapon = Array[StringName]([&"dagger_keen_edge"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_g78c7")]([ExtResource("2_sn6g7")])
+set_acquired_flag_on_weapon = &"dagger_honed_edge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

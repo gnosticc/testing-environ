@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://m8s6mnfi5ggd"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_gxegs"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_54nyq"]
+[ext_resource type="Resource" uid="uid://qkiv1xnsppvx" path="res://DataResources/Weapons/DaggerStrike/Effects/thousand_cuts_effect.tres" id="2_xa3o8"]
+
+[resource]
+script = ExtResource("2_54nyq")
+upgrade_id = &"dagger_thousand_cuts"
+title = "Thousand Cuts"
+description = "If all four hits of the combo land on the same target, it takes the full combo's damage again instantly."
+prerequisites_on_this_weapon = Array[StringName]([&"dagger_finishing_blow"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_gxegs")]([ExtResource("2_xa3o8")])
+set_acquired_flag_on_weapon = &"dagger_thousand_cuts_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

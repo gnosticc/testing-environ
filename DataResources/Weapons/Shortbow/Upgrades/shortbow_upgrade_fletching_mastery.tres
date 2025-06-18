@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://bjy3hwfc1rnnv"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_yli4q"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_e0pbn"]
+[ext_resource type="Resource" uid="uid://diqks6pfviwb8" path="res://DataResources/Weapons/Shortbow/Effects/fletching_damage_effect.tres" id="2_em28b"]
+[ext_resource type="Resource" uid="uid://dswwsttpbl2k8" path="res://DataResources/Weapons/Shortbow/Effects/fletching_size_effect.tres" id="3_m2y3d"]
+[ext_resource type="Resource" uid="uid://pd0170k8t7nu" path="res://DataResources/Weapons/Shortbow/Effects/fletching_speed_effect.tres" id="4_6hmrv"]
+
+[resource]
+script = ExtResource("2_e0pbn")
+upgrade_id = &"shortbow_fletching_mastery"
+title = "Fletching Mastery"
+description = "Arrows fly 50% faster and are 200% larger. Arrow damage +25%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_yli4q")]([ExtResource("2_em28b"), ExtResource("3_m2y3d"), ExtResource("4_6hmrv")])
+set_acquired_flag_on_weapon = &"shortbow_fletching_mastery_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

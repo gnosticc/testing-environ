@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cjtht7flet713"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_3ktku"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_v5bmo"]
+[ext_resource type="Resource" uid="uid://djeyf1ddwf5v1" path="res://DataResources/Weapons/DaggerStrike/Effects/fan_of_knives_effect.tres" id="2_v872o"]
+
+[resource]
+script = ExtResource("2_v5bmo")
+upgrade_id = &"dagger_fan_of_knives"
+title = "Fan of Knives"
+description = "The final hit of the combo also releases a circular volley of five knives."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_3ktku")]([ExtResource("2_v872o")])
+set_acquired_flag_on_weapon = &"dagger_fan_of_knives_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

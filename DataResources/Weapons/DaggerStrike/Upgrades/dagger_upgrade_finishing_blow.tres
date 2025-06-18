@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://05cwk8umyva7"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_4hxa2"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_7ubvv"]
+[ext_resource type="Resource" uid="uid://bkaktw4ynsush" path="res://DataResources/Weapons/DaggerStrike/Effects/finishing_blow_effect.tres" id="2_vx7uo"]
+
+[resource]
+script = ExtResource("2_7ubvv")
+upgrade_id = &"dagger_finishing_blow"
+title = "Finishing Blow"
+description = "Adds a fourth, powerful slash to the end of the combo that deals 2.5x damage."
+prerequisites_on_this_weapon = Array[StringName]([&"dagger_triple_threat"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_4hxa2")]([ExtResource("2_vx7uo")])
+set_acquired_flag_on_weapon = &"dagger_finishing_blow_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

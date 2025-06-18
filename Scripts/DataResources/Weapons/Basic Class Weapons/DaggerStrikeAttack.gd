@@ -1,250 +1,214 @@
-# DaggerStrikeAttack.gd
-# Behavior for a single instance of the Dagger Strike attack (the hitbox/visual).
-# It receives its properties from WeaponManager (or DaggerStrikeController)
-# and deals damage based on player stats.
-# It now fully integrates with the standardized stat system.
-#
-# UPDATED: Passes weapon tags to PlayerStats.get_calculated_player_damage for tag-specific damage modifiers.
-# UPDATED: Integrates GLOBAL_LIFESTEAL_PERCENT for healing.
-# UPDATED: Integrates GLOBAL_STATUS_EFFECT_CHANCE_ADD for status effect application.
-# FIXED: Corrected reference to CollisionShape2D node (assuming it's named CollisionShape2D directly under DamageArea).
+# ======================================================================
+# MODIFIED SCRIPT: DaggerStrikeAttack.gd
+# Path: res://Scripts/Weapons/DaggerStrikeAttack.gd
+# FIX: The creation of the cleave visual effect is now deferred to
+# prevent physics state crashes.
+# ======================================================================
 
+class_name DaggerStrikeAttack
 extends Node2D
-class_name DaggerStrikeAttack # Explicit class_name for clarity and type hinting
 
-@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D # Use $ shorthand
-@onready var damage_area: Area2D = $DamageArea # Use $ shorthand
-# FIXED: Changed node name from CollisionPolygon2D to CollisionShape2D in documentation,
-#        assuming standard CollisionShape2D is used directly under DamageArea.
+signal hit_enemy_for_combo(enemy_node: Node)
+signal dealt_damage(enemy_node: Node, damage_amount: int)
+
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var damage_area: Area2D = $DamageArea
 @onready var collision_shape: CollisionShape2D = $DamageArea/CollisionShape2D
 
-const SLASH_ANIMATION_NAME = &"slash" # Use StringName for animation names
+var specific_stats: Dictionary = {}
+var owner_player_stats: PlayerStats = null
 
-var specific_stats: Dictionary = {} # Dictionary of weapon-specific stats passed from controller/manager
-var owner_player_stats: PlayerStats = null # Reference to the player's PlayerStats node
-
-var _enemies_hit_this_sweep: Array[Node2D] = [] # Tracks enemies hit to prevent multi-hitting per sweep
-var _is_attack_active: bool = false # Flag to control hit detection
-var _current_attack_duration: float # Actual duration of the attack animation/hitbox activity
-var _stats_have_been_set: bool = false # Declared _stats_have_been_set here
+var _enemies_hit_this_sweep: Array[Node2D] = []
+var _is_attack_active: bool = false
+var _current_attack_duration: float
+var _stats_have_been_set: bool = false
+var _scene_file: PackedScene
 
 func _ready():
 	if not is_instance_valid(animated_sprite):
-		push_error("ERROR (DaggerStrikeAttack): AnimatedSprite2D node missing! Queueing free."); call_deferred("queue_free"); return
+		push_error("ERROR (DaggerStrikeAttack): AnimatedSprite2D node missing!"); call_deferred("queue_free"); return
 	else:
-		# Connect animation_finished to its handler
 		animated_sprite.animation_finished.connect(Callable(self, "_on_animation_finished"))
-
 	if not is_instance_valid(damage_area):
-		push_warning("WARNING (DaggerStrikeAttack): DamageArea node missing. Hit detection might not work.")
+		push_warning("WARNING (DaggerStrikeAttack): DamageArea node missing.")
 	else:
-		# Connect body_entered to hit detection logic
-		damage_area.body_entered.connect(Callable(self, "_on_damage_area_body_entered"))
-		
-		# Disable collision shape initially; it will be enabled when attack starts
-		if is_instance_valid(collision_shape):
-			collision_shape.disabled = true
-		else:
-			# This warning should no longer appear if the @onready var is correctly set up
-			push_warning("WARNING (DaggerStrikeAttack): CollisionShape (CollisionShape2D) not found under DamageArea. Hit detection might fail.")
-
-
-# Standardized initialization function called by WeaponManager or DaggerStrikeController.
-# direction: The normalized direction vector for the attack.
-# p_attack_stats: Dictionary of specific stats for this weapon instance (already calculated by WeaponManager).
-# p_player_stats: Reference to the player's PlayerStats node.
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
-	specific_stats = p_attack_stats.duplicate(true) # Deep copy to avoid modifying original
-	owner_player_stats = p_player_stats
-	_stats_have_been_set = true # Set the flag here as properties are now set
+		damage_area.body_entered.connect(Callable(self, "_on_body_entered"))
+		if not is_instance_valid(collision_shape):
+			push_warning("WARNING (DaggerStrikeAttack): CollisionShape not found under DamageArea.")
 	
-	# --- Rotation and Flipping Logic ---
-	if direction != Vector2.ZERO:
-		# Rotate the entire Node2D (self) to face the direction.
-		# This is the primary rotation. Children will inherit this rotation.
-		self.rotation = direction.angle()
-		
-		# Now, handle sprite-specific flipping based on the angle, relative to its new rotation.
-		# This logic assumes the sprite asset is drawn facing RIGHT (0 degrees).
-		if is_instance_valid(animated_sprite):
-			# Reset flips first to avoid previous state interfering with new direction.
-			animated_sprite.flip_h = false
-			animated_sprite.flip_v = false
+	# The collision shape is now enabled/disabled only when the attack starts and ends.
 
-			# Determine horizontal flip (flip_h) for left/right aiming.
-			# If sprite faces right, flip_h is true when aiming left.
-			if direction.x < 0:
-				animated_sprite.flip_h = true
-			
-			# Determine vertical flip (flip_v) for up/down aiming.
-			# This is often needed for melee attacks that might be symmetrical horizontally,
-			# but need to flip for visual consistency when aiming mostly up.
-			#
-			# IMPORTANT: This logic is highly dependent on your sprite assets' original drawing.
-			# - If your "slash" animation is drawn horizontally (e.g., right-facing swipe).
-			# - If you want an UPWARD swipe, it's typically 'rotation' combined with 'flip_v = true'.
-			# - If you want a DOWNWARD swipe, it's typically 'rotation' combined with 'flip_v = false'.
-			# Adjust `0.5` threshold if your diagonal angles are different.
-			
-			# Check if aiming predominantly vertically
-			if absf(direction.y) > absf(direction.x): # If vertical component is stronger
-				if direction.y < 0: # Aiming UP
-					animated_sprite.flip_v = true # Flip for upward attacks
-				else: # Aiming DOWN
-					animated_sprite.flip_v = false # No vertical flip for downward attacks
-			# If aiming mostly horizontally, flip_v remains false (from reset above)
-			
-			# *** CRITICAL SCENE SETUP CHECK FOR ROTATION ***
-			# The 'AnimatedSprite2D' node itself inside DaggerStrikeAttack.tscn
-			# should typically have its *initial rotation* set to 0 degrees in the editor,
-			# AND its texture/animation frames should be drawn facing RIGHT (0 degrees).
-			# If your sprite asset is, for example, drawn facing UPWARDS, you MUST
-			# rotate the *AnimatedSprite2D node* by -90 degrees in the scene editor
-			# so its "right" direction aligns with Godot's 0-degree angle.
-			# If the animation still looks off, experiment with the flip_h and flip_v logic or
-			# adjust the base rotation of your AnimatedSprite2D within the scene.
-			# The 'offset' property of AnimatedSprite2D can also cause visual misalignment.
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+	specific_stats = p_attack_stats.duplicate(true)
+	owner_player_stats = p_player_stats
+	_stats_have_been_set = true
+	
+	var scene_path = specific_stats.get("scene_file_path", "")
+	if not scene_path.is_empty() and ResourceLoader.exists(scene_path):
+		_scene_file = load(scene_path)
 	else:
-		# If direction is zero (e.g., fallback), reset rotation and flips.
+		push_warning("DaggerStrikeAttack: scene_file_path not found in stats or is invalid. Cleave visual may fail.")
+	
+	if direction != Vector2.ZERO:
+		self.rotation = direction.angle()
+		if is_instance_valid(animated_sprite):
+			animated_sprite.flip_h = false; animated_sprite.flip_v = false
+			if direction.x < 0: animated_sprite.flip_h = true
+			if absf(direction.y) > absf(direction.x):
+				if direction.y < 0: animated_sprite.flip_v = true
+				else: animated_sprite.flip_v = false
+	else:
 		self.rotation = 0.0
 		if is_instance_valid(animated_sprite):
-			animated_sprite.flip_h = false
-			animated_sprite.flip_v = false
+			animated_sprite.flip_h = false; animated_sprite.flip_v = false
+	_apply_all_stats_effects(); _start_attack_animation()
 
+func initialize_as_visual_effect_only(p_scale_multiplier: float = 0.3):
+	_is_attack_active = false
+	if is_instance_valid(collision_shape):
+		collision_shape.set_deferred("disabled", true)
+	if is_instance_valid(animated_sprite):
+		self.scale *= p_scale_multiplier
+		animated_sprite.modulate = Color(1, 1, 1, 0.7)
+		animated_sprite.play("slash")
 
-	# Apply stats and start the attack.
-	_apply_all_stats_effects()
-	_start_attack_animation()
-
-
-# Applies all calculated stats and effects to the attack instance.
-# This method pulls relevant data from 'specific_stats' (already calculated) and 'owner_player_stats'.
 func _apply_all_stats_effects():
 	if not is_instance_valid(owner_player_stats):
-		push_warning("DaggerStrikeAttack: owner_player_stats invalid. Cannot apply effects."); return
+		push_warning("DaggerStrikeAttack: owner_player_stats invalid."); return
 
-	# --- Scale Calculation (Visual and Collision) ---
-	# specific_stats here should already contain the calculated weapon scale
-	var base_scale_x = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_X], 1.0))
-	var base_scale_y = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.INHERENT_VISUAL_SCALE_Y], 1.0))
+	var attack_area_scale_x = float(specific_stats.get(&"attack_area_scale_x", 1.0))
+	var attack_area_scale_y = float(specific_stats.get(&"attack_area_scale_y", 1.0))
+	var player_aoe_multiplier = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER)
+	self.scale = Vector2(attack_area_scale_x * player_aoe_multiplier, attack_area_scale_y * player_aoe_multiplier)
 	
-	# The player's AOE_AREA_MULTIPLIER from PlayerStats is applied on top of the weapon's inherent scale
-	var player_aoe_multiplier = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER) # Use get_final_stat
-	
-	# Apply scale to the root of the attack scene (which should scale children as well)
-	self.scale = Vector2(base_scale_x * player_aoe_multiplier, base_scale_y * player_aoe_multiplier)
-	
-	# --- Attack Duration Calculation ---
-	# specific_stats should already contain the calculated base_attack_duration
-	var base_duration = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION], 0.25)) # Default to 0.25 seconds
-	
-	# Player's attack speed multiplier from PlayerStats.gd
-	var player_attack_speed_multiplier = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER) # Use get_final_stat
-	
-	# Assuming 'weapon_attack_speed_mod' is a specific stat passed in specific_stats (already calculated)
+	if specific_stats.get("is_finishing_blow_visual", false):
+		self.scale *= 1.25
+		if is_instance_valid(animated_sprite):
+			animated_sprite.modulate = Color.GOLD
+			
+	var base_duration = float(specific_stats.get(&"base_attack_duration", 0.25))
+	var player_attack_speed_multiplier = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
 	var weapon_attack_speed_mod = float(specific_stats.get(&"weapon_attack_speed_mod", 1.0)) 
-	
 	var final_attack_speed_multiplier = player_attack_speed_multiplier * weapon_attack_speed_mod
-	if final_attack_speed_multiplier <= 0: final_attack_speed_multiplier = 0.01 # Prevent division by zero
-	
+	if final_attack_speed_multiplier <= 0: final_attack_speed_multiplier = 0.01
 	_current_attack_duration = base_duration / final_attack_speed_multiplier
 	
-	# Adjust animation speed scale based on calculated attack speed
 	if is_instance_valid(animated_sprite):
 		animated_sprite.speed_scale = final_attack_speed_multiplier
-	else:
-		push_warning("DaggerStrikeAttack: AnimatedSprite2D is invalid, cannot set speed_scale.")
 
-# Initiates the attack animation and enables the hitbox.
 func _start_attack_animation():
 	if not is_instance_valid(animated_sprite) or not is_instance_valid(damage_area):
-		push_error("DaggerStrikeAttack: Missing animated_sprite or damage_area for attack. Queueing free."); call_deferred("queue_free"); return
-
-	_enemies_hit_this_sweep.clear() # Clear enemies hit from previous sweeps
-	_is_attack_active = true # Activate hitbox
-	
-	# Enable collision shape
+		call_deferred("queue_free"); return
+	_enemies_hit_this_sweep.clear(); _is_attack_active = true
 	if is_instance_valid(collision_shape): collision_shape.disabled = false
-	else: push_warning("DaggerStrikeAttack: CollisionShape (CollisionShape2D) not found under DamageArea. Hitbox may not activate.")
-
-	# Play the attack animation
-	animated_sprite.play(SLASH_ANIMATION_NAME)
-	
-	# Set a timer to queue_free this attack instance after its calculated duration.
-	# This ensures the hitbox is active for the full attack duration.
+	animated_sprite.play("slash")
 	var duration_finish_timer = get_tree().create_timer(_current_attack_duration, true, false, true)
-	duration_finish_timer.timeout.connect(Callable(self, "queue_free"))
+	duration_finish_timer.timeout.connect(queue_free)
 
-
-# Called when the attack animation finishes.
 func _on_animation_finished():
-	if is_instance_valid(animated_sprite) and animated_sprite.animation == SLASH_ANIMATION_NAME:
-		# Optional: You could add logic here if the animation ending triggers something,
-		# but for this type of attack, the duration_finish_timer handles _is_attack_active reset.
-		pass
+	if not _is_attack_active:
+		queue_free()
 
-
-# Handles collision with other bodies (enemies).
-func _on_damage_area_body_entered(body: Node2D):
-	# Only process if attack is active, body is valid, and enemy hasn't been hit yet this sweep.
+func _on_body_entered(body: Node2D):
 	if not _is_attack_active or not is_instance_valid(body) or _enemies_hit_this_sweep.has(body): return
 	
 	if body.is_in_group("enemies") and body is BaseEnemy:
 		var enemy_target = body as BaseEnemy
-		if enemy_target.is_dead(): return # Don't hit dead enemies
+		if enemy_target.is_dead(): return
 		
-		_enemies_hit_this_sweep.append(enemy_target) # Mark enemy as hit this sweep
-		
+		_enemies_hit_this_sweep.append(enemy_target)
 		if not is_instance_valid(owner_player_stats):
-			push_error("DaggerStrikeAttack: owner_player_stats is invalid. Cannot deal damage."); return
+			push_error("DaggerStrikeAttack: owner_player_stats is invalid."); return
 
-		# --- Damage Calculation ---
-		# Get weapon-specific damage percentage multiplier (from blueprint/upgrades).
-		# Default to 0.9 if not found, as per original code.
-		var weapon_damage_percent = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 0.9))
-		# Retrieve weapon tags to pass to the damage calculation.
-		var weapon_tags: Array[StringName] = specific_stats.get(&"tags", [])
-
-		# Use the unified damage calculation from PlayerStats.gd, passing weapon tags.
-		var calculated_damage_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
-		var final_damage_to_deal = int(round(maxf(1.0, calculated_damage_float))) # Ensure minimum 1 damage.
-		
-		var owner_player = owner_player_stats.get_parent() if is_instance_valid(owner_player_stats) else null
-		
-		# Prepare attack stats to pass to the enemy's take_damage method.
-		# This includes armor penetration from the player's stats.
+		var owner_player = owner_player_stats.get_parent()
 		var attack_stats_for_enemy: Dictionary = {
-			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION) # Use get_final_stat
-			# Add any other relevant attack properties here (e.g., lifesteal, status application chance)
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 		}
+		
+		_deal_damage_and_effects(enemy_target, owner_player, attack_stats_for_enemy)
+		
+		var has_cleave = specific_stats.get(&"has_cleave", false)
+		var cleave_chance = float(specific_stats.get(&"cleave_chance", 0.0))
+		if has_cleave and randf() < cleave_chance:
+			var cleave_target = _find_cleave_target(enemy_target.global_position)
+			if is_instance_valid(cleave_target):
+				_enemies_hit_this_sweep.append(cleave_target)
+				_deal_damage_and_effects(cleave_target, owner_player, attack_stats_for_enemy)
+				
+				## FIX: Defer the entire creation of the visual cue to prevent physics state errors.
+				call_deferred("_spawn_cleave_visual_cue", cleave_target.global_position, self.rotation)
 
-		enemy_target.take_damage(final_damage_to_deal, owner_player, attack_stats_for_enemy)
-
-		# --- Apply Lifesteal ---
-		var global_lifesteal_percent = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
-		if global_lifesteal_percent > 0:
-			var heal_amount = final_damage_to_deal * global_lifesteal_percent
-			if is_instance_valid(owner_player) and owner_player.has_method("heal"):
-				owner_player.heal(heal_amount)
-
-		# --- Apply Status Effects on Hit ---
-		if specific_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
-			var status_apps: Array = specific_stats.get(&"on_hit_status_applications", [])
-			var global_status_effect_chance_add = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
-
-			for app_data_res in status_apps:
-				var app_data = app_data_res as StatusEffectApplicationData
-				if is_instance_valid(app_data):
-					# Combine base application chance with global status effect chance addition.
-					var final_application_chance = app_data.application_chance + global_status_effect_chance_add
-					final_application_chance = clampf(final_application_chance, 0.0, 1.0) # Clamp between 0 and 1.
+## NEW: This function handles the creation of the visual cue safely.
+func _spawn_cleave_visual_cue(position: Vector2, p_rotation: float):
+	if is_instance_valid(_scene_file):
+		var visual_cue = _scene_file.instantiate()
+		get_tree().current_scene.add_child(visual_cue)
+		visual_cue.global_position = position
+		visual_cue.rotation = p_rotation
+		if visual_cue.has_method("initialize_as_visual_effect_only"):
+			# This call is now safe because the entire function was deferred.
+			visual_cue.initialize_as_visual_effect_only(0.3)
 					
-					if randf() < final_application_chance:
-						enemy_target.status_effect_component.apply_effect(
-							load(app_data.status_effect_resource_path) as StatusEffectData,
-							owner_player, # Source of the effect (the player).
-							specific_stats, # Weapon stats for scaling (these are the calculated ones)
-							app_data.duration_override,
-							app_data.potency_override
-						)
-						# print("DaggerStrikeAttack: Applied status from '", app_data.status_effect_resource_path, "' to enemy.") # Debug print.
+func _deal_damage_and_effects(target_enemy: BaseEnemy, p_owner_player: PlayerCharacter, p_attack_stats: Dictionary):
+	if not is_instance_valid(target_enemy): return
+	
+	var weapon_damage_percent = float(specific_stats.get(&"weapon_damage_percentage", 0.9))
+	var hit_damage_mult = float(specific_stats.get("damage_multiplier", 1.0))
+	var weapon_tags: Array[StringName] = specific_stats.get(&"tags", [])
+	var calculated_damage_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent * hit_damage_mult, weapon_tags)
+	
+	var weapon_crit_chance = float(specific_stats.get(&"crit_chance", 0.0))
+	var total_crit_chance = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_CHANCE) + weapon_crit_chance
+	if randf() < total_crit_chance:
+		var player_crit_mult = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
+		var weapon_crit_mult = float(specific_stats.get(&"crit_damage_multiplier", 1.0))
+		calculated_damage_float *= (player_crit_mult + weapon_crit_mult - 1.0)
+
+	var final_damage_to_deal = int(round(maxf(1.0, calculated_damage_float)))
+	target_enemy.take_damage(final_damage_to_deal, p_owner_player, p_attack_stats)
+	
+	var global_lifesteal_percent = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
+	if global_lifesteal_percent > 0:
+		var heal_amount = final_damage_to_deal * global_lifesteal_percent
+		if is_instance_valid(p_owner_player) and p_owner_player.has_method("heal"):
+			p_owner_player.heal(heal_amount)
+	
+	if specific_stats.has(&"on_hit_status_applications") and is_instance_valid(target_enemy.status_effect_component):
+		var status_apps: Array = specific_stats.get(&"on_hit_status_applications", [])
+		var global_status_chance_add = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
+
+		for app_data_res in status_apps:
+			var app_data = app_data_res as StatusEffectApplicationData
+			if is_instance_valid(app_data):
+				var final_application_chance = app_data.application_chance + global_status_chance_add
+				final_application_chance = clampf(final_application_chance, 0.0, 1.0)
+				
+				if randf() < final_application_chance:
+					target_enemy.status_effect_component.apply_effect(
+						load(app_data.status_effect_resource_path) as StatusEffectData,
+						p_owner_player,
+						specific_stats,
+						app_data.duration_override,
+						app_data.potency_override
+					)
+	
+	emit_signal("hit_enemy_for_combo", target_enemy)
+	emit_signal("dealt_damage", target_enemy, final_damage_to_deal)
+
+func _find_cleave_target(hit_position: Vector2) -> BaseEnemy:
+	var cleave_radius = float(specific_stats.get(&"cleave_radius", 100.0))
+	var best_target: BaseEnemy = null
+	var min_dist_sq = cleave_radius * cleave_radius
+	var all_enemies = get_tree().get_nodes_in_group("enemies")
+	
+	for enemy in all_enemies:
+		if not is_instance_valid(enemy) or _enemies_hit_this_sweep.has(enemy) or not (enemy is BaseEnemy): continue
+		var enemy_base = enemy as BaseEnemy
+		if enemy_base.is_dead(): continue
+		
+		var dist_sq = hit_position.distance_squared_to(enemy.global_position)
+		if dist_sq < min_dist_sq:
+			min_dist_sq = dist_sq
+			best_target = enemy_base
+			
+	return best_target

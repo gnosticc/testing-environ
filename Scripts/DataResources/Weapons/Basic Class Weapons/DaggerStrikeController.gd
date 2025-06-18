@@ -1,167 +1,155 @@
-# DaggerStrikeController.gd
-# This script manages the complex sequence of hits for the Dagger Strike weapon.
-# It reads an "attack_sequence" array from its stats and executes each hit
-# by spawning instances of the DaggerStrikeAttack scene with appropriate timing and properties.
-#
-# UPDATED: Passes weapon tags to the individual DaggerStrikeAttack instances.
-# UPDATED: Applies PlayerStats.AOE_AREA_MULTIPLIER to the controller's visual scale.
-# UPDATED: Uses PlayerStatKeys for stat lookups.
+# ======================================================================
+# 3. MODIFIED SCRIPT: DaggerStrikeController.gd
+# Path: res://Scripts/Weapons/DaggerStrikeController.gd
+# FIX: Refactored lifetime management to be immune to attack speed changes.
+# It now calculates the true total duration of the combo and uses a single
+# master timer to destroy itself, guaranteeing all hits can spawn.
+# ======================================================================
 
 class_name DaggerStrikeController
 extends Node2D
 
-@export var hitbox_scene: PackedScene # The PackedScene for the individual DaggerStrikeAttack (e.g., DaggerStrikeAttack.tscn)
+@export var hitbox_scene: PackedScene
+@export var fan_of_knives_scene: PackedScene
+@export var proc_visual_effect_scene: PackedScene
 
-# --- Node References ---
-@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+var _specific_stats: Dictionary
+var _owner_player_stats: PlayerStats
+var _base_direction: Vector2
+var _attack_sequence: Array
 
-# --- Internal State ---
-# _specific_stats now holds the 'calculated_weapon_stats' from WeaponManager
-var _specific_stats: Dictionary 
-var _owner_player_stats: PlayerStats # Reference to the player's PlayerStats node
-var _base_direction: Vector2 # The initial direction of the Dagger Strike (e.g., player aiming direction)
+var _hit_tracker: Dictionary = {}
+var _damage_tracker: Dictionary = {}
+var _has_thousand_cuts: bool = false
 
-var _hit_index: int = 0 # Current index in the _attack_sequence
-var _attack_sequence: Array = [] # The sequence of hits to execute (loaded from _specific_stats)
+const FAN_OF_KNIVES_SCENE_PATH = "res://Scenes/Weapons/Projectiles/FanOfKnivesController.tscn"
 
 func _ready():
-	# No specific _ready logic needed here, as initialization is handled by set_attack_properties.
-	pass
+	if fan_of_knives_scene == null and ResourceLoader.exists(FAN_OF_KNIVES_SCENE_PATH):
+		fan_of_knives_scene = load(FAN_OF_KNIVES_SCENE_PATH)
 
-
-# Standardized initialization function called by WeaponManager.
-# direction: The base direction for the entire Dagger Strike sequence.
-# p_attack_stats: The weapon's specific_stats dictionary (these are the calculated stats from WeaponManager).
-# p_player_stats: Reference to the player's PlayerStats node.
 func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
-	print("DaggerStrikeController: Received p_attack_stats: ", p_attack_stats)
-	_specific_stats = p_attack_stats.duplicate(true) # Deep copy to prevent modifying original
+	_specific_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
-	_base_direction = direction.normalized() if direction.length_squared() > 0 else Vector2.RIGHT # Ensure normalized direction
-	
-	_attack_sequence = _specific_stats.get(&"attack_sequence", []) # Get the attack sequence from stats
-	print("DaggerStrikeController: Extracted _attack_sequence: ", _attack_sequence)
-	if not is_instance_valid(hitbox_scene):
-		push_error("ERROR (DaggerStrikeController): 'hitbox_scene' is not assigned or is invalid! Queueing free."); queue_free(); return
-	if _attack_sequence.is_empty():
-		push_error("ERROR (DaggerStrikeController): 'attack_sequence' is empty in weapon specific stats! Queueing free."); queue_free(); return
+	_base_direction = direction.normalized() if direction.length_squared() > 0 else Vector2.RIGHT
+	_attack_sequence = _specific_stats.get(&"attack_sequence", [])
+	_has_thousand_cuts = _specific_stats.get(&"has_thousand_cuts", false)
 
-	# --- Handle Controller's Visuals (if any) ---
-	# The controller itself might have an animated sprite for the overall effect.
-	if is_instance_valid(animated_sprite):
-		# Apply scale for the overall attack visual (e.g., if the controller has a sprite)
-		# Use the already calculated AREA_SCALE from _specific_stats, and player's AOE multiplier
-		var attack_area_scale = float(_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AREA_SCALE], 1.0))
-		var player_aoe_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER) # Use get_final_stat
-		self.scale = Vector2.ONE * attack_area_scale * player_aoe_multiplier
+	if not is_instance_valid(hitbox_scene) or _attack_sequence.is_empty():
+		push_error("DaggerStrikeController: Missing hitbox scene or attack sequence."); queue_free(); return
+	
+	# Execute the sequence of attacks
+	_execute_attack_sequence()
+	
+	# Calculate the true total duration of the entire attack combo
+	var total_duration = 0.0
+	var base_attack_duration = float(_specific_stats.get(&"base_attack_duration", 0.25))
+	var player_attack_speed_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	var weapon_attack_speed_mod = float(_specific_stats.get(&"weapon_attack_speed_mod", 1.0))
+	var final_attack_speed_multiplier = player_attack_speed_multiplier * weapon_attack_speed_mod
+	if final_attack_speed_multiplier <= 0: final_attack_speed_multiplier = 0.01
+	var actual_slash_duration = base_attack_duration / final_attack_speed_multiplier
+
+	for hit_data in _attack_sequence:
+		total_duration += float(hit_data.get("delay", 0.0))
+	
+	# The controller's lifetime is the sum of all delays plus the duration of the final slash animation.
+	get_tree().create_timer(total_duration + actual_slash_duration + 0.1, false).timeout.connect(queue_free)
+
+func _execute_attack_sequence():
+	var cumulative_delay = 0.0
+	for i in range(_attack_sequence.size()):
+		var hit_data = _attack_sequence[i]
+		cumulative_delay += float(hit_data.get("delay", 0.0))
 		
-		# Set rotation of the controller's sprite (if it has one)
-		if _base_direction != Vector2.ZERO:
-			self.rotation = _base_direction.angle()
-			# This flip logic depends on your sprite's orientation. Adjust if needed.
-			if absf(_base_direction.angle()) > PI / 2.0: # If aiming mostly left or right
-				animated_sprite.flip_v = false # No vertical flip for horizontal attacks
-			else: # If aiming mostly up or down
-				if _base_direction.y < 0: # Aiming up
-					animated_sprite.flip_v = true
-				else: # Aiming down
-					animated_sprite.flip_v = false
-		
-		# Play the overall attack animation (if the controller has one, e.g., a "wind-up")
-		if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation(&"slash"): # Example animation name
-			animated_sprite.play(&"slash")
-		else:
-			push_warning("WARNING (DaggerStrikeController): 'slash_controller' animation not found or sprite missing.")
-	
-	# --- Start the Attack Sequence ---
-	_hit_index = 0 # Reset hit index for a new sequence
-	_execute_next_hit()
+		# Use a timer to spawn each hit after its cumulative delay.
+		var timer = get_tree().create_timer(cumulative_delay, true, false, true)
+		timer.timeout.connect(_spawn_hitbox.bind(i))
 
-	# --- Controller's Lifetime Logic ---
-	# This timer is for the entire controller node, which manages the sequence.
-	# The individual hitboxes will have their own lifetime.
-	# Use BASE_ATTACK_DURATION from _specific_stats (already calculated by WeaponManager)
-	var total_lifetime = float(_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.BASE_ATTACK_DURATION], 0.3)) 
-	
-	# Factor in player's effect duration multiplier for the controller's lifetime
-	var effect_duration_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER) # Use get_final_stat
-	total_lifetime *= effect_duration_multiplier
+func _spawn_hitbox(hit_index: int):
+	if not is_instance_valid(self): return # Controller might have been freed by other means
+	var hit_data = _attack_sequence[hit_index]
+	var owner_player = _owner_player_stats.get_parent()
+	if not is_instance_valid(owner_player): return
 
-	var cleanup_timer = get_tree().create_timer(total_lifetime, true, false, true)
-	cleanup_timer.timeout.connect(Callable(self, "queue_free")) # Queue free the controller after its lifetime
+	var hitbox_instance = hitbox_scene.instantiate() as DaggerStrikeAttack
 
-
-# Executes the next hit in the attack sequence.
-func _execute_next_hit():
-	if _hit_index >= _attack_sequence.size():
-		return # Sequence complete, all hits spawned
-
-	var current_hit_data = _attack_sequence[_hit_index]
-	var delay = float(current_hit_data.get(&"delay", 0.0)) # Delay for this hit
-
-	# Only apply delay *after* the first hit (i.e., for subsequent hits in the sequence)
-	if delay > 0.0 and _hit_index > 0:
-		var timer = get_tree().create_timer(delay, true, false, true)
-		timer.timeout.connect(Callable(self, "_spawn_hitbox").bind(current_hit_data))
-	else:
-		# Spawn immediately for the first hit or if no delay
-		_spawn_hitbox(current_hit_data)
-
-# Spawns a single instance of the DaggerStrikeAttack (hitbox).
-# hit_data: Dictionary containing specific parameters for this particular hit (e.g., damage multiplier, rotation offset).
-func _spawn_hitbox(hit_data: Dictionary):
-	if not is_instance_valid(hitbox_scene):
-		push_error("ERROR (DaggerStrikeController): 'hitbox_scene' is invalid when trying to spawn hitbox."); return
-	if not is_instance_valid(_owner_player_stats):
-		push_error("ERROR (DaggerStrikeController): _owner_player_stats is invalid when trying to spawn hitbox."); return
-	
-	var owner_player = _owner_player_stats.get_parent() # Get PlayerCharacter reference
-	if not is_instance_valid(owner_player):
-		push_error("ERROR (DaggerStrikeController): PlayerCharacter is invalid when trying to spawn hitbox."); return
-
-	var hitbox_instance = hitbox_scene.instantiate() as DaggerStrikeAttack # Instantiate the individual attack scene
-	if not is_instance_valid(hitbox_instance):
-		push_error("ERROR (DaggerStrikeController): Failed to instantiate DaggerStrikeAttack scene."); return
-	
-	# Add the hitbox instance to the appropriate container (e.g., AttacksContainer).
 	var attacks_container = get_tree().current_scene.get_node_or_null("AttacksContainer")
 	if is_instance_valid(attacks_container): attacks_container.add_child(hitbox_instance)
-	else: get_tree().current_scene.add_child(hitbox_instance) # Fallback to current scene root
+	else: get_tree().current_scene.add_child(hitbox_instance)
 
-	# Calculate specific position and rotation for this hit.
-	var rotation_offset_degrees = float(hit_data.get(&"rotation_offset", 0.0)) # Offset for this hit from base direction
-	var final_direction = _base_direction.rotated(deg_to_rad(rotation_offset_degrees))
-	
-	# Position the hitbox (e.g., at the player's aiming dot for melee attacks).
-	# This assumes melee_aiming_dot is a Marker2D on PlayerCharacter.
+	var rotation_offset = deg_to_rad(float(hit_data.get(&"rotation_offset", 0.0)))
+	var final_direction = _base_direction.rotated(rotation_offset)
 	if is_instance_valid(owner_player.melee_aiming_dot):
 		hitbox_instance.global_position = owner_player.melee_aiming_dot.global_position
 	else:
-		hitbox_instance.global_position = owner_player.global_position # Fallback to player center
+		hitbox_instance.global_position = owner_player.global_position
 	
-	# Create a copy of the weapon's overall specific_stats for this individual hit.
-	# Then, apply any hit-specific multipliers defined in hit_data.
-	# _specific_stats already contain the fully calculated stats from WeaponManager.
 	var hit_specific_stats = _specific_stats.duplicate(true)
-	var hit_damage_mult = float(hit_data.get(&"damage_multiplier", 1.0))
+	hit_specific_stats["damage_multiplier"] = float(hit_data.get(&"damage_multiplier", 1.0))
+	if hit_data.get("is_finishing_blow", false):
+		hit_specific_stats["is_finishing_blow_visual"] = true
+
+	if is_instance_valid(hitbox_scene):
+		hit_specific_stats["scene_file_path"] = hitbox_scene.resource_path
+		
+	hitbox_instance.set_attack_properties(final_direction, hit_specific_stats, _owner_player_stats)
+
+	if _has_thousand_cuts:
+		hitbox_instance.hit_enemy_for_combo.connect(_on_dagger_hit_enemy_for_combo.bind(hit_index))
+		hitbox_instance.dealt_damage.connect(_on_dagger_dealt_damage)
+
+	if hit_index == _attack_sequence.size() - 1 and _specific_stats.get(&"has_fan_of_knives", false):
+		if not is_instance_valid(fan_of_knives_scene):
+			push_error("DaggerStrikeController: Fan of Knives scene not loaded!")
+			return
+		
+		var fok_instance = fan_of_knives_scene.instantiate()
+		add_child(fok_instance)
+		fok_instance.global_position = owner_player.global_position
+		
+		var final_slash_damage = _owner_player_stats.get_calculated_player_damage(
+			hit_specific_stats.get(&"weapon_damage_percentage", 1.0) * hit_specific_stats["damage_multiplier"],
+			hit_specific_stats.get("tags", [])
+		)
+		
+		if fok_instance.has_method("initialize"):
+			fok_instance.initialize(int(round(final_slash_damage)), _owner_player_stats)
+
+func _on_dagger_dealt_damage(enemy_node: Node, damage_dealt: int):
+	if not _is_target_valid_for_combo(enemy_node): return
+	var current_total = _damage_tracker.get(enemy_node, 0)
+	_damage_tracker[enemy_node] = current_total + damage_dealt
+
+func _on_dagger_hit_enemy_for_combo(enemy_node: Node, hit_index: int):
+	if not _is_target_valid_for_combo(enemy_node): return
+
+	var hit_bit = 1 << hit_index
+	var current_mask = _hit_tracker.get(enemy_node, 0)
+	_hit_tracker[enemy_node] = current_mask | hit_bit
 	
-	# Update the 'weapon_damage_percentage' in the hit_specific_stats for this hit.
-	# This allows individual hits in the sequence to have different damage modifiers.
-	# We use the current calculated weapon_damage_percentage from _specific_stats
-	var current_weapon_damage_percent = float(hit_specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.0))
-	hit_specific_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] = current_weapon_damage_percent * hit_damage_mult
+	var required_mask = (1 << _attack_sequence.size()) - 1
+	if _hit_tracker[enemy_node] == required_mask:
+		print_debug("THOUSAND CUTS PROC on ", enemy_node.name)
+		
+		var total_accumulated_damage = _damage_tracker.get(enemy_node, 0)
+		var owner_player = _owner_player_stats.get_parent()
 
-	# Pass weapon tags to the individual attack instance
-	hit_specific_stats[&"tags"] = _specific_stats.get(&"tags", []).duplicate(true)
+		if enemy_node.has_method("take_damage") and total_accumulated_damage > 0:
+			var attack_stats_for_bonus_damage: Dictionary = {
+				PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
+			}
+			enemy_node.take_damage(total_accumulated_damage, owner_player, attack_stats_for_bonus_damage)
+			
+			if is_instance_valid(proc_visual_effect_scene):
+				var proc_vfx = proc_visual_effect_scene.instantiate()
+				get_tree().current_scene.add_child(proc_vfx)
+				proc_vfx.global_position = enemy_node.global_position
+				if proc_vfx.has_method("detonate"):
+					proc_vfx.detonate(0, 40, owner_player, {})
+		
+		_hit_tracker.erase(enemy_node)
+		_damage_tracker.erase(enemy_node)
 
-
-	# Call the standardized initialization function on the individual hitbox instance.
-	# This passes all necessary data for the hitbox to calculate its own damage, scale, etc.
-	if hitbox_instance.has_method("set_attack_properties"):
-		hitbox_instance.set_attack_properties(final_direction, hit_specific_stats, _owner_player_stats)
-	else:
-		push_error("ERROR (DaggerStrikeController): Spawned hitbox instance '", hitbox_instance.name, "' is missing 'set_attack_properties' method.")
-	
-	# Prepare for the next hit in the sequence.
-	_hit_index += 1
-	_execute_next_hit() # Call recursively (or iteratively) for the next hit
+func _is_target_valid_for_combo(target: Node) -> bool:
+	return is_instance_valid(target) and target is BaseEnemy and not target.is_dead()

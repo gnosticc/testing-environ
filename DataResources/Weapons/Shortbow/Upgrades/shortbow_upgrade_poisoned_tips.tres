@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bwvpggy3d15us"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_klte3"]
+[ext_resource type="Resource" uid="uid://cy5c640ty401x" path="res://DataResources/Weapons/Shortbow/Effects/poisoned_tips_apply_effect.tres" id="2_1mnga"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ckc8n"]
+
+[resource]
+script = ExtResource("2_ckc8n")
+upgrade_id = &"shortbow_poisoned_tips"
+title = "Poisoned Tips"
+description = "25% chance to apply a stacking poison, dealing 50% of the arrow's hit damage per second for 5 seconds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_klte3")]([ExtResource("2_1mnga")])
+set_acquired_flag_on_weapon = &"shortbow_poisoned_tips_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"
