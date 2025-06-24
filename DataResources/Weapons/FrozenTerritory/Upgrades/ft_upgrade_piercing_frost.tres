@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://cwgdaqaajlxcv"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_mhunh"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_6j2y5"]
+[ext_resource type="Resource" uid="uid://c28kopwusgvbh" path="res://DataResources/Weapons/FrozenTerritory/Effects/ft_damage_effect.tres" id="2_h7sit"]
+[ext_resource type="Resource" uid="uid://dsvfubyerfs0v" path="res://DataResources/Weapons/FrozenTerritory/Effects/ft_piercing_frost_flag_effect.tres" id="3_s6rdo"]
+
+[resource]
+script = ExtResource("2_6j2y5")
+upgrade_id = &"ft_piercing_frost"
+title = "Piercing Frost"
+description = "Further increases the damage of the frost orbs by 40%. Orbs now ignore armor."
+prerequisites_on_this_weapon = Array[StringName]([&"ft_deeper_freeze"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_mhunh")]([ExtResource("2_h7sit"), ExtResource("3_s6rdo")])
+set_acquired_flag_on_weapon = &"ft_piercing_frost_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

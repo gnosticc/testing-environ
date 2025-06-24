@@ -1,34 +1,50 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://dmqmsb2c64mhc"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://dmqmsb2c64mhc"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_xvcj6"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ds0vv"]
-[ext_resource type="PackedScene" uid="uid://cmd15djjk8ikl" path="res://Scenes/Weapons/Summons/LesserSpiritController.tscn" id="3_ds0vv"]
+[ext_resource type="Resource" uid="uid://ch5mq0j5yxafu" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_arcane_infusion.tres" id="2_eggr2"]
+[ext_resource type="Resource" uid="uid://bnnxns7ek8gwf" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_empowered_bolts.tres" id="3_scsvs"]
+[ext_resource type="Resource" uid="uid://u5bcp30x3ci1" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_ethereal_barrage.tres" id="4_60ee2"]
+[ext_resource type="Resource" uid="uid://p1upwjday01x" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_extended_range.tres" id="5_i10ng"]
+[ext_resource type="Resource" uid="uid://bgar28mig4um" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_piercing_essence.tres" id="6_sn402"]
+[ext_resource type="Resource" uid="uid://fpxpkftggndc" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_rapid_fire.tres" id="7_24e5m"]
+[ext_resource type="Resource" uid="uid://ws0ljdw7bpwg" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_seeking_orbs.tres" id="8_t3vmk"]
+[ext_resource type="Resource" uid="uid://d31s7qcyn4dta" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_spirit_vigor.tres" id="9_wrfbn"]
+[ext_resource type="Resource" uid="uid://smgg1v32ryj2" path="res://DataResources/Weapons/LesserSpirit/Upgrades/ls_upgrade_twin_souls.tres" id="10_i26cm"]
+[ext_resource type="PackedScene" uid="uid://d03ksk6g73uw8" path="res://Scenes/Weapons/Summons/LesserSpiritInstance.tscn" id="12_eggr2"]
 
 [resource]
 script = ExtResource("2_ds0vv")
 id = &"conjurer_lesser_spirit"
 title = "Lesser Spirit"
 description = "Summons an orbiting spirit that follows you and attacks neaby enemies."
-weapon_scene = ExtResource("3_ds0vv")
-tags = Array[StringName]([&"magical", &"orbital", &"summon"])
+weapon_scene = ExtResource("12_eggr2")
+tags = Array[StringName]([&"magical", &"orbital", &"summon", &"pet"])
 class_tag_restrictions = Array[int]([6])
 cooldown = 0.0
 max_level = 10
-base_lifetime = 1.0
+base_lifetime = -1.0
 spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
+tracks_shot_count = false
 initial_specific_stats = {
 "attack_cooldown": 0.8,
-"attack_range": 180.0,
+"attack_range": 120.0,
+"debuff_on_hit_chance": 0.0,
+"ethereal_barrage_proc_chance": 0.0,
+"has_arcane_infusion": false,
+"has_ethereal_barrage": false,
+"has_homing": false,
 "inherent_visual_scale_x": 0.08,
 "inherent_visual_scale_y": 0.08,
 "max_summons_of_type": 1,
 "orbit_radius": 20.0,
 "pierce_count": 0,
-"projectile_speed": 400.0,
+"projectile_lifetime": 2.0,
+"projectile_speed": 200.0,
 "rotation_duration": 2.0,
 "weapon_damage_percentage": 0.6
 }
-available_upgrades = Array[ExtResource("1_xvcj6")]([])
+available_upgrades = Array[ExtResource("1_xvcj6")]([ExtResource("2_eggr2"), ExtResource("3_scsvs"), ExtResource("4_60ee2"), ExtResource("5_i10ng"), ExtResource("6_sn402"), ExtResource("7_24e5m"), ExtResource("8_t3vmk"), ExtResource("9_wrfbn"), ExtResource("10_i26cm")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

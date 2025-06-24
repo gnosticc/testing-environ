@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://dxxeed4wbmrld"]
+[gd_scene load_steps=9 format=3 uid="uid://dxxeed4wbmrld"]
 
 [ext_resource type="Script" uid="uid://coof1whvxciaj" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/VineWhipAttack.gd" id="1_x4jnd"]
 [ext_resource type="Texture2D" uid="uid://djjlfs8jtnhwf" path="res://Assets/Weapons/Vine Whip Animation.png" id="1_ys0es"]
@@ -41,13 +41,10 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_mt5tl")
 }],
-"loop": true,
+"loop": false,
 "name": &"whip",
 "speed": 12.0
 }]
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_3lj7w"]
-size = Vector2(65, 10)
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_x4jnd")
@@ -57,16 +54,27 @@ position = Vector2(33.8358, 0.234278)
 scale = Vector2(0.136692, -0.0552764)
 sprite_frames = SubResource("SpriteFrames_2v61d")
 animation = &"whip"
-frame_progress = 0.107435
+frame = 4
+frame_progress = 1.0
 
-[node name="DamageArea" type="Area2D" parent="."]
+[node name="DamageAreaMain" type="Area2D" parent="."]
 position = Vector2(33.8358, 0.234278)
 scale = Vector2(1.35336, 1.58407)
 collision_layer = 4
 collision_mask = 136
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
+[node name="CollisionShapeMain" type="CollisionPolygon2D" parent="DamageAreaMain"]
 position = Vector2(-1.5, 0)
-shape = SubResource("RectangleShape2D_3lj7w")
+polygon = PackedVector2Array(-33.1071, -5.82946, 34.8719, -5.82946, 34.8719, 8.6901, -33.1071, 8.6901)
+
+[node name="DamageAreaTip" type="Area2D" parent="."]
+position = Vector2(33.8358, 0.234278)
+scale = Vector2(1.35336, 1.58407)
+collision_layer = 4
+collision_mask = 136
+
+[node name="CollisionShapeTip" type="CollisionPolygon2D" parent="DamageAreaTip"]
+position = Vector2(1.4778, 2.52514)
+polygon = PackedVector2Array(11.2049, -11.511, 21.5495, -10.2485, 34.1108, -8.3546, 34.1108, 3.63982, 28.9385, 9.95267, 11.9438, 9.32138, 0.121326, 7.42753, -0.617575, 3.00853, 0.860228, -4.56689, 5.29364, -8.98589)
 
 [node name="DurationTimer" type="Timer" parent="."]

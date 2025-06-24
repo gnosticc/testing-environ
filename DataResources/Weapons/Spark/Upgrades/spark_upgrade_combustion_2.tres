@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bjiol4uk22s08"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_xkl2d"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_lpsie"]
+[ext_resource type="Resource" uid="uid://bhhhekfpm0a6h" path="res://DataResources/Weapons/Spark/Effects/spark_combustion_damage_effect.tres" id="2_y5518"]
+
+[resource]
+script = ExtResource("2_lpsie")
+upgrade_id = &"spark_combustion_2"
+title = "Combustion II"
+description = "Further increases Spark damage by 75%."
+prerequisites_on_this_weapon = Array[StringName]([&"spark_combustion_1"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_xkl2d")]([ExtResource("2_y5518")])
+set_acquired_flag_on_weapon = &"spark_combustion_2_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

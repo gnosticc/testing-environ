@@ -73,6 +73,13 @@ var current_anim_state: EnemyAnimState = EnemyAnimState.IDLE
 const MIN_SPEED_FOR_WALK_ANIM: float = 5.0 # Minimum velocity squared to trigger walk animation
 var _is_contact_attacking: bool = false # Flag to prevent movement during attack animation
 var knockback_velocity: Vector2 = Vector2.ZERO # Current velocity from knockback
+# NEW: Variable to accumulate external forces for one frame.
+var external_forces: Vector2 = Vector2.ZERO
+# NEW: Multiplier for all outgoing damage. Used by "Weakened" debuff.
+var damage_output_multiplier: float = 1.0
+# NEW: Used by StatusEffectComponent to know how much damage a proc should do.
+var _last_damage_instance_received: int = 0
+
 
 # --- Lifecycle & Initialization ---
 
@@ -210,6 +217,10 @@ func apply_knockback(direction: Vector2, force: float):
 
 # --- Physics & Movement ---
 
+# NEW: Public function for external objects to apply forces.
+func apply_external_force(force: Vector2):
+	external_forces += force
+
 func _physics_process(delta: float):
 	if is_dead_flag or _is_contact_attacking:
 		velocity = Vector2.ZERO # Stop movement
@@ -259,17 +270,26 @@ func _physics_process(delta: float):
 		current_move_speed = maxf(0.0, current_move_speed) # Ensure speed doesn't go negative
 
 	# Combine movement velocity with knockback velocity
+	# --- MODIFIED: Velocity calculation pipeline ---
+	# 1. Start with the enemy's own intended movement.
 	velocity = final_direction * current_move_speed
-	if knockback_velocity.length_squared() > 0: # Check squared length for performance
+
+	# 2. Add any active knockback velocity.
+	if knockback_velocity.length_squared() > 0:
 		velocity += knockback_velocity
-		# Apply friction to the knockback so it fades out
 		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 300.0 * delta)
+
+	# 3. Add any accumulated external forces (like the vortex pull).
+	if external_forces.length_squared() > 0:
+		velocity += external_forces
 
 	# Sprite flipping based on movement direction
 	if is_instance_valid(animated_sprite) and velocity.x != 0:
 		animated_sprite.flip_h = (velocity.x < 0) if not _sprite_initially_faces_left else (velocity.x > 0)
 			
 	move_and_slide()
+	# 5. Reset external forces for the next frame.
+	external_forces = Vector2.ZERO
 	_update_animation_state()
 
 # Calculates a force vector to push enemies away from each other.
@@ -294,34 +314,26 @@ func _calculate_separation_force() -> Vector2:
 # amount: The base damage amount.
 # attacker_node: The node that dealt the damage (e.g., PlayerCharacter, a Projectile).
 # p_attack_stats: Dictionary containing attack-specific stats (e.g., player's armor_penetration).
-func take_damage(amount: float, attacker_node: Node = null, p_attack_stats: Dictionary = {}): # Amount is float for consistency
+# --- MERGED take_damage function ---
+func take_damage(amount: float, attacker_node: Node = null, p_attack_stats: Dictionary = {}):
 	if current_health <= 0 or is_dead_flag: return
 	
 	var final_damage_taken = amount
-	var current_armor_stat = armor # Enemy's current armor
+	var current_armor_stat = armor
 	
-	# Get armor penetration from the attack stats (from player's PlayerStats)
 	var armor_penetration_value = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0))
-		
-	# Calculate effective armor after penetration
-	# This uses the formula: Effective Armor = Current Armor * (1 - Penetration%) for percentage,
-	# or Current Armor - FlatPenetration for flat.
-	# Assuming p_attack_stats.armor_penetration is a flat value for now, as defined.
-	var effective_armor = maxf(0.0, current_armor_stat - armor_penetration_value) # Use maxf
+	var effective_armor = maxf(0.0, current_armor_stat - armor_penetration_value)
+	final_damage_taken = maxf(1.0, final_damage_taken - effective_armor)
 	
-	# Reduce incoming damage by effective armor
-	final_damage_taken = maxf(1.0, final_damage_taken - effective_armor) # Ensure at least 1 damage
-	
-	# Apply damage taken multipliers from status effects (e.g., Vulnerable)
 	if is_instance_valid(status_effect_component):
-		# Assumes "damage_taken_multiplier" is a percentage (e.g., 0.25 for +25% damage taken)
-		# The multiplier from status effects is stored as a sum of additive percentages.
 		var damage_taken_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER])
-		var damage_taken_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER]) # If you have this type
+		var damage_taken_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER])
+		final_damage_taken *= (1.0 + damage_taken_mod_add)
+		final_damage_taken *= damage_taken_mod_mult
 		
-		final_damage_taken *= (1.0 + damage_taken_mod_add) # Apply additive percentage modifiers
-		final_damage_taken *= damage_taken_mod_mult # Apply final multiplicative modifiers
-		
+	# NEW: Store this damage amount before applying it.
+	_last_damage_instance_received = int(round(final_damage_taken))
+
 	current_health -= final_damage_taken
 	update_health_bar()
 	_flash_on_hit()
@@ -344,6 +356,28 @@ func _die(killer_node: Node = null):
 	if is_instance_valid(shaman_aura): shaman_aura.queue_free()
 	if is_instance_valid(shaman_heal_pulse_timer): shaman_heal_pulse_timer.queue_free()
 	if is_instance_valid(time_warper_aura): time_warper_aura.queue_free() # For time_warper
+
+	# --- NEW: Lingering Cold Logic ---
+	# MODIFIED: Correctly check for the special effect ID.
+	if is_instance_valid(status_effect_component) and status_effect_component.has_status_effect_by_unique_id("ft_lingering_cold_slow"):
+		var weapon_stats = status_effect_component.get_stats_from_effect_source_by_unique_id("ft_lingering_cold_slow")
+		var spread_radius = float(weapon_stats.get(&"lingering_cold_radius", 75.0))
+		var slow_effect_data = load("res://DataResources/StatusEffects/slow_status.tres") as StatusEffectData
+		
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsShapeQueryParameters2D.new()
+		query.shape = CircleShape2D.new(); query.shape.radius = spread_radius
+		query.transform = Transform2D(0, global_position)
+		query.collision_mask = self.collision_layer
+		
+		var results = space_state.intersect_shape(query)
+		for result in results:
+			var collider = result.collider
+			if collider != self and collider is BaseEnemy and is_instance_valid(collider) and not collider.is_dead():
+				if is_instance_valid(collider.status_effect_component):
+					# Apply the regular slow effect to nearby enemies, without the special ID.
+					collider.status_effect_component.apply_effect(slow_effect_data, killer_node)
+
 
 	# Decrement active enemy count in game.gd.
 	if is_instance_valid(game_node_ref) and game_node_ref.has_method("decrement_active_enemy_count"):
@@ -550,7 +584,12 @@ func _try_deal_contact_damage():
 	if not _player_in_contact_area or is_dead_flag or _is_contact_attacking: return
 		
 	if is_instance_valid(player_node) and player_node.has_method("take_damage"):
-		player_node.take_damage(contact_damage, self) # Pass float damage
+		var final_contact_damage = contact_damage * damage_output_multiplier
+		
+		if damage_output_multiplier < 1.0:
+			print("DEBUG (Weakened): Enemy '", name, "' is Weakened. Base Dmg: ", contact_damage, ", Final Dmg: ", final_contact_damage)
+			
+		player_node.take_damage(final_contact_damage, self)
 		_can_deal_contact_damage_again = false # Reset cooldown flag
 		
 		# Play attack animation if available
@@ -774,10 +813,21 @@ func on_status_effects_changed(_owner_node: Node):
 	
 	animated_sprite.modulate = applied_tint
 
-	# DEBUG PRINT: Show final modulate color
+	# --- NEW: STAT UPDATE LOGIC ---
+	# Read the final calculated modifiers from the StatusEffectComponent and apply them.
+	# We start with a base multiplier of 1.0 (100% damage).
+	var final_damage_mult = 1.0 
+	var mult_from_status = status_effect_component.get_product_of_multiplicative_modifiers(
+		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_OUTPUT_MULTIPLIER]
+	)
+	final_damage_mult *= mult_from_status
+	
+	# Update the local variable that is used in the damage calculation.
+	self.damage_output_multiplier = final_damage_mult
 
 	# Update movement behavior based on status effects that impair movement.
-	set_physics_process(true) # Ensure physics process is running to re-evaluate movement
+	set_physics_process(true)
+
 
 func is_dead() -> bool:
 	return is_dead_flag

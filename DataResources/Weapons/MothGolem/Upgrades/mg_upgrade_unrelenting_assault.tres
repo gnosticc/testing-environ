@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bn617cnkinvnc"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_e3fjv"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_3f10d"]
+[ext_resource type="Resource" uid="uid://b28ju70yk3a13" path="res://DataResources/Weapons/MothGolem/Effects/mg_unrelenting_assault_damage_effect.tres" id="2_aqhbw"]
+[ext_resource type="Resource" uid="uid://bnik5x657vt6l" path="res://DataResources/Weapons/MothGolem/Effects/mg_unrelenting_assault_speed_effect.tres" id="3_fm88q"]
+
+[resource]
+script = ExtResource("2_3f10d")
+upgrade_id = &"mg_unrelenting_assault"
+title = "Unrelenting Assault"
+description = "Increases both damage by 60% and attack speed by 10% of the Golem."
+prerequisites_on_this_weapon = Array[StringName]([&"mg_dense_mitts"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_e3fjv")]([ExtResource("2_aqhbw"), ExtResource("3_fm88q")])
+set_acquired_flag_on_weapon = &"mg_unrelenting_assault_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bfmcvpilojx3d"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_rew7d"]
+[ext_resource type="Resource" uid="uid://dvnrd60aaiidm" path="res://DataResources/Weapons/FrozenTerritory/Effects/ft_expanded_chill_area_effect.tres" id="2_5gj2p"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ag5tr"]
+[ext_resource type="Resource" uid="uid://bwdiksmjmblcb" path="res://DataResources/Weapons/FrozenTerritory/Effects/ft_add_orb_effect.tres" id="3_m2m2t"]
+
+[resource]
+script = ExtResource("2_ag5tr")
+upgrade_id = &"ft_expanded_chill"
+title = "Expanded Chill"
+description = "Increases the area of each frost orb by 25% and adds 1 orb."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_rew7d")]([ExtResource("2_5gj2p"), ExtResource("3_m2m2t")])
+set_acquired_flag_on_weapon = &"ft_expanded_chill_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

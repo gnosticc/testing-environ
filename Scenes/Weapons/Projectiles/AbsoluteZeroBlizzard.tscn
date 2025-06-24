@@ -1,0 +1,122 @@
+[gd_scene load_steps=18 format=3 uid="uid://d0mpeb3y88lrf"]
+
+[ext_resource type="Script" uid="uid://bedpvow8qy2tb" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/AbsoluteZeroBlizzard.gd" id="1_qd1u6"]
+[ext_resource type="Texture2D" uid="uid://d0p6bsh5fpacw" path="res://Assets/SFX/Absolute Zero Animation.png" id="2_4xcax"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w3kx6"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(0, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_swa5l"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(205, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fb54l"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(410, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ja2e3"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(615, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a3gsa"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(820, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_02bjc"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(1025, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vjunc"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(1230, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iiblm"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(1435, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_451xx"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(1640, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y2gtr"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(1845, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ofgf"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(2050, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xdiq0"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(2255, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1fw65"]
+atlas = ExtResource("2_4xcax")
+region = Rect2(2460, 0, 205, 205)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_e60tf"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w3kx6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_swa5l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fb54l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ja2e3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a3gsa")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_02bjc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vjunc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iiblm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_451xx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y2gtr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5ofgf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xdiq0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1fw65")
+}],
+"loop": true,
+"name": &"default",
+"speed": 24.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_j0xiw"]
+radius = 102.956
+
+[node name="AbsoluteZeroBlizzard" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_qd1u6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.976471)
+sprite_frames = SubResource("SpriteFrames_e60tf")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_j0xiw")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="DamageTickTimer" type="Timer" parent="."]

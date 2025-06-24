@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://chf1hkh7b3mek"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_ahrja"]
+
+[resource]
+script = ExtResource("1_ahrja")
+id = &""
+modification_type = &"flat_add"
+stat_key = &"health_regen_percent_max_hp"
+value_type = 1
+value_float = 1.0
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"player_stats"
+developer_note = "The value for this effect is dynamically set by the ShieldBashAttack script via potency_override."
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

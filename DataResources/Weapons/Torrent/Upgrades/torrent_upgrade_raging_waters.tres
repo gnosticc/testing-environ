@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dgsqrscmge8n"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_fmuri"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_7fr0r"]
+[ext_resource type="Resource" uid="uid://2yqtmxujoyhj" path="res://DataResources/Weapons/Torrent/Effects/torrent_damage_effect_1.tres" id="2_42wqp"]
+
+[resource]
+script = ExtResource("2_7fr0r")
+upgrade_id = &"torrent_raging_waters"
+title = "Raging Waters"
+description = "Increases the base damage of the torrent by 50%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_fmuri")]([ExtResource("2_42wqp")])
+set_acquired_flag_on_weapon = &"torrent_raging_waters_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

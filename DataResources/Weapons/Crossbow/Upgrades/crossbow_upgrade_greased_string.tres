@@ -8,7 +8,7 @@
 script = ExtResource("2_xdafc")
 upgrade_id = &"crossbow_greased_string"
 title = "Greased String"
-description = "Increases crossbow attack speed by 20%."
+description = "Reduces crossbow cooldown by 20%."
 prerequisites_on_this_weapon = Array[StringName]([])
 weight = 100.0
 max_stacks = 1

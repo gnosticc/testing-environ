@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://cgxw4cdt8ad4u"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_wxb7i"]
+
+[resource]
+script = ExtResource("1_wxb7i")
+id = &"ls_twin_souls_add_summon"
+modification_type = &"flat_add"
+stat_key = &"max_summons_of_type"
+value_type = 0
+value_float = 0.0
+value_int = 1
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = "Twin Souls: +1 to max Lesser Spirits."
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=6 format=3 uid="uid://dkdsq6br83fe4"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_aipl3"]
+[ext_resource type="Resource" uid="uid://bygtebup15pxe" path="res://DataResources/StatusEffects/primal_fury_area.tres" id="2_5m11e"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_f8em5"]
+[ext_resource type="Resource" uid="uid://csod0hcvnhdyk" path="res://DataResources/StatusEffects/primal_fury_damage.tres" id="3_f2t3a"]
+[ext_resource type="Resource" uid="uid://gfk3ym6frkqm" path="res://DataResources/StatusEffects/primal_fury_speed.tres" id="4_7an32"]
+
+[resource]
+script = ExtResource("2_f8em5")
+id = &"primal_fury_buff"
+display_name = "Primal Fury"
+duration = 8.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_aipl3")]([ExtResource("2_5m11e"), ExtResource("3_f2t3a"), ExtResource("4_7an32")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

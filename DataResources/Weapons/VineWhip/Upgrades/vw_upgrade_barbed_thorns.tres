@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://6h4rlp5yrr3o"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_082e3"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_4xgy3"]
+[ext_resource type="Resource" uid="uid://b2v1kw55ufnjy" path="res://DataResources/Weapons/VineWhip/Effects/vw_barbed_thorns_effect.tres" id="2_tiiwn"]
+
+[resource]
+script = ExtResource("2_4xgy3")
+upgrade_id = &"vw_barbed_thorns"
+title = "Barbed Thorns"
+description = "The Vine Whip deals 80% increased base damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_082e3")]([ExtResource("2_tiiwn")])
+set_acquired_flag_on_weapon = &"vw_barbed_thorns_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

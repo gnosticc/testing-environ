@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3 uid="uid://bdd0u8ruka0mk"]
+
+[ext_resource type="Script" uid="uid://dw4ok5dxpia2g" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/GolemSmashEffect.gd" id="1_b888l"]
+[ext_resource type="Texture2D" uid="uid://doxlbr86cvcah" path="res://Assets/SFX/Golem Smash Animation.png" id="2_litxh"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3yjcu"]
+atlas = ExtResource("2_litxh")
+region = Rect2(0, 0, 210, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1mglv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yjcu")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="GolemSmashEffect" type="Node2D"]
+script = ExtResource("1_b888l")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.503)
+z_index = -2
+sprite_frames = SubResource("SpriteFrames_1mglv")

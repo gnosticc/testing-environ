@@ -253,11 +253,12 @@ func initialize_base_stats_with_raw_dict(raw_stats_dict: Dictionary):
 func apply_stat_modification(effect_data: StatModificationEffectData):
 	if not is_instance_valid(effect_data): return
 	
-	var key = effect_data.stat_key
+	var key = PlayerStatKeys.KEY_NAMES.get(effect_data.stat_key, &"")
+	if key == &"":
+		key = effect_data.stat_key # Fallback for direct StringName
+
 	var value = effect_data.get_value()
 
-	# CORRECTED: Modifications are now applied to the modifier dictionaries, not the base stats.
-	# This keeps the base values clean and makes the system more robust.
 	match effect_data.modification_type:
 		&"flat_add":
 			flat_modifiers[key] = flat_modifiers.get(key, 0.0) + value
@@ -266,7 +267,6 @@ func apply_stat_modification(effect_data: StatModificationEffectData):
 		&"percent_mult_final":
 			percent_mult_final_modifiers[key] = percent_mult_final_modifiers.get(key, 1.0) * (1.0 + value)
 		&"override_value":
-			# An override sets the base value directly, wiping out other modifiers for that stat.
 			base_stat_values[key] = value
 			flat_modifiers[key] = 0.0
 			percent_add_modifiers[key] = 0.0
@@ -278,23 +278,29 @@ func apply_stat_modification(effect_data: StatModificationEffectData):
 
 
 
+
 # --- Handling Custom Flags (Boolean states) ---
 # These are handled by CustomFlagEffectData and stored in a separate dictionary.
 var player_flags: Dictionary = {}
 
+# --- NEW: Function to apply boolean flags to the player ---
 func apply_custom_flag(effect_data: CustomFlagEffectData):
-	var flag_key_string: StringName = effect_data.flag_key
-	var flag_value: bool = effect_data.flag_value
+	if not is_instance_valid(effect_data): return
+	
+	# Attempt to get the standardized StringName from the enum key
+	var key = PlayerStatKeys.KEY_NAMES.get(effect_data.flag_key, &"")
+	if key == &"":
+		# Fallback for direct StringName keys if enum isn't used
+		key = effect_data.flag_key
 
-	player_flags[flag_key_string] = flag_value
-	print("PlayerStats: Flag '", flag_key_string, "' set to ", flag_value)
-	# Flags generally don't trigger a full stat recalculation unless they directly affect a calculated stat's formula,
-	# which is usually handled within the get_final_stat logic or in the consuming script.
+	player_flags[key] = effect_data.flag_value
+	print("PlayerStats: Flag '", key, "' set to ", effect_data.flag_value)
+	
+	recalculate_all_stats()
 
-
-func get_flag(flag_key_enum: PlayerStatKeys.Keys) -> bool: # Use PlayerStatKeys
-	var flag_key_string: StringName = PlayerStatKeys.KEY_NAMES[flag_key_enum] # Use PlayerStatKeys
-	return player_flags.get(flag_key_string, false) # Default to false if flag not set
+func get_flag(key_enum: PlayerStatKeys.Keys) -> bool:
+	var key_string = PlayerStatKeys.KEY_NAMES[key_enum]
+	return player_flags.get(key_string, false)
 
 
 # --- Getting Final Stat Value ---
@@ -302,23 +308,24 @@ func get_flag(flag_key_enum: PlayerStatKeys.Keys) -> bool: # Use PlayerStatKeys
 func get_final_stat(key_enum: PlayerStatKeys.Keys) -> float:
 	var key_string = PlayerStatKeys.KEY_NAMES[key_enum]
 	
-	# 1. Get permanent stats stored in this node.
 	var base_val = float(base_stat_values.get(key_string, 0.0))
 	var permanent_flat_mod = float(flat_modifiers.get(key_string, 0.0))
 	var permanent_percent_add_mod = float(percent_add_modifiers.get(key_string, 0.0))
 	var permanent_percent_mult_final_mod = float(percent_mult_final_modifiers.get(key_string, 1.0))
 	
-	# 2. Get temporary modifiers from active status effects (e.g., Knight's Resolve).
 	var temp_additive_mod = 0.0
 	var temp_multiplicative_mod = 1.0
 	if is_instance_valid(status_effect_component):
 		temp_additive_mod = status_effect_component.get_sum_of_additive_modifiers(key_string)
 		temp_multiplicative_mod = status_effect_component.get_product_of_multiplicative_modifiers(key_string)
 
-	# 3. Combine all stats in the correct order of operations.
-	# Formula: (Base + FlatPermanent + TempAdditive) * (1 + PercentAddPermanent) * FinalMultPermanent * TempFinalMult
 	var final_value = (base_val + permanent_flat_mod + temp_additive_mod) * (1.0 + permanent_percent_add_mod) * permanent_percent_mult_final_mod * temp_multiplicative_mod
 	
+	if key_enum == PlayerStatKeys.Keys.DODGE_CHANCE and get_flag(PlayerStatKeys.Keys.PLAYER_HAS_LEVERAGE):
+		var luck = get_final_stat(PlayerStatKeys.Keys.LUCK)
+		var bonus_from_luck = min(0.15, luck * 0.01)
+		final_value += (0.05 + bonus_from_luck)
+
 	return final_value
 
 func get_final_stat_by_string(key_string: StringName) -> float:

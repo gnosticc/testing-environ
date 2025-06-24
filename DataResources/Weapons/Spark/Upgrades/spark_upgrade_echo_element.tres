@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c1570ehp7e8qo"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_f34tj"]
+[ext_resource type="Resource" uid="uid://qyn7jg2nwldj" path="res://DataResources/Weapons/Spark/Effects/spark_echo_element_flag_effect.tres" id="2_fdcyq"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_sepsr"]
+
+[resource]
+script = ExtResource("2_sepsr")
+upgrade_id = &"spark_echo_element"
+title = "Echo Element"
+description = "Explosions from Spark now occur a second time."
+prerequisites_on_this_weapon = Array[StringName]([&"spark_tamed_element"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_f34tj")]([ExtResource("2_fdcyq")])
+set_acquired_flag_on_weapon = &"spark_echo_element_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://lcgovobbmcgy"]
+
+[ext_resource type="Script" uid="uid://cdn1lnp4sxl0a" path="res://Scripts/Weapons/Projectiles/RimeheartAura.gd" id="1_a2nj2"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1y8jo"]
+
+[node name="RimeheartAura" type="Area2D"]
+collision_layer = 0
+collision_mask = 136
+script = ExtResource("1_a2nj2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1y8jo")

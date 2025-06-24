@@ -1,15 +1,24 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://ciri65vps4yi8"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://ciri65vps4yi8"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_gotja"]
+[ext_resource type="Resource" uid="uid://661duq3es1e4" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_combustion_1.tres" id="2_ddqid"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_hspf8"]
-[ext_resource type="PackedScene" uid="uid://blj6u880sernr" path="res://Scenes/Weapons/SparkProjectile.tscn" id="3_hspf8"]
+[ext_resource type="Resource" uid="uid://bjiol4uk22s08" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_combustion_2.tres" id="3_wqba7"]
+[ext_resource type="Resource" uid="uid://c7d1ey6e1cvhl" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_gathering_heat.tres" id="4_qi5ag"]
+[ext_resource type="Resource" uid="uid://cenuraxuca7c0" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_larger_flame.tres" id="5_veslc"]
+[ext_resource type="Resource" uid="uid://dh7g3evsjwxka" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_quick_cast.tres" id="6_y2ey7"]
+[ext_resource type="Resource" uid="uid://bbajdrwxcx034" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_twin_flames.tres" id="7_6gjif"]
+[ext_resource type="Resource" uid="uid://b3uy8tx6xg5qq" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_volatile_element.tres" id="8_kpukr"]
+[ext_resource type="Resource" uid="uid://lvababttgavv" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_tamed_element.tres" id="9_roi4q"]
+[ext_resource type="Resource" uid="uid://c1570ehp7e8qo" path="res://DataResources/Weapons/Spark/Upgrades/spark_upgrade_echo_element.tres" id="10_bs6a7"]
+[ext_resource type="PackedScene" uid="uid://drg74cjiprblp" path="res://Scenes/Weapons/SparkAttackController.tscn" id="12_ddqid"]
 
 [resource]
 script = ExtResource("2_hspf8")
 id = &"wizard_spark"
 title = "Spark"
 description = "Fires a small, firey ball of magical energy."
-weapon_scene = ExtResource("3_hspf8")
+weapon_scene = ExtResource("12_ddqid")
 tags = Array[StringName]([&"projectile", &"magical", &"fire", &"wizard weapon"])
 class_tag_restrictions = Array[int]([4])
 cooldown = 1.7
@@ -19,11 +28,18 @@ spawn_as_child = false
 requires_direction = true
 targeting_type = &"mouse_direction"
 initial_specific_stats = {
+"base_attack_duration": 0.2,
+"explosion_chance": 0.0,
+"explosion_echoes": false,
+"explosion_radius": 25.0,
+"has_explosion": false,
+"has_twin_flames": false,
 "inherent_visual_scale_x": 0.4,
 "inherent_visual_scale_y": 0.4,
 "pierce_count": 0,
+"projectile_size_multiplier": 1.0,
 "projectile_speed": 200.0,
 "weapon_damage_percentage": 1.8
 }
-available_upgrades = Array[ExtResource("1_gotja")]([])
+available_upgrades = Array[ExtResource("1_gotja")]([ExtResource("2_ddqid"), ExtResource("3_wqba7"), ExtResource("4_qi5ag"), ExtResource("5_veslc"), ExtResource("6_y2ey7"), ExtResource("7_6gjif"), ExtResource("8_kpukr"), ExtResource("9_roi4q"), ExtResource("10_bs6a7")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

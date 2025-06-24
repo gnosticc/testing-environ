@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://c4s104gyppej4"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_jku8v"]
+[ext_resource type="Resource" uid="uid://biiupa0sun6sb" path="res://DataResources/StatusEffects/root_effect.tres" id="2_tpxp2"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_wp2ix"]
+
+[resource]
+script = ExtResource("2_wp2ix")
+id = &"root"
+display_name = "Rooted"
+duration = 3.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_jku8v")]([ExtResource("2_tpxp2")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

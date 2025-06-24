@@ -1,0 +1,87 @@
+[gd_scene load_steps=13 format=3 uid="uid://opjs8vnbwyy8"]
+
+[ext_resource type="Script" uid="uid://dmd5lo17yusi1" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/ProtectiveDustCloud.gd" id="1_8k15y"]
+[ext_resource type="Texture2D" uid="uid://os7dn1avmqrg" path="res://Assets/SFX/Protective Dust Animation.png" id="2_e48uc"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_aboco"]
+radius = 111.629
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dxvto"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(1575, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eqr2o"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(1350, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a7vdy"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(1125, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vpxap"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(900, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m54uw"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(675, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_402si"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(450, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qcyy1"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(225, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k5n5w"]
+atlas = ExtResource("2_e48uc")
+region = Rect2(0, 0, 225, 225)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_x523e"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dxvto")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eqr2o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a7vdy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vpxap")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m54uw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_402si")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qcyy1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k5n5w")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[node name="ProtectiveDustCloud" type="Area2D"]
+collision_mask = 2
+script = ExtResource("1_8k15y")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_aboco")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_x523e")
+frame_progress = 0.148864
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 5.0
+
+[node name="RefreshTimer" type="Timer" parent="."]

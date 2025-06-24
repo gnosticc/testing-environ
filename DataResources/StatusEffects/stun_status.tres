@@ -1,18 +1,23 @@
-[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://edb0bu50o2dg"]
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=5 format=3 uid="uid://edb0bu50o2dg"]
 
 [ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_x0wr5"]
 [ext_resource type="Resource" uid="uid://c3sgwc8uilb62" path="res://DataResources/StatusEffects/stun_effect.tres" id="2_omoso"]
 [ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="3_s7lpo"]
+[ext_resource type="PackedScene" uid="uid://edefojcr0ype" path="res://Scenes/Weapons/Projectiles/Stun.tscn" id="4_omoso"]
 
 [resource]
 script = ExtResource("3_s7lpo")
 id = &"stun"
 display_name = "Stunned"
-duration = 1.0
+duration = 2.0
+is_stackable = false
 max_stacks = 1
 refresh_duration_on_reapply = true
 tick_interval = 0.0
 tick_on_application = false
 effects_while_active = Array[ExtResource("1_x0wr5")]([ExtResource("2_omoso")])
 next_status_effect_on_expire = &""
+visual_effect_scene = ExtResource("4_omoso")
+visual_anchor_point = 0
+visual_scale_multiplier = 2.0
 metadata/_custom_type_script = "uid://5du86wr4q1bj"

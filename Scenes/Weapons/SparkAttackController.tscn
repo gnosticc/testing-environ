@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://drg74cjiprblp"]
+
+[ext_resource type="Script" uid="uid://cq5bsp52qyjjd" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/SparkAttackController.gd" id="1_hejod"]
+[ext_resource type="PackedScene" uid="uid://blj6u880sernr" path="res://Scenes/Weapons/SparkProjectile.tscn" id="2_jfw35"]
+
+[node name="SparkAttackController" type="Node2D"]
+script = ExtResource("1_hejod")
+projectile_scene = ExtResource("2_jfw35")

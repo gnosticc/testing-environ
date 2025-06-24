@@ -1,45 +1,50 @@
-# FrozenTerritoryController.gd
-# This script's only job is to spawn the correct number of orbiting instances
-# with the correct spacing and stats, then remove itself.
-#
-# UPDATED: Uses PlayerStatKeys for stat lookups.
-# UPDATED: Passes weapon tags to the individual FrozenTerritoryInstance.
+# File: res://Scripts/DataResources/Weapons/Basic Class Weapons/FrozenTerritoryController.gd
+# MODIFIED: Now spawns the RimeheartAura scene if the upgrade is active.
 
 class_name FrozenTerritoryController
 extends Node2D
 
 @export var instance_scene: PackedScene
+const ABSOLUTE_ZERO_SCENE = preload("res://Scenes/Weapons/Projectiles/AbsoluteZeroBlizzard.tscn")
+# NEW: Preload the RimeheartAura scene.
+const RIMEHEART_AURA_SCENE = preload("res://Scenes/Weapons/Projectiles/RimeheartAura.tscn")
+
 
 func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
-	# Create a deep copy of the received stats to ensure isolated data for this controller.
-	# This also contains the 'tags' array now.
 	var received_stats_copy = p_attack_stats.duplicate(true) 
+	var owner_player = p_player_stats.get_parent() as PlayerCharacter
+	if not is_instance_valid(owner_player): queue_free(); return
 
-	if not is_instance_valid(instance_scene):
-		push_error("ERROR (FrozenTerritoryController): Missing Instance Scene! Queueing free."); queue_free(); return
+	# --- Absolute Zero Logic ---
+	if received_stats_copy.get(&"has_absolute_zero", false):
+		if is_instance_valid(ABSOLUTE_ZERO_SCENE):
+			var blizzard_instance = ABSOLUTE_ZERO_SCENE.instantiate()
+			owner_player.add_child(blizzard_instance)
+			blizzard_instance.global_position = owner_player.global_position
+			blizzard_instance.initialize(p_player_stats, owner_player)
 	
-	var owner_player = p_player_stats.get_parent() as PlayerCharacter # Cast for type safety
-	if not is_instance_valid(owner_player):
-		push_error("ERROR (FrozenTerritoryController): PlayerCharacter is invalid. Cannot spawn instances."); queue_free(); return
+	# --- NEW: Rimeheart Logic ---
+	if received_stats_copy.get(&"has_rimeheart", false):
+		if is_instance_valid(RIMEHEART_AURA_SCENE):
+			var aura_instance = RIMEHEART_AURA_SCENE.instantiate()
+			owner_player.add_child(aura_instance) # Attach to player to follow them
+			aura_instance.global_position = owner_player.global_position
+			
+			var weapon_damage_percent = float(received_stats_copy.get(&"weapon_damage_percentage", 1.0))
+			var orb_damage = int(round(maxf(1.0, p_player_stats.get_calculated_player_damage(weapon_damage_percent, received_stats_copy.get(&"tags",[])))))
+			var duration = float(received_stats_copy.get(&"base_lifetime", 3.0)) * p_player_stats.get_final_stat(PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER)
+			
+			aura_instance.initialize(owner_player, received_stats_copy, orb_damage, duration)
+
+	if not is_instance_valid(instance_scene): queue_free(); return
 	
-	# Use PlayerStatKeys for instance_count lookup (NUMBER_OF_ORBITS)
-	var instance_count = int(received_stats_copy.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMBER_OF_ORBITS], 1))
-	var angle_step = TAU / float(instance_count) # TAU is 2*PI, a full circle
+	var instance_count = int(received_stats_copy.get(&"number_of_orbits", 1))
+	var angle_step = TAU / float(instance_count)
 
 	for i in range(instance_count):
 		var instance = instance_scene.instantiate() as FrozenTerritoryInstance
-		
-		# Add to a general container so it doesn't get destroyed with this controller
-		var attacks_container = get_tree().current_scene.get_node_or_null("AttacksContainer")
-		if is_instance_valid(attacks_container):
-			attacks_container.add_child(instance)
-		else:
-			get_tree().current_scene.add_child(instance)
-			
+		owner_player.add_child(instance)
 		var start_angle = i * angle_step
-		# Pass the duplicated received_stats_copy directly to the instance.
-		# This ensures all calculated weapon-specific stats AND the 'tags' array are available.
 		instance.initialize(owner_player, received_stats_copy, start_angle)
 		
-	# This controller's job is done after spawning all instances.
 	queue_free()

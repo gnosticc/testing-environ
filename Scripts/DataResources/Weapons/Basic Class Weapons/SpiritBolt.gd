@@ -1,122 +1,137 @@
-# SpiritBolt.gd
-# A simple projectile fired by summoned spirits. This script handles its own
-# movement, collision, and damage application.
-# CORRECTED: Scale calculation now ignores inherited scale to prevent the projectile from being too small.
+# File: res/Scripts/DataResources/Weapons/Basic Class Weapons/SpiritBolt.gd
+# REVISED: Corrected damage calculation and implements deferred destruction.
 
 class_name SpiritBolt
 extends CharacterBody2D
 
-# --- Internal State ---
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var lifetime_timer: Timer = $LifetimeTimer
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
+@onready var homing_component: HomingComponent = get_node_or_null("HomingComponent")
+@onready var damage_area: Area2D = $DamageArea
+
 var final_damage_amount: int
 var final_speed: float
-var final_applied_scale: Vector2
 var direction: Vector2 = Vector2.RIGHT
 
 var max_pierce_count: int = 0
 var current_pierce_count: int = 0
+var _enemies_hit_this_instance: Array[Node2D] = []
 
-# --- Node References ---
-@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var lifetime_timer: Timer = $LifetimeTimer
-@onready var collision_shape: CollisionShape2D = $CollisionShape2D
-@onready var damage_area: Area2D = $DamageArea
-
-var _stats_have_been_set: bool = false
 var _received_stats: Dictionary = {}
 var _owner_player_stats: PlayerStats
+var _is_destroying: bool = false
 
 func _ready():
-	if not is_instance_valid(animated_sprite):
-		push_error("SpiritBolt ERROR: AnimatedSprite2D node not found at path '$AnimatedSprite2D'. Scene will be destroyed."); queue_free(); return
-	if not is_instance_valid(lifetime_timer):
-		push_error("SpiritBolt ERROR: LifetimeTimer node not found at path '$LifetimeTimer'. Scene will be destroyed."); queue_free(); return
-	if not is_instance_valid(collision_shape):
-		push_error("SpiritBolt ERROR: CollisionShape2D node not found at path '$CollisionShape2D'. Scene will be destroyed."); queue_free(); return
-	if not is_instance_valid(damage_area):
-		push_error("SpiritBolt ERROR: DamageArea node not found at path '$DamageArea'. Scene will be destroyed."); queue_free(); return
-		
-	lifetime_timer.timeout.connect(queue_free)
-	damage_area.body_entered.connect(_on_body_entered)
-	
-	if _stats_have_been_set:
-		_apply_all_stats_effects()
+	lifetime_timer.timeout.connect(_start_destruction)
+	if is_instance_valid(damage_area):
+		damage_area.body_entered.connect(_on_body_entered)
 
-func _physics_process(_delta: float):
-	velocity = direction * final_speed
+func _physics_process(delta: float):
+	if _is_destroying: return
+
+	if not (is_instance_valid(homing_component) and homing_component.is_active):
+		velocity = direction * final_speed
 	move_and_slide()
 
 func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
 	direction = p_direction.normalized() if p_direction.length_squared() > 0 else Vector2.RIGHT
 	_received_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
-	_stats_have_been_set = true
-	
-	if direction != Vector2.ZERO:
-		rotation = direction.angle()
-	
 	if is_inside_tree():
 		_apply_all_stats_effects()
 
 func _apply_all_stats_effects():
-	if not _stats_have_been_set or not is_instance_valid(_owner_player_stats): return
+	if not is_instance_valid(_owner_player_stats): return
 
-	var weapon_damage_percent = float(_received_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.0))
+	var weapon_damage_percent = float(_received_stats.get(&"weapon_damage_percentage", 1.0))
 	var weapon_tags: Array[StringName] = _received_stats.get(&"tags", [])
 	var calculated_damage_float = _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
+	
+	var total_crit_chance = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_CHANCE)
+	if randf() < total_crit_chance:
+		calculated_damage_float *= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
+		
 	final_damage_amount = int(round(maxf(1.0, calculated_damage_float)))
 	
-	var base_projectile_speed = _received_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED], 400.0)
+	var base_projectile_speed = float(_received_stats.get(&"projectile_speed", 400.0))
 	var player_proj_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER)
 	final_speed = base_projectile_speed * player_proj_speed_mult
-	
-	var base_pierce = _received_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PIERCE_COUNT], 0)
-	var global_pierce_add = int(_owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_PROJECTILE_PIERCE_COUNT_ADD))
-	max_pierce_count = base_pierce + global_pierce_add
 
-	# --- FIXED: SCALE CALCULATION ---
-	# We no longer read the 'inherent_visual_scale' from the received stats,
-	# as that belongs to the summoner (LesserSpiritInstance), not the projectile.
-	# We start with a base scale of 1.0 for the projectile itself.
-	var base_scale_x = 1.0
-	var base_scale_y = 1.0
+	max_pierce_count = int(_received_stats.get(&"pierce_count", 0))
+
 	var player_size_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SIZE_MULTIPLIER)
-	final_applied_scale = Vector2(base_scale_x * player_size_mult, base_scale_y * player_size_mult)
-	_apply_visual_scale()
-	
-	var base_lifetime = float(_received_stats.get(&"base_lifetime", 1.0))
-	var duration_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER)
-	lifetime_timer.wait_time = maxf(0.1, base_lifetime * duration_mult)
-	lifetime_timer.start()
-	
-	if is_instance_valid(animated_sprite):
-		animated_sprite.play("default")
+	var final_applied_scale = Vector2.ONE * player_size_mult
+	animated_sprite.scale = final_applied_scale; collision_shape.scale = final_applied_scale
 
-func _apply_visual_scale():
-	# Since the projectile's root node (this CharacterBody2D) is not scaled by default,
-	# we apply the final calculated scale directly to the visual components.
-	if is_instance_valid(animated_sprite): animated_sprite.scale = final_applied_scale
-	if is_instance_valid(collision_shape): collision_shape.scale = final_applied_scale
+	var base_lifetime = float(_received_stats.get(&"projectile_lifetime", 1.2))
+	var global_range_add = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD)
+	var time_from_added_range = 0.0
+	if final_speed > 0:
+		time_from_added_range = global_range_add / final_speed
+		
+	var duration_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.EFFECT_DURATION_MULTIPLIER)
+	lifetime_timer.wait_time = maxf(0.1, (base_lifetime + time_from_added_range) * duration_mult)
+	lifetime_timer.start()
+
+	rotation = direction.angle()
+	animated_sprite.play("default")
+
+	if _received_stats.get(&"has_homing", false) and is_instance_valid(homing_component):
+		var target = _find_nearest_enemy()
+		if is_instance_valid(target):
+			homing_component.activate(target)
 
 func _on_body_entered(body: Node2D):
-	if body.is_in_group("enemies") and body is BaseEnemy:
+	if _is_destroying: return
+
+	if body is BaseEnemy and not _enemies_hit_this_instance.has(body):
 		var enemy_target = body as BaseEnemy
 		if enemy_target.is_dead(): return
 
-		var owner_player_char = _owner_player_stats.get_parent() as PlayerCharacter
-		var attack_stats_for_enemy = {
-			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
-		}
-
-		enemy_target.take_damage(final_damage_amount, owner_player_char, attack_stats_for_enemy)
+		_enemies_hit_this_instance.append(enemy_target)
+		var owner_player_char = _owner_player_stats.get_parent()
 		
-		var global_lifesteal_percent = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
-		if global_lifesteal_percent > 0:
-			if is_instance_valid(owner_player_char) and owner_player_char.has_method("heal"):
-				owner_player_char.heal(final_damage_amount * global_lifesteal_percent)
+		enemy_target.take_damage(final_damage_amount, owner_player_char)
+
+		if _received_stats.get(&"has_arcane_infusion", false):
+			var proc_chance = float(_received_stats.get(&"debuff_on_hit_chance", 0.0))
+			if randf() < proc_chance:
+				_apply_random_debuff(enemy_target)
 
 		current_pierce_count += 1
 		if current_pierce_count > max_pierce_count:
-			queue_free()
-	
-	elif body.is_in_group("world_obstacles"):
-		queue_free()
+			_start_destruction()
+
+func _start_destruction():
+	if _is_destroying: return
+	_is_destroying = true
+	set_physics_process(false)
+	collision_shape.set_deferred("disabled", true)
+	get_tree().create_timer(0.1, true, false, true).timeout.connect(queue_free)
+
+func _apply_random_debuff(enemy: BaseEnemy):
+	# This function remains unchanged.
+	if not is_instance_valid(enemy.status_effect_component): return
+	var debuffs = [
+		"res://DataResources/StatusEffects/slow_status.tres",
+		"res://DataResources/StatusEffects/weakened_status.tres",
+		"res://DataResources/StatusEffects/vulnerable_status.tres",
+		"res://DataResources/StatusEffects/stun_status.tres"
+	]
+	var random_debuff_path = debuffs.pick_random()
+	var effect_data = load(random_debuff_path) as StatusEffectData
+	if is_instance_valid(effect_data):
+		enemy.status_effect_component.apply_effect(effect_data, _owner_player_stats.get_parent())
+
+func _find_nearest_enemy() -> Node2D:
+	# This function remains unchanged.
+	var enemies_in_scene = get_tree().get_nodes_in_group("enemies")
+	var nearest_enemy: Node2D = null; var min_dist_sq = INF
+	for enemy_node in enemies_in_scene:
+		if is_instance_valid(enemy_node) and not (enemy_node as BaseEnemy).is_dead():
+			var dist_sq = global_position.distance_squared_to(enemy_node.global_position)
+			if dist_sq < min_dist_sq:
+				min_dist_sq = dist_sq
+				nearest_enemy = enemy_node
+	return nearest_enemy

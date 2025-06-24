@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b5qpxcam04v1s"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_o0bjk"]
+[ext_resource type="Resource" uid="uid://q4gjs3m0u5sl" path="res://DataResources/Weapons/Torrent/Effects/torrent_maelstrom_effect.tres" id="2_atq2o"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_hasbc"]
+
+[resource]
+script = ExtResource("2_hasbc")
+upgrade_id = &"torrent_maelstrom"
+title = "Maelstrom"
+description = "Sends waves outward in random directions with each tick of damage, dealing 25% of Torrent's damage to each enemy hit."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_o0bjk")]([ExtResource("2_atq2o")])
+set_acquired_flag_on_weapon = &"torrent_maelstrom_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

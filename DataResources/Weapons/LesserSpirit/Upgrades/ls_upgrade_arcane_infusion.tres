@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://ch5mq0j5yxafu"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_uuufd"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_jbskw"]
+[ext_resource type="Resource" uid="uid://b7f77p7hepvnc" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_arcane_infusion_chance_effect.tres" id="2_ptcav"]
+[ext_resource type="Resource" uid="uid://dj6aiuxtpc2g8" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_arcane_infusion_flag_effect.tres" id="3_d3ph3"]
+
+[resource]
+script = ExtResource("2_jbskw")
+upgrade_id = &"ls_arcane_infusion"
+title = "Arcane Infusion"
+description = "Projectiles have a 5% chance to apply a random minor debuff: slow, weaken, vulnerable, or stun."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_uuufd")]([ExtResource("2_ptcav"), ExtResource("3_d3ph3")])
+set_acquired_flag_on_weapon = &"ls_arcane_infusion_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

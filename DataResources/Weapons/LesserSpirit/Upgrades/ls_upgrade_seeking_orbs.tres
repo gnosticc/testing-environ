@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://ws0ljdw7bpwg"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_q5m8a"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ufmtx"]
+[ext_resource type="Resource" uid="uid://bymxo6slghfu5" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_seeking_orbs_effect.tres" id="2_w4v4a"]
+
+[resource]
+script = ExtResource("2_ufmtx")
+upgrade_id = &"ls_seeking_orbs"
+title = "Seeking Orbs"
+description = "The spirit's projectiles gain a homing effect."
+prerequisites_on_this_weapon = Array[StringName]([&"ls_extended_range"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_q5m8a")]([ExtResource("2_w4v4a")])
+set_acquired_flag_on_weapon = &"ls_seeking_orbs_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

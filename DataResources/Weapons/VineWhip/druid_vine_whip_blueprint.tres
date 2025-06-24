@@ -1,15 +1,24 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://1sm1rqt4ktpw"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://1sm1rqt4ktpw"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_yf6fc"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_fi54i"]
-[ext_resource type="PackedScene" uid="uid://dxxeed4wbmrld" path="res://Scenes/Weapons/VineWhipAttack.tscn" id="3_fi54i"]
+[ext_resource type="Resource" uid="uid://6h4rlp5yrr3o" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_barbed_thorns.tres" id="2_wkkcp"]
+[ext_resource type="Resource" uid="uid://ccf4sagtcn71c" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_constricting_grip.tres" id="3_f3wfm"]
+[ext_resource type="Resource" uid="uid://d0usdlpajll5p" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_cracking_whip.tres" id="4_8nahj"]
+[ext_resource type="Resource" uid="uid://dcgbbbo4srmwp" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_entangling_vines.tres" id="5_nx28q"]
+[ext_resource type="Resource" uid="uid://do1hdxg5l6pk1" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_extended_reach.tres" id="6_ib804"]
+[ext_resource type="Resource" uid="uid://c3yb7s3i8gq6r" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_natures_fury.tres" id="7_d1paa"]
+[ext_resource type="Resource" uid="uid://globkumkr04w" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_swift_lash.tres" id="8_i8gdj"]
+[ext_resource type="Resource" uid="uid://dmdnx40t3cu1p" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_whiplash.tres" id="9_d2d3l"]
+[ext_resource type="Resource" uid="uid://c1bao4qt1q66b" path="res://DataResources/Weapons/VineWhip/Upgrades/vw_upgrade_wrath_of_the_wilds.tres" id="10_pf4rw"]
+[ext_resource type="PackedScene" uid="uid://cmh2xmwphleap" path="res://Scenes/Weapons/VineWhipController.tscn" id="12_otqrv"]
 
 [resource]
 script = ExtResource("2_fi54i")
 id = &"druid_vine_whip"
 title = "Vine Whip"
 description = "Lash out with a thorny vine in front of you."
-weapon_scene = ExtResource("3_fi54i")
+weapon_scene = ExtResource("12_otqrv")
 tags = Array[StringName]([&"melee", &"physical", &"nature", &"druid weapon"])
 class_tag_restrictions = Array[int]([5])
 cooldown = 1.5
@@ -18,15 +27,24 @@ base_lifetime = 0.3
 spawn_as_child = true
 requires_direction = true
 targeting_type = &"mouse_direction"
+tracks_shot_count = true
 initial_specific_stats = {
 "area_scale": 1.0,
 "base_attack_duration": 0.3,
+"cracking_whip_tip_scale": 1.0,
+"entangling_vines_chance": 0.0,
+"has_constricting_grip": false,
+"has_cracking_whip": false,
+"has_natures_fury": false,
+"has_wrath_of_the_wilds": false,
 "inherent_visual_scale_x": 1.0,
 "inherent_visual_scale_y": 0.9,
+"natures_fury_proc_chance": 0.33,
+"on_hit_status_applications": [],
 "pierce_count": 0,
 "projectile_speed": 200.0,
 "weapon_attack_speed_mod": 1.0,
 "weapon_damage_percentage": 1.1
 }
-available_upgrades = Array[ExtResource("1_yf6fc")]([])
+available_upgrades = Array[ExtResource("1_yf6fc")]([ExtResource("2_wkkcp"), ExtResource("3_f3wfm"), ExtResource("4_8nahj"), ExtResource("5_nx28q"), ExtResource("6_ib804"), ExtResource("7_d1paa"), ExtResource("8_i8gdj"), ExtResource("9_d2d3l"), ExtResource("10_pf4rw")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

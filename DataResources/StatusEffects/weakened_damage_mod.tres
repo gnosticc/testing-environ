@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://c11lt2sl5j7rq"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_m6y4x"]
+
+[resource]
+script = ExtResource("1_m6y4x")
+id = &""
+modification_type = &"percent_mult_final"
+stat_key = &"damage_output_multiplier"
+value_type = 1
+value_float = -0.25
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"enemy_stats"
+developer_note = "Reduces enemy's outgoing damage by 25%."
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

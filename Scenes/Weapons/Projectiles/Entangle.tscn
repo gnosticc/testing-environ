@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://dlps2b8subkjb"]
+
+[ext_resource type="Script" uid="uid://cfh1uar7vtrp4" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/Entangle.gd" id="1_orolr"]
+[ext_resource type="Texture2D" uid="uid://dbs1o06tvhylp" path="res://Assets/SFX/Entangle Animation.png" id="1_ws2ic"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_orolr"]
+atlas = ExtResource("1_ws2ic")
+region = Rect2(0, 0, 180, 230)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2231o"]
+atlas = ExtResource("1_ws2ic")
+region = Rect2(180, 0, 180, 230)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ghfcm"]
+atlas = ExtResource("1_ws2ic")
+region = Rect2(360, 0, 180, 230)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_31618"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_orolr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2231o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ghfcm")
+}],
+"loop": false,
+"name": &"default",
+"speed": 3.0
+}]
+
+[node name="Entangle" type="Node2D"]
+script = ExtResource("1_orolr")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_31618")
+frame = 2
+frame_progress = 1.0

@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://ddbs7d3prtk3y"]
+[gd_scene load_steps=8 format=3 uid="uid://ddbs7d3prtk3y"]
 
 [ext_resource type="Script" uid="uid://cmwp228mx2p3u" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/SpiritBolt.gd" id="1_3pnmf"]
 [ext_resource type="Texture2D" uid="uid://be625j4xar4ss" path="res://Assets/Pets and Summons/Lesser Spirit Projectile.png" id="2_6uqle"]
+[ext_resource type="Script" uid="uid://dck8ogq4gsyox" path="res://Scripts/Weapons/Projectiles/HomingComponent.gd" id="3_hnm12"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_vg2sr"]
 atlas = ExtResource("2_6uqle")
@@ -47,3 +48,6 @@ collision_mask = 136
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea"]
 shape = SubResource("RectangleShape2D_3pnmf")
+
+[node name="HomingComponent" type="Node" parent="."]
+script = ExtResource("3_hnm12")

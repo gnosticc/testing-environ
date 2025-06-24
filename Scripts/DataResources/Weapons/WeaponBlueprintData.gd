@@ -35,7 +35,8 @@ extends Resource
 @export var requires_direction: bool = true
 ## Defines how the weapon targets (if it requires direction).
 @export var targeting_type: StringName = &"mouse_direction" # Changed to StringName, example default
-
+# NEW: Add this boolean export. If true, WeaponManager will count attacks for this weapon.
+@export var tracks_shot_count: bool = false
 
 ## A dictionary holding the initial, inherent stats for this weapon type.
 # Keys here should be consistent within the weapon's specific domain.

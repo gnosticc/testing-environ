@@ -1,0 +1,109 @@
+[gd_scene load_steps=17 format=3 uid="uid://b5viovyn7rgbu"]
+
+[ext_resource type="Script" uid="uid://dcuakv33mbsx" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/ChillHitEffect.gd" id="1_k21l3"]
+[ext_resource type="Texture2D" uid="uid://d0p6bsh5fpacw" path="res://Assets/SFX/Absolute Zero Animation.png" id="2_xblv6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_81uaf"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(0, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qt6j8"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(205, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ltgre"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(410, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f004s"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(615, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xls0q"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(820, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_11yij"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(1025, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_itjgo"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(1230, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6rvvq"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(1435, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vwuoh"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(1640, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_unwqm"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(1845, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f2hdx"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(2050, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1ukya"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(2255, 0, 205, 205)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eavcx"]
+atlas = ExtResource("2_xblv6")
+region = Rect2(2460, 0, 205, 205)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2qodh"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_81uaf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qt6j8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ltgre")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f004s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xls0q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_11yij")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_itjgo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6rvvq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vwuoh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_unwqm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f2hdx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1ukya")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eavcx")
+}],
+"loop": true,
+"name": &"default",
+"speed": 30.0
+}]
+
+[node name="ChillHitEffect" type="Node2D"]
+script = ExtResource("1_k21l3")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2qodh")

@@ -73,6 +73,10 @@ enum Keys {
 	GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE, # NEW: Chance for any projectile to explode in a small AoE when it despawns.
 	GLOBAL_CHAIN_LIGHTNING_COUNT, # NEW: Adds a flat number of chain targets for chaining projectiles.
 	GLOBAL_LIFESTEAL_PERCENT, # NEW: Percentage of damage dealt converted to healing.
+	DAMAGE_OUTPUT_MULTIPLIER, # NEW: Added for Weakened debuff
+	HEALTH_REGEN_PERCENT_MAX_HP, # NEW: Added for Resolute Defense
+	PLAYER_HAS_LEVERAGE, 		# NEW: Added for Leverage upgrade flag
+
 
 	# --- Utility & Economy (additional modifiers) ---
 	CURRENCY_GAIN_MULTIPLIER, # Multiplier for gold/currency gained
@@ -183,6 +187,8 @@ enum Keys {
 	SCYTHE_WIDER_ARC_ACQUIRED,
 	CROSSBOW_PIERCING_BOLTS_ACQUIRED,
 	DAGGER_SHADOW_STEP_ACQUIRED,
+	PLAYER_HAS_TREMORWAVE,
+	PLAYER_HAS_CHAIN_BASH
 }
 
 # This dictionary maps the enum keys to their actual StringName values.
@@ -244,6 +250,9 @@ const KEY_NAMES: Dictionary = {
 	Keys.GLOBAL_PROJECTILE_EXPLODE_ON_DEATH_CHANCE: &"global_projectile_explode_on_death_chance",
 	Keys.GLOBAL_CHAIN_LIGHTNING_COUNT: &"global_chain_lightning_count",
 	Keys.GLOBAL_LIFESTEAL_PERCENT: &"global_lifesteal_percent",
+	Keys.DAMAGE_OUTPUT_MULTIPLIER: &"damage_output_multiplier",
+	Keys.HEALTH_REGEN_PERCENT_MAX_HP: &"health_regen_percent_max_hp",
+	Keys.PLAYER_HAS_LEVERAGE: &"player_has_leverage",
 
 	Keys.CURRENCY_GAIN_MULTIPLIER: &"currency_gain_multiplier",
 	Keys.ITEM_DROP_CHANCE_ADD: &"item_drop_chance_add",
@@ -346,4 +355,6 @@ const KEY_NAMES: Dictionary = {
 	Keys.SCYTHE_WIDER_ARC_ACQUIRED: &"scythe_wider_arc_acquired",
 	Keys.CROSSBOW_PIERCING_BOLTS_ACQUIRED: &"crossbow_piercing_bolts_acquired",
 	Keys.DAGGER_SHADOW_STEP_ACQUIRED: &"dagger_shadow_step_acquired",
+	Keys.PLAYER_HAS_TREMORWAVE: &"player_has_tremorwave",
+	Keys.PLAYER_HAS_CHAIN_BASH: &"player_has_chain_bash"
 }

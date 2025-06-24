@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://ffjljl0yjyhv"]
+
+[ext_resource type="Script" uid="uid://r705awsb2ll2" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/TorrentWave.gd" id="1_rkndr"]
+[ext_resource type="Texture2D" uid="uid://deklk24h7bhl8" path="res://Assets/SFX/TorrentWave Animation.png" id="2_hopru"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_itu64"]
+atlas = ExtResource("2_hopru")
+region = Rect2(0, 0, 265, 270)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8aeql"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_itu64")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ym15b"]
+size = Vector2(256, 262)
+
+[node name="TorrentWave" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_rkndr")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.15, 0.22)
+sprite_frames = SubResource("SpriteFrames_8aeql")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.15, 0.22)
+shape = SubResource("RectangleShape2D_ym15b")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

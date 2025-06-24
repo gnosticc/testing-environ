@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StatusEffectApplicationData" load_steps=2 format=3 uid="uid://yoxi4tsplg2e"]
+
+[ext_resource type="Script" uid="uid://5c1duh4w3e28" path="res://Scripts/DataResources/Effects/StatusEffectApplicationData.gd" id="1_s4118"]
+
+[resource]
+script = ExtResource("1_s4118")
+status_effect_resource_path = "uid://edb0bu50o2dg"
+id = &""
+application_chance = 0.2
+duration_override = -1.0
+potency_override = -1.0
+effect_type_id = &"apply_status"
+target_scope = &"target_enemy"
+developer_note = ""
+metadata/_custom_type_script = "uid://5c1duh4w3e28"

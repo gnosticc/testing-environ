@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://u5bcp30x3ci1"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_qbw46"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_1sea1"]
+[ext_resource type="Resource" uid="uid://rhatq53hxvx1" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_ethereal_barrage_chance_effect.tres" id="2_liiva"]
+[ext_resource type="Resource" uid="uid://ck258n8oxb6ew" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_ethereal_barrage_flag_effect.tres" id="3_kfyx8"]
+
+[resource]
+script = ExtResource("2_1sea1")
+upgrade_id = &"ls_ethereal_barrage"
+title = "Ethereal Barrage"
+description = "The spirit occasionally fires a quick burst of three projectiles."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_qbw46")]([ExtResource("2_liiva"), ExtResource("3_kfyx8")])
+set_acquired_flag_on_weapon = &"ls_ethereal_barrage_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dpg1b2w2fn211"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_47jd8"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_a6nxl"]
+[ext_resource type="Resource" uid="uid://bi3vhlm7fb4q4" path="res://DataResources/Weapons/MothGolem/Effects/mg_crushing_blows_chance_effect.tres" id="2_e1tto"]
+[ext_resource type="Resource" uid="uid://x5ia1mtf6p0h" path="res://DataResources/Weapons/MothGolem/Effects/mg_crushing_blows_flag_effect.tres" id="3_rkve1"]
+
+[resource]
+script = ExtResource("2_a6nxl")
+upgrade_id = &"mg_crushing_blows"
+title = "Crushing Blows"
+description = "The Moth Golem's standard attacks have a 10% chance to hit a larger area, dealing its hit damage to every enemy within a moderate area."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_47jd8")]([ExtResource("2_e1tto"), ExtResource("3_rkve1")])
+set_acquired_flag_on_weapon = &"mg_crushing_blows_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

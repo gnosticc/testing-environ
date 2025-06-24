@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dcgbbbo4srmwp"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_037d0"]
+[ext_resource type="Resource" uid="uid://cjvxtlt8xxyn3" path="res://DataResources/Weapons/VineWhip/Effects/vw_entangling_vines_effect.tres" id="2_1uwig"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_4opkh"]
+
+[resource]
+script = ExtResource("2_4opkh")
+upgrade_id = &"vw_entangling_vines"
+title = "Entangling Vines"
+description = "Enemies hit by the whip have a 35% chance to become briefly rooted for 3 seconds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_037d0")]([ExtResource("2_1uwig")])
+set_acquired_flag_on_weapon = &"vw_entangling_vines_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

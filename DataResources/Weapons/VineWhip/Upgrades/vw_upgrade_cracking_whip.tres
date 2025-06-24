@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://d0usdlpajll5p"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_681lv"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_cj42u"]
+[ext_resource type="Resource" uid="uid://cmur7n1lh2agh" path="res://DataResources/Weapons/VineWhip/Effects/vw_cracking_whip_effect.tres" id="2_o7euy"]
+
+[resource]
+script = ExtResource("2_cj42u")
+upgrade_id = &"vw_cracking_whip"
+title = "Cracking Whip"
+description = "The end of the Vine Whip attack cracks with greater force, dealing 100% additional damage in a small area."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_681lv")]([ExtResource("2_o7euy")])
+set_acquired_flag_on_weapon = &"vw_cracking_whip_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

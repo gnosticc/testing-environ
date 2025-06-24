@@ -1,8 +1,17 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://21pfpd0y71ba"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://21pfpd0y71ba"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_7fley"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_q2bjc"]
+[ext_resource type="Resource" uid="uid://cjkibml3fi32l" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_caustic_aura.tres" id="2_x7p60"]
+[ext_resource type="Resource" uid="uid://dpg1b2w2fn211" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_crushing_blows.tres" id="3_81xfy"]
 [ext_resource type="PackedScene" uid="uid://7vxk6mtpfyup" path="res://Scenes/Weapons/Summons/MothGolem.tscn" id="3_q2bjc"]
+[ext_resource type="Resource" uid="uid://cyg7h2jpn3lt5" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_dense_mitts.tres" id="4_wgy72"]
+[ext_resource type="Resource" uid="uid://ck274csplpiej" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_guardian_spirit.tres" id="5_fw75v"]
+[ext_resource type="Resource" uid="uid://f0hb3wsokcck" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_hunters_instinct.tres" id="6_qt4mj"]
+[ext_resource type="Resource" uid="uid://66bnk66dmrdq" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_primal_fury.tres" id="7_lh6cd"]
+[ext_resource type="Resource" uid="uid://cs418f638wwyd" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_protective_dust.tres" id="8_0y780"]
+[ext_resource type="Resource" uid="uid://dspe26f3fg0sq" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_quicker_strikes.tres" id="9_dg805"]
+[ext_resource type="Resource" uid="uid://bn617cnkinvnc" path="res://DataResources/Weapons/MothGolem/Upgrades/mg_upgrade_unrelenting_assault.tres" id="10_37lnm"]
 
 [resource]
 script = ExtResource("2_q2bjc")
@@ -10,25 +19,40 @@ id = &"conjurer_moth_golem"
 title = "Moth Golem"
 description = "Summons a loyal golem that seeks out and attacks enemies."
 weapon_scene = ExtResource("3_q2bjc")
-tags = Array[StringName]([&"summon", &"physical", &"melee"])
+tags = Array[StringName]([&"summon", &"physical", &"melee", &"pet"])
 class_tag_restrictions = Array[int]([6])
-cooldown = 1.8
+cooldown = 0.0
 max_level = 10
 base_lifetime = -1.0
 spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
+tracks_shot_count = false
 initial_specific_stats = {
+"attack_area_scale": 1.0,
 "attack_cooldown": 1.8,
 "attack_range": 1.0,
 "base_visual_scale": 1.0,
+"caustic_aura_damage_percent": 0.5,
+"caustic_aura_radius": 50.0,
+"crit_chance": 0.0,
+"crushing_blow_chance": 0.0,
+"crushing_blow_radius": 35.0,
 "follow_distance": 150.0,
+"has_caustic_aura": false,
+"has_crushing_blows": false,
+"has_guardian_spirit": false,
+"has_primal_fury": false,
+"has_protective_dust": false,
 "max_summons_of_type": 1,
 "movement_speed": 100.0,
 "pierce_count": 0,
+"primal_fury_proc_chance": 0.0,
 "projectile_speed": 200.0,
+"protective_dust_cloud_radius": 50.0,
+"protective_dust_proc_chance": 0.0,
 "scale_increase_per_level": 0.05,
 "weapon_damage_percentage": 1.8
 }
-available_upgrades = Array[ExtResource("1_7fley")]([])
+available_upgrades = Array[ExtResource("1_7fley")]([ExtResource("2_x7p60"), ExtResource("3_81xfy"), ExtResource("4_wgy72"), ExtResource("5_fw75v"), ExtResource("6_qt4mj"), ExtResource("7_lh6cd"), ExtResource("8_0y780"), ExtResource("9_dg805"), ExtResource("10_37lnm")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

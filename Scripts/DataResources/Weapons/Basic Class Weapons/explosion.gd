@@ -3,6 +3,7 @@
 # animation, applies damage to all enemies within its radius once, and then
 # removes itself after the animation finishes.
 # CORRECTED: The explosion animation is now scaled to match the damage radius.
+# FIX: Deferred setting of collision shape radius to prevent "flushing queries" error.
 
 class_name Explosion
 extends Area2D
@@ -26,7 +27,10 @@ func _ready():
 func detonate(damage_amount: int, radius: float, source_node: Node, attack_stats: Dictionary):
 	# Set the radius of the explosion's collision shape.
 	if collision_shape.shape is CircleShape2D:
-		(collision_shape.shape as CircleShape2D).radius = radius
+		# FIX: Use call_deferred to safely set the radius.
+		# This prevents the "Can't change this state while flushing queries" error
+		# by ensuring the modification happens at a safe time in the physics pipeline.
+		(collision_shape.shape as CircleShape2D).call_deferred("set", &"radius", radius)
 	else:
 		push_error("Explosion.gd ERROR: CollisionShape2D does not have a CircleShape2D. Cannot set radius.")
 

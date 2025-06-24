@@ -28,6 +28,7 @@ spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
 initial_specific_stats = {
+"arrow_storm_waves": 3,
 "arrows_per_direction": 1,
 "attack_speed_multiplier": 1.0,
 "has_arrow_storm": false,

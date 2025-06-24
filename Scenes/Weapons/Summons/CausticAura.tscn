@@ -1,0 +1,85 @@
+[gd_scene load_steps=13 format=3 uid="uid://b4alobh2sqqbt"]
+
+[ext_resource type="Script" uid="uid://bk3dadd6hyp0i" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/CausticAura.gd" id="1_df7oj"]
+[ext_resource type="Texture2D" uid="uid://vo3oq3o4hvf" path="res://Assets/SFX/Caustic Aura Animation.png" id="2_mjlg6"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_qwan2"]
+radius = 105.224
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fnxry"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(0, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cbba7"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u2w4r"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(500, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4to8n"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(750, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3fn83"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(1000, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6hgpo"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(1250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndlt4"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(1500, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ckcl0"]
+atlas = ExtResource("2_mjlg6")
+region = Rect2(1750, 0, 250, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_crkby"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fnxry")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cbba7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u2w4r")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4to8n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3fn83")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6hgpo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ndlt4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ckcl0")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[node name="CausticAura" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_df7oj")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_qwan2")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_crkby")
+frame_progress = 0.313952
+
+[node name="DamageTickTimer" type="Timer" parent="."]

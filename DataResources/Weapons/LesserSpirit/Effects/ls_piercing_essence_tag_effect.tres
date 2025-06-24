@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AddTagEffectData" load_steps=2 format=3 uid="uid://mywa23gpvfcq"]
+
+[ext_resource type="Script" uid="uid://d2xsy8ik5lue5" path="res://Scripts/DataResources/Effects/AddTagEffectData.gd" id="1_2qhey"]
+
+[resource]
+script = ExtResource("1_2qhey")
+tag_to_add = &"piercing"
+effect_type_id = &"add_tag"
+target_scope = &"weapon_behavior"
+developer_note = "Piercing Essence: Adds the 'piercing' tag to the Lesser Spirit weapon."
+metadata/_custom_type_script = "uid://d2xsy8ik5lue5"

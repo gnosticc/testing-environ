@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c1bao4qt1q66b"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_awadr"]
+[ext_resource type="Resource" uid="uid://bv7h7xlhfa3oq" path="res://DataResources/Weapons/VineWhip/Effects/vw_wrath_of_the_wilds_effect.tres" id="2_x617d"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_yukvi"]
+
+[resource]
+script = ExtResource("2_yukvi")
+upgrade_id = &"vw_wrath_of_the_wilds"
+title = "Wrath of the Wilds"
+description = "\"Every fourth attack, 8 whips fan out in all directions."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_awadr")]([ExtResource("2_x617d")])
+set_acquired_flag_on_weapon = &"vw_wrath_of_the_wilds_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

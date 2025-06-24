@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://b3uy8tx6xg5qq"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_mt1bc"]
+[ext_resource type="Resource" uid="uid://hy2akn08nhbo" path="res://DataResources/Weapons/Spark/Effects/spark_volatile_element_flag_effect.tres" id="2_5ovyx"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_82jln"]
+[ext_resource type="Resource" uid="uid://d14ty1ffruggn" path="res://DataResources/Weapons/Spark/Effects/spark_volatile_element_chance_effect.tres" id="3_ocsf7"]
+
+[resource]
+script = ExtResource("2_82jln")
+upgrade_id = &"spark_volatile_element"
+title = "Volatile Element"
+description = "Spark has a 50% chance to explode on impact, damaging nearby enemies."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_mt1bc")]([ExtResource("2_5ovyx"), ExtResource("3_ocsf7")])
+set_acquired_flag_on_weapon = &"spark_volatile_element_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

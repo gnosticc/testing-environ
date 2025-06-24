@@ -53,10 +53,12 @@ sprite_frames = SubResource("SpriteFrames_h1xe8")
 animation = &"bash"
 frame = 3
 frame_progress = 1.0
+flip_h = true
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-rotation = -0.0143703
+position = Vector2(-2.98023e-08, 2.22222)
+rotation = 2.94061
 scale = Vector2(0.45, 0.45)
-polygon = PackedVector2Array(-32, -126, 61, -20, 52, 43, -52, 123, -61, 80, -59, 7, -51, -59, -41, -104)
+polygon = PackedVector2Array(-32, -126, 60.1284, -23.0279, 52, 43, -55.6509, 124.734, -61, 80, -59, 7, -51, -59, -41, -104)
 
 [node name="LifetimeTimer" type="Timer" parent="."]

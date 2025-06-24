@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://cwjnejhqh2yf0"]
+
+[ext_resource type="Script" uid="uid://dj30fyumrephd" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/SparkExplosion.gd" id="1_ay5s4"]
+[ext_resource type="Texture2D" uid="uid://rfnma0q3qljd" path="res://Assets/SFX/SparkExplosion Animation.png" id="2_38q7q"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5vosk"]
+atlas = ExtResource("2_38q7q")
+region = Rect2(0, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5lf5e"]
+atlas = ExtResource("2_38q7q")
+region = Rect2(250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ulf4l"]
+atlas = ExtResource("2_38q7q")
+region = Rect2(500, 0, 250, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7ahng"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5vosk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5lf5e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ulf4l")
+}],
+"loop": false,
+"name": &"default",
+"speed": 9.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gspev"]
+radius = 156.051
+
+[node name="SparkExplosion" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_ay5s4")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_7ahng")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_gspev")

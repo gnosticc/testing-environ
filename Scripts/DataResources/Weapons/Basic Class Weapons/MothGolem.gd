@@ -1,220 +1,316 @@
-# MothGolem.gd
-# Controls the behavior of a summoned Moth Golem.
-# CORRECTED: Features a more robust state machine to prevent "state thrashing"
-# and ensures the golem commits to and completes its attack animation.
+# MothGolem.gd (Signal Disconnect Fix)
+# This script controls the behavior of the Moth Golem summon.
+# FIX: The _notification function now disconnects from the correct player signal
+# ('player_took_damage_from') upon deletion, preventing a crash.
 
 class_name MothGolem
 extends CharacterBody2D
 
-# State machine for the Golem's AI
-enum State { IDLE, FOLLOWING_PLAYER, CHASING_TARGET, ATTACKING }
+# The enum defines all possible states for the golem.
+enum State { IDLE, FOLLOWING_PLAYER, CHASING_TARGET, ATTACKING, GUARDIAN_READY, PRIMAL_FURY }
 var current_state: State = State.IDLE
+
+# --- Node References ---
+@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var attack_cooldown_timer: Timer = $AttackCooldownTimer
+@onready var melee_attack_area: Area2D = $MeleeAttackArea
+@onready var proc_check_timer: Timer = $ProcCheckTimer
+@onready var status_effect_component: StatusEffectComponent = $StatusEffectComponent
+
+# --- Scene Preloads ---
+const CRUSHING_BLOW_SCENE = preload("res://Scenes/Weapons/Summons/GolemSmashEffect.tscn")
+const PROTECTIVE_DUST_SCENE = preload("res://Scenes/Weapons/Summons/ProtectiveDustCloud.tscn")
+const CAUSTIC_AURA_SCENE = preload("res://Scenes/Weapons/Summons/CausticAura.tscn")
+const PRIMAL_FURY_BUFF = preload("res://DataResources/StatusEffects/primal_fury_buff.tres")
 
 # --- References ---
 var owner_player: PlayerCharacter
 var _owner_player_stats: PlayerStats
 var target_enemy: BaseEnemy
+var specific_weapon_stats: Dictionary
+var _last_attacker: BaseEnemy
 
-# --- Core Stats ---
+# --- Core Stats & State ---
 var movement_speed: float = 100.0
-var max_follow_distance: float = 250.0
-var player_detection_range: float = 200.0
+var player_detection_range: float = 150.0
 var attack_range: float = 30.0
 var attack_cooldown: float = 1.8
 var damage: int = 20
+var golem_crit_chance: float = 0.0
 var base_scale: float = 1.0
+var _guardian_spirit_buff_active: bool = false
+var _caustic_aura_instance: Node2D
+var _fury_tween: Tween
 
-var specific_weapon_stats: Dictionary
-
-# --- Components ---
-@onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
-@onready var attack_cooldown_timer: Timer = $AttackCooldownTimer
-@onready var melee_attack_area: Area2D = $MeleeAttackArea
-@onready var body_collision_shape: CollisionShape2D = $CollisionShape2D
-
+# --- Signals ---
 signal instances_spawned(summon_id: StringName, spawned_instances: Array[Node2D])
 
-func _ready():
-	# Initialization is deferred to set_attack_properties
-	pass
-	
+# --- Initialization & Cleanup ---
+
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		if is_instance_valid(_owner_player_stats) and _owner_player_stats.is_connected("stats_recalculated", _on_player_stats_recalculated):
 			_owner_player_stats.stats_recalculated.disconnect(_on_player_stats_recalculated)
+		# FIX: Disconnect from the correct signal name.
+		if is_instance_valid(owner_player) and owner_player.is_connected("player_took_damage_from", on_player_damaged):
+			owner_player.player_took_damage_from.disconnect(on_player_damaged)
+		if is_instance_valid(_caustic_aura_instance):
+			_caustic_aura_instance.queue_free()
+		if is_instance_valid(_fury_tween):
+			_fury_tween.kill()
 
-func set_attack_properties(_p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
-	owner_player = p_player_stats.get_parent() as PlayerCharacter
-	_owner_player_stats = p_player_stats
-	specific_weapon_stats = p_attack_stats
+func initialize(p_owner: PlayerCharacter, p_stats: Dictionary, _start_angle: float):
+	owner_player = p_owner
+	_owner_player_stats = p_owner.player_stats
+	specific_weapon_stats = p_stats
 
-	if not is_instance_valid(owner_player) or not is_instance_valid(_owner_player_stats):
-		push_error("MothGolem ERROR: Player or PlayerStats invalid. Queueing free."); queue_free(); return
+	if not is_instance_valid(owner_player):
+		queue_free()
+		return
 
-	# Connect signals
-	if not owner_player.is_connected("attacked_by_enemy", on_player_damaged):
-		owner_player.attacked_by_enemy.connect(on_player_damaged)
-	if not animated_sprite.is_connected("animation_finished", _on_attack_animation_finished):
-		animated_sprite.animation_finished.connect(_on_attack_animation_finished)
-	if not _owner_player_stats.is_connected("stats_recalculated", _on_player_stats_recalculated):
-		_owner_player_stats.stats_recalculated.connect(_on_player_stats_recalculated, CONNECT_DEFERRED)
-	if not melee_attack_area.is_connected("body_entered", _on_melee_attack_area_hit_detected):
-		melee_attack_area.body_entered.connect(_on_melee_attack_area_hit_detected)        
+	if owner_player.has_signal("player_took_damage_from"):
+		owner_player.player_took_damage_from.connect(on_player_damaged)
+	else:
+		push_warning("MothGolem WARNING: PlayerCharacter is missing the 'player_took_damage_from' signal.")
 
-	attack_cooldown_timer.one_shot = true
-	attack_cooldown_timer.autostart = false
+	animated_sprite.animation_finished.connect(_on_attack_animation_finished)
+	status_effect_component.status_effects_changed.connect(_on_status_effects_changed)
+	proc_check_timer.timeout.connect(_on_proc_check_timeout)
+	melee_attack_area.body_entered.connect(_on_melee_attack_area_hit)
 	
-	var area_collision_shape = melee_attack_area.get_child(0) as CollisionShape2D
+	if _owner_player_stats and not _owner_player_stats.is_connected("stats_recalculated", _on_player_stats_recalculated):
+		_owner_player_stats.stats_recalculated.connect(_on_player_stats_recalculated)
+
+	var area_collision_shape = melee_attack_area.get_node("CollisionShape2D") as CollisionShape2D
 	if is_instance_valid(area_collision_shape):
 		area_collision_shape.disabled = true
 
-	update_stats(specific_weapon_stats)
+	update_stats()
+	proc_check_timer.start()
+	
+	var weapon_id = specific_weapon_stats.get(&"weapon_id", &"conjurer_moth_golem")
+	emit_signal("instances_spawned", weapon_id, [self])
+	
+	_change_state(State.IDLE)
 
-	var weapon_id_for_tracking = specific_weapon_stats.get(&"weapon_id", &"moth_golem")
-	emit_signal("instances_spawned", weapon_id_for_tracking, [self])
 
-func _on_player_stats_recalculated(_new_max_health, _new_movement_speed):
-	update_stats({})
-
-func update_stats(p_stats: Dictionary):
-	if not p_stats.is_empty():
-		specific_weapon_stats = p_stats
+func update_stats(new_stats: Dictionary = {}):
+	if not new_stats.is_empty():
+		specific_weapon_stats = new_stats.duplicate(true)
 	if not is_instance_valid(_owner_player_stats): return
 
-	movement_speed = float(specific_weapon_stats.get(&"movement_speed", 80.0))
-	max_follow_distance = float(specific_weapon_stats.get(&"follow_distance", 250.0))
-	player_detection_range = float(specific_weapon_stats.get(&"detection_range", 300.0))
+	# Get base stats from the weapon's dictionary
+	movement_speed = float(specific_weapon_stats.get(&"movement_speed", 100.0))
+	player_detection_range = float(specific_weapon_stats.get(&"player_detection_range", 150.0))
 	attack_range = float(specific_weapon_stats.get(&"attack_range", 30.0))
 	attack_cooldown = float(specific_weapon_stats.get(&"attack_cooldown", 1.8))
-	base_scale = float(specific_weapon_stats.get(&"base_visual_scale", 1.0))
-	
-	var weapon_level = int(specific_weapon_stats.get(&"weapon_level", 1))
-	var scale_per_level = float(specific_weapon_stats.get(&"scale_increase_per_level", 0.05))
-	
-	var weapon_damage_percent = float(specific_weapon_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.8))
-	var global_summon_damage_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
-	var summon_damage_percent_final = weapon_damage_percent * global_summon_damage_mult
-	var weapon_tags: Array[StringName] = specific_weapon_stats.get(&"tags", [])
-	damage = int(round(maxf(1.0, _owner_player_stats.get_calculated_player_damage(summon_damage_percent_final, weapon_tags))))
-	
-	var global_summon_cdr_percent = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT)
-	attack_cooldown_timer.wait_time = attack_cooldown * (1.0 - global_summon_cdr_percent)
+	golem_crit_chance = float(specific_weapon_stats.get(&"crit_chance", 0.0))
+	var base_visual_scale = float(specific_weapon_stats.get(&"base_visual_scale", 1.0))
+	var scale_increase_per_level = float(specific_weapon_stats.get(&"scale_increase_per_level", 0.0))
+	var weapon_level = int(specific_weapon_stats.get("weapon_level", 1))
 
-	var final_scale = base_scale + (scale_per_level * (weapon_level - 1))
-	self.scale = Vector2.ONE * final_scale
+	# --- SCALING LOGIC ---
+	var bonus_scale = float(weapon_level - 1) * scale_increase_per_level
+	base_scale = base_visual_scale + bonus_scale
+	
+	var final_attack_area_scale = float(specific_weapon_stats.get(&"attack_area_scale", 1.0))
+	
+	# --- PRIMAL FURY FIX: Apply local buff modifiers ---
+	if is_instance_valid(status_effect_component):
+		# Get the area multiplier from the golem's own status effects.
+		var fury_area_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"attack_area_scale")
+		final_attack_area_scale *= fury_area_mult
+
+	melee_attack_area.scale = Vector2.ONE * final_attack_area_scale * base_scale
+	animated_sprite.scale = Vector2.ONE * base_scale
+	
+	# --- DAMAGE CALCULATION ---
+	var weapon_damage_percent = float(specific_weapon_stats.get(&"weapon_damage_percentage", 1.8))
+	var weapon_tags: Array[StringName] = specific_weapon_stats.get(&"tags", [])
+	var summon_damage_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+	var final_damage_percent = weapon_damage_percent * summon_damage_mult
+
+	# --- PRIMAL FURY FIX: Apply local damage buff ---
+	if is_instance_valid(status_effect_component):
+		var fury_damage_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"weapon_damage_percentage")
+		final_damage_percent *= fury_damage_mult
+		
+	damage = int(round(maxf(1.0, _owner_player_stats.get_calculated_player_damage(final_damage_percent, weapon_tags))))
+	
+	# --- COOLDOWN CALCULATION ---
+	var final_cooldown = attack_cooldown
+	
+	# --- PRIMAL FURY FIX: Apply local cooldown buff ---
+	if is_instance_valid(status_effect_component):
+		var fury_cooldown_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"attack_cooldown")
+		final_cooldown *= fury_cooldown_mult
+		
+	# Apply global attack speed from player
+	final_cooldown /= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	attack_cooldown_timer.wait_time = maxf(0.1, final_cooldown)
+	
+	# --- AURA LOGIC ---
+	var has_caustic_aura = specific_weapon_stats.get(&"has_caustic_aura", false)
+	if has_caustic_aura and not is_instance_valid(_caustic_aura_instance):
+		_caustic_aura_instance = CAUSTIC_AURA_SCENE.instantiate()
+		get_tree().current_scene.add_child(_caustic_aura_instance)
+	elif not has_caustic_aura and is_instance_valid(_caustic_aura_instance):
+		_caustic_aura_instance.queue_free()
+		_caustic_aura_instance = null
+	
+	if is_instance_valid(_caustic_aura_instance):
+		_caustic_aura_instance.initialize(self, specific_weapon_stats, self.damage)
+	
+	_update_visual_state()
+
+# --- State Machine & AI Logic ---
 
 func _physics_process(delta: float):
 	if not is_instance_valid(owner_player):
 		queue_free(); return
 
-	# The ATTACKING state is now handled by animation signals, not the physics process.
-	# This prevents it from being interrupted every frame.
-	if current_state == State.ATTACKING:
-		velocity = velocity.move_toward(Vector2.ZERO, movement_speed * delta * 5)
-	else:
-		match current_state:
-			State.IDLE:
-				animated_sprite.play("idle")
-				velocity = velocity.move_toward(Vector2.ZERO, movement_speed * delta * 5)
-				_find_new_target()
-				if _is_target_valid(target_enemy):
-					_change_state(State.CHASING_TARGET)
-				elif global_position.distance_to(owner_player.global_position) > 25:
-					_change_state(State.FOLLOWING_PLAYER)
+	if is_instance_valid(_caustic_aura_instance):
+		_caustic_aura_instance.global_position = self.global_position
 
-			State.FOLLOWING_PLAYER:
-				animated_sprite.play("walk")
-				var dir_to_player = (owner_player.global_position - global_position).normalized()
-				velocity = dir_to_player * movement_speed
-				_find_new_target()
-				if _is_target_valid(target_enemy):
-					_change_state(State.CHASING_TARGET)
-				elif global_position.distance_to(owner_player.global_position) < 20:
-					_change_state(State.IDLE)
+	var next_state = _get_next_state()
+	_change_state(next_state)
 
-			State.CHASING_TARGET:
-				if not _is_target_valid(target_enemy):
-					_change_state(State.IDLE); return
-				
-				if target_enemy.global_position.distance_to(owner_player.global_position) > max_follow_distance:
-					target_enemy = null
-					_change_state(State.FOLLOWING_PLAYER)
-					return
-
-				var distance_to_target = global_position.distance_to(target_enemy.global_position)
-				if distance_to_target <= attack_range:
-					if attack_cooldown_timer.is_stopped():
-						_change_state(State.ATTACKING)
-				else:
-					animated_sprite.play("walk")
-					var dir_to_enemy = (target_enemy.global_position - global_position).normalized()
-					velocity = dir_to_enemy * movement_speed
+	match current_state:
+		State.IDLE, State.GUARDIAN_READY, State.PRIMAL_FURY:
+			velocity = velocity.move_toward(Vector2.ZERO, movement_speed * delta * 5)
+		State.FOLLOWING_PLAYER:
+			velocity = (owner_player.global_position - global_position).normalized() * movement_speed
+		State.CHASING_TARGET:
+			if _is_target_valid(target_enemy):
+				velocity = (target_enemy.global_position - global_position).normalized() * movement_speed
+			else:
+				velocity = Vector2.ZERO
+		State.ATTACKING:
+			velocity = Vector2.ZERO
 
 	if velocity.length_squared() > 1:
 		animated_sprite.flip_h = velocity.x < 0
-
 	move_and_slide()
+
+func _get_next_state() -> State:
+	if current_state == State.ATTACKING:
+		return State.ATTACKING
+
+	_find_new_target()
+	
+	if _is_target_valid(target_enemy):
+		if global_position.distance_squared_to(target_enemy.global_position) <= attack_range * attack_range and attack_cooldown_timer.is_stopped():
+			return State.ATTACKING
+		else:
+			return State.CHASING_TARGET
+	else:
+		if global_position.distance_squared_to(owner_player.global_position) > 25 * 25:
+			return State.FOLLOWING_PLAYER
+		else:
+			if status_effect_component.has_status_effect(&"primal_fury_buff"):
+				return State.PRIMAL_FURY
+			elif _guardian_spirit_buff_active:
+				return State.GUARDIAN_READY
+			else:
+				return State.IDLE
 
 func _change_state(new_state: State):
 	if current_state == new_state: return
 	current_state = new_state
-	
-	if new_state == State.ATTACKING:
-		_perform_attack_action()
-
-func _perform_attack_action():
-	velocity = Vector2.ZERO
-	attack_cooldown_timer.start()
-	animated_sprite.play("attack")
-	
-	# Enable hitbox at the start of the attack animation
-	var area_collision_shape = melee_attack_area.get_child(0) as CollisionShape2D
-	if is_instance_valid(area_collision_shape):
-		area_collision_shape.disabled = false
-
-func _on_attack_animation_finished():
-	if animated_sprite.animation != "attack": return
-
-	# Disable hitbox after the animation finishes
-	var area_collision_shape = melee_attack_area.get_child(0) as CollisionShape2D
-	if is_instance_valid(area_collision_shape):
-		area_collision_shape.disabled = true
-
-	# After attacking, decide what to do next
-	_change_state(State.IDLE)
-
-func _on_melee_attack_area_hit_detected(body: Node2D):
-	if not (body.is_in_group("enemies") and body is BaseEnemy): return
-
-	var enemy_target = body as BaseEnemy
-	if _is_target_valid(enemy_target):
-		var owner_player_char = owner_player
-		var attack_stats_for_enemy = {
-			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
-		}
-		enemy_target.take_damage(damage, owner_player_char, attack_stats_for_enemy)
-		
-		# Apply lifesteal and other on-hit effects here...
-
-func on_player_damaged(attacker: Node2D):
-	if _is_target_valid(attacker):
-		target_enemy = attacker as BaseEnemy
-		_change_state(State.CHASING_TARGET)
+	match new_state:
+		State.IDLE: animated_sprite.play("idle")
+		State.FOLLOWING_PLAYER, State.CHASING_TARGET: animated_sprite.play("walk")
+		State.GUARDIAN_READY: animated_sprite.play("guardian")
+		State.PRIMAL_FURY: animated_sprite.play("fury")
+		State.ATTACKING:
+			animated_sprite.play("attack")
+			get_node("MeleeAttackArea/CollisionShape2D").disabled = false
 
 func _find_new_target():
+	if _is_target_valid(_last_attacker):
+		target_enemy = _last_attacker
+		return
+	_last_attacker = null
 	target_enemy = null
 	var enemies = get_tree().get_nodes_in_group("enemies")
-	var best_target_distance_sq = INF
-	
-	var search_origin = global_position
-	var search_range_sq = player_detection_range * player_detection_range
-	
+	var best_target_distance_sq = player_detection_range * player_detection_range
 	for enemy in enemies:
 		if _is_target_valid(enemy):
-			var dist_from_golem_sq = search_origin.distance_squared_to(enemy.global_position)
-			if dist_from_golem_sq < search_range_sq and dist_from_golem_sq < best_target_distance_sq:
+			var dist_from_golem_sq = global_position.distance_squared_to(enemy.global_position)
+			if dist_from_golem_sq < best_target_distance_sq:
 				best_target_distance_sq = dist_from_golem_sq
 				target_enemy = enemy as BaseEnemy
 
-func _is_target_valid(target_node: Node) -> bool:
-	return is_instance_valid(target_node) and target_node.is_inside_tree() and not (target_node as BaseEnemy).is_dead()
+# --- Event Handlers & Attack Logic ---
+
+func _on_player_stats_recalculated(_new_health: float, _new_speed: float):
+	update_stats()
+
+func _on_attack_animation_finished():
+	if animated_sprite.animation == "attack":
+		get_node("MeleeAttackArea/CollisionShape2D").disabled = true
+		attack_cooldown_timer.start()
+		if _is_target_valid(target_enemy) and target_enemy == _last_attacker:
+			_last_attacker = null
+		_change_state(State.IDLE)
+		_update_visual_state() # Update visuals now that attack is done
+
+func _on_melee_attack_area_hit(body: Node2D):
+	if not (body is BaseEnemy and _is_target_valid(body)): return
+	
+	var final_damage = float(damage)
+	if _guardian_spirit_buff_active:
+		final_damage *= 4.0
+		_guardian_spirit_buff_active = false
+		_update_visual_state()
+	
+	var total_crit_chance = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_CHANCE) + golem_crit_chance
+	if randf() < total_crit_chance:
+		final_damage *= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
+
+	body.take_damage(int(round(final_damage)), owner_player)
+	
+	if specific_weapon_stats.get(&"has_crushing_blows", false):
+		if randf() < float(specific_weapon_stats.get(&"crushing_blow_chance", 0.0)):
+			var smash_effect = CRUSHING_BLOW_SCENE.instantiate()
+			get_tree().current_scene.add_child(smash_effect)
+			smash_effect.initialize(global_position, damage, specific_weapon_stats, owner_player)
+
+func on_player_damaged(attacker_node: Node2D):
+	if not is_instance_valid(attacker_node) or not (attacker_node is BaseEnemy): return
+	if specific_weapon_stats.get(&"has_guardian_spirit", false) and not _guardian_spirit_buff_active:
+		_guardian_spirit_buff_active = true
+		_last_attacker = attacker_node as BaseEnemy
+		_update_visual_state()
+
+func _on_proc_check_timeout():
+	if specific_weapon_stats.get(&"has_protective_dust", false):
+		if randf() < float(specific_weapon_stats.get(&"protective_dust_proc_chance", 0.0)):
+			var cloud = PROTECTIVE_DUST_SCENE.instantiate()
+			get_tree().current_scene.add_child(cloud)
+			cloud.global_position = global_position
+			var cloud_radius = float(specific_weapon_stats.get(&"protective_dust_cloud_radius", 50.0))
+			cloud.initialize(owner_player, load("res://DataResources/StatusEffects/protective_dust_buff.tres"), cloud_radius)
+	if specific_weapon_stats.get(&"has_primal_fury", false):
+		if randf() < float(specific_weapon_stats.get(&"primal_fury_proc_chance", 0.0)):
+			status_effect_component.apply_effect(PRIMAL_FURY_BUFF, self)
+
+func _on_status_effects_changed(_owner_node = null):
+	update_stats()
+
+func _update_visual_state():
+	if is_instance_valid(_fury_tween):
+		_fury_tween.kill()
+		_fury_tween = null
+	
+	if status_effect_component.has_status_effect(&"primal_fury_buff"):
+		_fury_tween = create_tween().set_loops()
+		_fury_tween.tween_property(animated_sprite, "modulate", Color.RED, 0.2).set_trans(Tween.TRANS_SINE)
+		_fury_tween.tween_property(animated_sprite, "modulate", Color.YELLOW, 0.2).set_trans(Tween.TRANS_SINE)
+	elif _guardian_spirit_buff_active:
+		animated_sprite.modulate = Color(0.5, 1.0, 0.5, 1.0)
+	else:
+		animated_sprite.modulate = Color.WHITE
+
+func _is_target_valid(target: Node) -> bool:
+	return is_instance_valid(target) and target is BaseEnemy and not target.is_dead()

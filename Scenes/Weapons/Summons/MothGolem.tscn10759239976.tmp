@@ -1,0 +1,139 @@
+[gd_scene load_steps=19 format=3 uid="uid://7vxk6mtpfyup"]
+
+[ext_resource type="Script" uid="uid://cgtro22i5akue" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/MothGolem.gd" id="1_nd37c"]
+[ext_resource type="Texture2D" uid="uid://dpxqhwu642lum" path="res://Assets/Pets and Summons/Moth Golem Attack Animation.png" id="2_qa362"]
+[ext_resource type="Texture2D" uid="uid://cu5ne478i2kui" path="res://Assets/Pets and Summons/Moth Golem Animation Fury Proc.png" id="3_uhmtq"]
+[ext_resource type="Texture2D" uid="uid://cf1tweoyqgii1" path="res://Assets/Pets and Summons/Moth Golem Animation.png" id="3_w4not"]
+[ext_resource type="Texture2D" uid="uid://6o2ta2sllaw6" path="res://Assets/Pets and Summons/Moth Golem Animation Guardian Proc.png" id="4_lw5db"]
+[ext_resource type="Script" uid="uid://beexf6tvvofb5" path="res://Scripts/StatusEffects/StatusEffectComponent.gd" id="6_lw5db"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_22v6j"]
+atlas = ExtResource("2_qa362")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5he47"]
+atlas = ExtResource("2_qa362")
+region = Rect2(256, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w2lu0"]
+atlas = ExtResource("3_uhmtq")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ip72x"]
+atlas = ExtResource("3_uhmtq")
+region = Rect2(256, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b4tdg"]
+atlas = ExtResource("4_lw5db")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fwj2c"]
+atlas = ExtResource("4_lw5db")
+region = Rect2(256, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_22jhq"]
+atlas = ExtResource("3_w4not")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jctgs"]
+atlas = ExtResource("3_w4not")
+region = Rect2(0, 0, 256, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xg78q"]
+atlas = ExtResource("3_w4not")
+region = Rect2(256, 0, 256, 300)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vf4dy"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_22v6j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5he47")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w2lu0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ip72x")
+}],
+"loop": true,
+"name": &"fury",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b4tdg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fwj2c")
+}],
+"loop": true,
+"name": &"guardian",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_22jhq")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jctgs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xg78q")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_771e2"]
+radius = 75.0
+height = 150.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ux4fk"]
+radius = 6250.0
+
+[node name="CharacterBody2D" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 128
+script = ExtResource("1_nd37c")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.06, 0.06)
+sprite_frames = SubResource("SpriteFrames_vf4dy")
+animation = &"walk"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 1)
+scale = Vector2(0.04, 0.04)
+shape = SubResource("CapsuleShape2D_771e2")
+
+[node name="MeleeAttackArea" type="Area2D" parent="."]
+scale = Vector2(0.04, 0.04)
+collision_layer = 0
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="MeleeAttackArea"]
+position = Vector2(0, 25)
+scale = Vector2(0.04, 0.04)
+shape = SubResource("CircleShape2D_ux4fk")
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="StatusEffectComponent" type="Node" parent="."]
+script = ExtResource("6_lw5db")
+
+[node name="ProcCheckTimer" type="Timer" parent="."]

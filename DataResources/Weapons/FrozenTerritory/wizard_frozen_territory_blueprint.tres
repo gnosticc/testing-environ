@@ -1,9 +1,18 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=5 format=3 uid="uid://b8sykifhk6bdo"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=14 format=3 uid="uid://b8sykifhk6bdo"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_plnb8"]
+[ext_resource type="Resource" uid="uid://daolf43j5avc" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_deeper_freeze.tres" id="2_1717k"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ox1t0"]
 [ext_resource type="Resource" uid="uid://3uuwkxaovfsg" path="res://DataResources/StatusEffects/slow_apply.tres" id="2_rnqi5"]
 [ext_resource type="PackedScene" uid="uid://uywgfxjqbhae" path="res://Scenes/Weapons/FrozenTerritoryController.tscn" id="3_ox1t0"]
+[ext_resource type="Resource" uid="uid://brej4r7fy8ryf" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_rimeheart.tres" id="3_qbs3m"]
+[ext_resource type="Resource" uid="uid://bfmcvpilojx3d" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_expanded_chill.tres" id="4_di2dm"]
+[ext_resource type="Resource" uid="uid://dn4ed2kvd1sqy" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_mirrored_orbs.tres" id="5_46so2"]
+[ext_resource type="Resource" uid="uid://7vuak5mi331y" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_lingering_cold.tres" id="6_j2jf6"]
+[ext_resource type="Resource" uid="uid://cwgdaqaajlxcv" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_piercing_frost.tres" id="7_spa3t"]
+[ext_resource type="Resource" uid="uid://bp56yx1ws5wj4" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_permafrost.tres" id="8_g8c1a"]
+[ext_resource type="Resource" uid="uid://cnrf8vt7lcpxl" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_arctic_vortex.tres" id="9_y5nby"]
+[ext_resource type="Resource" uid="uid://diogmkokw0wga" path="res://DataResources/Weapons/FrozenTerritory/Upgrades/ft_upgrade_absolute_zero.tres" id="10_mels4"]
 
 [resource]
 script = ExtResource("2_ox1t0")
@@ -21,13 +30,24 @@ requires_direction = false
 targeting_type = "none"
 initial_specific_stats = {
 "area_scale": 1.0,
+"has_absolute_zero": false,
+"has_arctic_vortex": false,
+"has_armor_pierce": false,
+"has_lingering_cold": false,
+"has_rimeheart": false,
+"lingering_cold_radius": 75.0,
 "number_of_orbits": 2,
 "on_hit_status_applications": [ExtResource("2_rnqi5")],
 "orbit_radius": 60.0,
 "pierce_count": 0,
 "projectile_speed": 200.0,
+"rimeheart_chance": 1.0,
+"rimeheart_damage_percent": 1.0,
+"rimeheart_radius": 35.0,
 "rotation_duration": 3.0,
+"vortex_pull_strength": 3000.0,
+"vortex_radius_multiplier": 4.0,
 "weapon_damage_percentage": 1.0
 }
-available_upgrades = Array[ExtResource("1_plnb8")]([])
+available_upgrades = Array[ExtResource("1_plnb8")]([ExtResource("2_1717k"), ExtResource("3_qbs3m"), ExtResource("4_di2dm"), ExtResource("5_46so2"), ExtResource("6_j2jf6"), ExtResource("7_spa3t"), ExtResource("8_g8c1a"), ExtResource("9_y5nby"), ExtResource("10_mels4")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

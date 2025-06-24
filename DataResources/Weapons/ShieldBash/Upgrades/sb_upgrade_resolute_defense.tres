@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bvf6swbc3eh7e"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_sivx0"]
+[ext_resource type="Resource" uid="uid://dygb1tcuysdhv" path="res://DataResources/Weapons/ShieldBash/Effects/sb_resolute_defense_effect.tres" id="2_63riq"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_yx3xl"]
+
+[resource]
+script = ExtResource("2_yx3xl")
+upgrade_id = &"sb_resolute_defense"
+title = "Resolute Defense"
+description = "Briefly grants a moment of respite after performing a shield bash. The player gains 1% hp/sec health regen per enemy hit for 2 seconds (maximum 20% per second)."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_sivx0")]([ExtResource("2_63riq")])
+set_acquired_flag_on_weapon = &"sb_resolute_defense_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

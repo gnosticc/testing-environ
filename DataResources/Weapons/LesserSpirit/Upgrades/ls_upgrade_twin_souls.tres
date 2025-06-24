@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://smgg1v32ryj2"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_4xb70"]
+[ext_resource type="Resource" uid="uid://cgxw4cdt8ad4u" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_twin_souls_effect.tres" id="2_6gf4y"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_n8wux"]
+
+[resource]
+script = ExtResource("2_n8wux")
+upgrade_id = &"ls_twin_souls"
+title = "Twin Souls"
+description = "Summons an additional Lesser Spirit."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_4xb70")]([ExtResource("2_6gf4y")])
+set_acquired_flag_on_weapon = &"ls_twin_souls_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

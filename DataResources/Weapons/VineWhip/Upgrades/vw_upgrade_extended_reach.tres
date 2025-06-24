@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://do1hdxg5l6pk1"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_r01yj"]
+[ext_resource type="Resource" uid="uid://k1f4s36b6c5b" path="res://DataResources/Weapons/VineWhip/Effects/vw_extended_reach_effect.tres" id="2_g3lk4"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_l5pn4"]
+
+[resource]
+script = ExtResource("2_l5pn4")
+upgrade_id = &"vw_extended_reach"
+title = "Extended Reach"
+description = "Increases the size of the Vine Whip's lash by 30%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_r01yj")]([ExtResource("2_g3lk4")])
+set_acquired_flag_on_weapon = &"vw_extended_reach_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

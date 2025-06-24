@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c3yb7s3i8gq6r"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_r2dju"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_evdj3"]
+[ext_resource type="Resource" uid="uid://ch8wwvbfir1b5" path="res://DataResources/Weapons/VineWhip/Effects/vw_natures_fury_effect.tres" id="2_ovk7w"]
+
+[resource]
+script = ExtResource("2_evdj3")
+upgrade_id = &"vw_natures_fury"
+title = "Nature's Fury"
+description = "Vine Whip now has a 33% chance to instantly attack again."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_r2dju")]([ExtResource("2_ovk7w")])
+set_acquired_flag_on_weapon = &"vw_natures_fury_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

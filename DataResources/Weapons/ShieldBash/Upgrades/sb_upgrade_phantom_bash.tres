@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://hiaorcjftopm"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_yaifq"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_5if71"]
+[ext_resource type="Resource" uid="uid://dcv3jldn0pqiv" path="res://DataResources/Weapons/ShieldBash/Effects/sb_phantom_bash_effect.tres" id="2_ap1je"]
+
+[resource]
+script = ExtResource("2_5if71")
+upgrade_id = &"sb_phantom_bash"
+title = "Phantom Bash"
+description = "The attack leaves behind an aftershock that explodes after a brief delay. Deals 100% damage to nearby enemies upon detonation."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_yaifq")]([ExtResource("2_ap1je")])
+set_acquired_flag_on_weapon = &"sb_phantom_bash_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

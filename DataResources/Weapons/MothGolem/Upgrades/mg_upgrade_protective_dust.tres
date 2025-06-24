@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://cs418f638wwyd"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_gjfgw"]
+[ext_resource type="Resource" uid="uid://cy04i1itd5b7t" path="res://DataResources/Weapons/MothGolem/Effects/mg_protective_dust_chance_effect.tres" id="2_85nse"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_vhiv6"]
+[ext_resource type="Resource" uid="uid://23txjm5cmfxe" path="res://DataResources/Weapons/MothGolem/Effects/mg_protective_dust_flag_effect.tres" id="3_vg733"]
+
+[resource]
+script = ExtResource("2_vhiv6")
+upgrade_id = &"mg_protective_dust"
+title = "Protective Dust"
+description = "The Golem periodically releases a cloud that grants the player temporary defense of +10 armor (+1 armor per point in luck up to 25 total armor). Lasts 5 seconds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_gjfgw")]([ExtResource("2_85nse"), ExtResource("3_vg733")])
+set_acquired_flag_on_weapon = &"mg_protective_dust_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

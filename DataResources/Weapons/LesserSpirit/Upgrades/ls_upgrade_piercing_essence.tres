@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bgar28mig4um"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_h7ka4"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_aqb8s"]
+[ext_resource type="Resource" uid="uid://dpe1w4xn3lfrn" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_piercing_essence_pierce_effect.tres" id="2_fp2mp"]
+[ext_resource type="Resource" uid="uid://mywa23gpvfcq" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_piercing_essence_tag_effect.tres" id="3_eiu47"]
+
+[resource]
+script = ExtResource("2_aqb8s")
+upgrade_id = &"ls_piercing_essence"
+title = "Piercing Essence"
+description = "The spirit's projectiles can pierce one enemy. Lesser Spirit gains the 'piercing' tag."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_h7ka4")]([ExtResource("2_fp2mp"), ExtResource("3_eiu47")])
+set_acquired_flag_on_weapon = &"ls_piercing_essence_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

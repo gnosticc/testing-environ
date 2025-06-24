@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://cy04i1itd5b7t"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_d6ryr"]
+
+[resource]
+script = ExtResource("1_d6ryr")
+id = &""
+modification_type = &"override_value"
+stat_key = &"protective_dust_proc_chance"
+value_type = 1
+value_float = 0.05
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

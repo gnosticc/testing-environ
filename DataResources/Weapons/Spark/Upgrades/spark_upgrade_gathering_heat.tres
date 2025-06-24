@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=6 format=3 uid="uid://c7d1ey6e1cvhl"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_x5t65"]
+[ext_resource type="Resource" uid="uid://b8wtbox0o4xea" path="res://DataResources/Weapons/Spark/Effects/spark_gathering_heat_damage_effect.tres" id="2_wadgr"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_xsg5v"]
+[ext_resource type="Resource" uid="uid://dq05kyafx143v" path="res://DataResources/Weapons/Spark/Effects/spark_gathering_heat_speed_effect.tres" id="3_fnpgp"]
+[ext_resource type="Resource" uid="uid://bv2dc78jr2gu2" path="res://DataResources/Weapons/Spark/Effects/spark_gathering_heat_lifetime_effect.tres" id="4_fnpgp"]
+
+[resource]
+script = ExtResource("2_xsg5v")
+upgrade_id = &"spark_gathering_heat"
+title = "Gathering Heat"
+description = "Spark flies 50% slower but increases damage by 150%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_x5t65")]([ExtResource("2_wadgr"), ExtResource("3_fnpgp"), ExtResource("4_fnpgp")])
+set_acquired_flag_on_weapon = &"spark_gathering_heat_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://c4v3mfn4gg4me"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_u8io4"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_8txmg"]
+[ext_resource type="Resource" uid="uid://dfeos812blccy" path="res://DataResources/Weapons/Torrent/Effects/torrent_tidal_surge_area.tres" id="2_csbqv"]
+[ext_resource type="Resource" uid="uid://bj6ftnxr1axtg" path="res://DataResources/Weapons/Torrent/Effects/torrent_tidal_surge_damage.tres" id="3_1ck1b"]
+
+[resource]
+script = ExtResource("2_8txmg")
+upgrade_id = &"torrent_tidal_surge"
+title = "Tidal Surge"
+description = "Torrent area further increases by 20%. Damage increases by another 50%."
+prerequisites_on_this_weapon = Array[StringName]([&"torrent_wider_current", &"torrent_crushing_wave"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_u8io4")]([ExtResource("2_csbqv"), ExtResource("3_1ck1b")])
+set_acquired_flag_on_weapon = &"torrent_tidal_surge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

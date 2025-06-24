@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://6uga7fax35jm"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_b530v"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_01ydk"]
+[ext_resource type="Resource" uid="uid://chf1hkh7b3mek" path="res://DataResources/StatusEffects/resolute_defense_regen_mod.tres" id="2_ohpvo"]
+
+[resource]
+script = ExtResource("2_01ydk")
+id = &"resolute_defense_buff"
+display_name = "Resolute Defense"
+duration = 2.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_b530v")]([ExtResource("2_ohpvo")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

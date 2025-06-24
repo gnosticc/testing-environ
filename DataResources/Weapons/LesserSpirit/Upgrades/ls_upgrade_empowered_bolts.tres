@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bnnxns7ek8gwf"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_t8hp0"]
+[ext_resource type="Resource" uid="uid://bcwgk1jkn2lpm" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_empowered_bolts_effect.tres" id="2_ifpbb"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_y1shs"]
+
+[resource]
+script = ExtResource("2_y1shs")
+upgrade_id = &"ls_empowered_bolts"
+title = "Empowered Bolts"
+description = "The spirit's projectiles deal 30% more damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_t8hp0")]([ExtResource("2_ifpbb")])
+set_acquired_flag_on_weapon = &"ls_empowered_bolts_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

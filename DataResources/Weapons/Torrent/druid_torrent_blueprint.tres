@@ -1,15 +1,24 @@
-[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=4 format=3 uid="uid://cgriyt25goeal"]
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://cgriyt25goeal"]
 
 [ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_g88c3"]
+[ext_resource type="Resource" uid="uid://d0mxspmfvlnsk" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_crushing_wave.tres" id="2_8v6hx"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ah2d8"]
-[ext_resource type="PackedScene" uid="uid://d32yo3kvx4gy2" path="res://Scenes/Weapons/TorrentAttack.tscn" id="3_ah2d8"]
+[ext_resource type="Resource" uid="uid://cs07ahuwtva5m" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_devastation.tres" id="3_fl2v3"]
+[ext_resource type="Resource" uid="uid://p7tbicb5uove" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_drenching_force.tres" id="4_dx5n1"]
+[ext_resource type="Resource" uid="uid://ct18p1fp3cm1h" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_enduring_current.tres" id="5_vd14d"]
+[ext_resource type="Resource" uid="uid://bxwa3p333ylkv" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_flash_flood.tres" id="6_mey34"]
+[ext_resource type="Resource" uid="uid://b5qpxcam04v1s" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_maelstrom.tres" id="7_f26a4"]
+[ext_resource type="Resource" uid="uid://dgsqrscmge8n" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_raging_waters.tres" id="8_tmslq"]
+[ext_resource type="Resource" uid="uid://c4v3mfn4gg4me" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_tidal_surge.tres" id="9_fwoug"]
+[ext_resource type="Resource" uid="uid://ba10b08qlh8oq" path="res://DataResources/Weapons/Torrent/Upgrades/torrent_upgrade_wider_current.tres" id="10_en71u"]
+[ext_resource type="PackedScene" uid="uid://b602xq1mmfrr2" path="res://Scenes/Weapons/Projectiles/TorrentAttackController.tscn" id="12_d3r5g"]
 
 [resource]
 script = ExtResource("2_ah2d8")
 id = &"druid_torrent"
 title = "Torrent"
-description = "Summons a pool of volatile water at a location."
-weapon_scene = ExtResource("3_ah2d8")
+description = null
+weapon_scene = ExtResource("12_d3r5g")
 tags = Array[StringName]([&"aoe", &"magical", &"water", &"druid weapon"])
 class_tag_restrictions = Array[int]([5])
 cooldown = 4.5
@@ -18,10 +27,17 @@ base_lifetime = 2.0
 spawn_as_child = false
 requires_direction = true
 targeting_type = "mouse_location"
+tracks_shot_count = false
 initial_specific_stats = {
 "area_scale": 1.0,
 "base_lifetime": 2.0,
 "damage_tick_interval": 0.5,
+"flash_flood_max_distance": 115.0,
+"flash_flood_min_distance": 70.0,
+"has_devastation": false,
+"has_drenching_force": false,
+"has_flash_flood": false,
+"has_maelstrom": false,
 "inherent_visual_scale_x": 0.46,
 "inherent_visual_scale_y": 0.51,
 "max_cast_range": 150.0,
@@ -29,5 +45,5 @@ initial_specific_stats = {
 "projectile_speed": 200.0,
 "weapon_damage_percentage": 0.5
 }
-available_upgrades = Array[ExtResource("1_g88c3")]([])
+available_upgrades = Array[ExtResource("1_g88c3")]([ExtResource("2_8v6hx"), ExtResource("3_fl2v3"), ExtResource("4_dx5n1"), ExtResource("5_vd14d"), ExtResource("6_mey34"), ExtResource("7_f26a4"), ExtResource("8_tmslq"), ExtResource("9_fwoug"), ExtResource("10_en71u")])
 metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

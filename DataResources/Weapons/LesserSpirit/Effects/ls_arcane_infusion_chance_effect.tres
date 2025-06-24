@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://b7f77p7hepvnc"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_sxeqg"]
+
+[resource]
+script = ExtResource("1_sxeqg")
+id = &"ls_arcane_infusion_chance"
+modification_type = &"override_value"
+stat_key = &"debuff_on_hit_chance"
+value_type = 1
+value_float = 0.05
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = "Arcane Infusion: Sets the proc chance for applying a random debuff."
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

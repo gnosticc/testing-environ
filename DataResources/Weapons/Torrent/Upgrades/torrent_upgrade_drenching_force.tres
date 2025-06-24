@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://p7tbicb5uove"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_77t45"]
+[ext_resource type="Resource" uid="uid://ccmsoiagg41qa" path="res://DataResources/Weapons/Torrent/Effects/torrent_drenching_force_effect.tres" id="2_nhc88"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_u115g"]
+
+[resource]
+script = ExtResource("2_u115g")
+upgrade_id = &"torrent_drenching_force"
+title = "Drenching Force"
+description = "Enemies hit by the torrent are briefly slowed for 1 second."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_77t45")]([ExtResource("2_nhc88")])
+set_acquired_flag_on_weapon = &"torrent_drenching_force_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

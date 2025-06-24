@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://d31s7qcyn4dta"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_pw8mb"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_0nirl"]
+[ext_resource type="Resource" uid="uid://br3215f4s64nh" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_spirit_vigor_damage_effect.tres" id="2_1kxl4"]
+[ext_resource type="Resource" uid="uid://dwhoc56bgjmlc" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_spirit_vigor_speed_effect.tres" id="3_vlifi"]
+
+[resource]
+script = ExtResource("2_0nirl")
+upgrade_id = &"ls_spirit_vigor"
+title = "Spirit Vigor"
+description = "Increases the spirit's projectile speed by 50% and damage by 30%."
+prerequisites_on_this_weapon = Array[StringName]([&"ls_empowered_bolts"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_pw8mb")]([ExtResource("2_1kxl4"), ExtResource("3_vlifi")])
+set_acquired_flag_on_weapon = &"ls_spirit_vigor_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

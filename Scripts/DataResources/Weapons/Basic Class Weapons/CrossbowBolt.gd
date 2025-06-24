@@ -1,6 +1,7 @@
 # crossbowbolt.gd
 # CORRECTED: Now uses a timed, deferred queue_free to prevent physics crashes.
 # CORRECTED: Explosion logic now triggers on every valid enemy hit, not just on destruction.
+# FIX: Implemented deferred calls for physics state changes and adding new physics bodies to prevent "flushing queries" errors.
 
 extends CharacterBody2D
 
@@ -113,7 +114,9 @@ func _on_body_entered(body: Node2D):
 		enemy_target.take_damage(int(round(damage_to_deal)), owner_player, attack_stats_for_enemy)
 		
 		# --- Explosion logic now triggers on every hit ---
-		_try_spawn_explosion(int(round(damage_to_deal)))
+		# FIX: Defer the call to _try_spawn_explosion to avoid flushing queries error
+		# when adding children with physics bodies inside _spawn_explosion.
+		call_deferred("_try_spawn_explosion", int(round(damage_to_deal)))
 		
 		# --- Status effect logic ---
 		if _received_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
@@ -140,7 +143,8 @@ func _start_destruction():
 	if _is_destroying: return
 	_is_destroying = true
 	set_physics_process(false) # Stop movement
-	if is_instance_valid(collision_shape): collision_shape.disabled = true
+	# FIX: Use set_deferred for collision_shape.disabled to prevent flushing queries error.
+	if is_instance_valid(collision_shape): collision_shape.set_deferred("disabled", true)
 	if is_instance_valid(animated_sprite): animated_sprite.visible = false
 	# Wait for a very short moment before calling queue_free to exit the physics step.
 	get_tree().create_timer(0.1, false, false, true).timeout.connect(queue_free)
@@ -162,6 +166,12 @@ func _spawn_explosion(damage: int, radius: float):
 	var explosion_instance = EXPLOSION_SCENE.instantiate()
 	var attacks_container = get_tree().current_scene.get_node_or_null("AttacksContainer")
 	
+	# The `_try_spawn_explosion` function is now called deferred,
+	# so adding the child here should be safe. However, if this error persists,
+	# it might mean the deferral from `_on_body_entered` to `_try_spawn_explosion`
+	# isn't enough, and `add_child` itself might need to be deferred, or
+	# `_spawn_explosion` as a whole needs to be called even later.
+	# For now, the deferral of the *caller* (`_try_spawn_explosion`) is the primary fix.
 	if is_instance_valid(attacks_container):
 		attacks_container.add_child(explosion_instance)
 	else:

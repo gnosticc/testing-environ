@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://daolf43j5avc"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_kc6qp"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_01d3r"]
+[ext_resource type="Resource" uid="uid://c28kopwusgvbh" path="res://DataResources/Weapons/FrozenTerritory/Effects/ft_damage_effect.tres" id="2_ku3aa"]
+
+[resource]
+script = ExtResource("2_01d3r")
+upgrade_id = &"ft_deeper_freeze"
+title = "Deeper Freeze"
+description = "Frozen Territory orbs deal 40% increased damage per hit."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_kc6qp")]([ExtResource("2_ku3aa")])
+set_acquired_flag_on_weapon = &"ft_deeper_freeze_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

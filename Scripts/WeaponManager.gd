@@ -14,7 +14,9 @@ var game_node_ref: Node
 var _whirlwind_timer: Timer
 var _whirlwind_queue: Array[Dictionary] = []
 
-# --- Summon Tracking ---
+# --- NEW: Summon Tracking ---
+# This dictionary will store active summon nodes.
+# The key is the weapon_id (e.g., &"conjurer_lesser_spirit"), and the value is an Array of the summon nodes.
 var _active_summons: Dictionary = {}
 
 # --- Signals ---
@@ -43,6 +45,11 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 		"shot_counter": 0,
 		"_flat_mods": {}, "_percent_add_mods": {}, "_percent_mult_final_mods": {}
 	}
+	
+	weapon_entry.specific_stats[&"cooldown"] = blueprint_data.cooldown
+	weapon_entry.specific_stats[&"attack_speed_multiplier"] = 1.0
+	weapon_entry.specific_stats[&"base_lifetime"] = blueprint_data.base_lifetime
+	
 	for key_enum_value in PlayerStatKeys.Keys.values():
 		var key_string: StringName = PlayerStatKeys.KEY_NAMES[key_enum_value]
 		weapon_entry._flat_mods[key_string] = 0.0
@@ -50,6 +57,7 @@ func add_weapon(blueprint_data: WeaponBlueprintData) -> bool:
 		weapon_entry._percent_mult_final_mods[key_string] = 1.0
 
 	if blueprint_data.tags.has("summon"):
+		# For summons, we call the spawn logic immediately. It will also be called on upgrade.
 		_spawn_persistent_summon(weapon_entry)
 	else:
 		if blueprint_data.cooldown <= 0: return false
@@ -71,7 +79,16 @@ func _on_attack_cooldown_finished(weapon_id: StringName):
 	var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
 	if weapon_index == -1: return
 	var weapon_entry = active_weapons[weapon_index]
-	
+	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
+
+	# --- REVISED: Generic Attack Counter Logic ---
+	# Check if the weapon's blueprint says it should track shots.
+	if blueprint_data.tracks_shot_count:
+		var current_shots = weapon_entry.get("shot_counter", 0) + 1
+		weapon_entry["shot_counter"] = current_shots
+		# Pass the updated count to the controller.
+		weapon_entry.specific_stats["shot_counter"] = current_shots
+
 	## NEW: Arrow Storm Logic
 	# If this weapon has the "Arrow Storm" upgrade, increment its shot counter.
 	if weapon_entry.specific_stats.get(&"has_arrow_storm", false):
@@ -96,7 +113,15 @@ func _on_attack_cooldown_finished(weapon_id: StringName):
 	if is_instance_valid(primary_attack) and weapon_entry.specific_stats.get(&"has_blade_flurry", false):
 		if randf() < float(weapon_entry.specific_stats.get(&"blade_flurry_chance", 0.0)):
 			get_tree().create_timer(0.2, false).timeout.connect(_on_blade_flurry_timeout.bind(weapon_entry, riposte_multiplier, primary_attack.global_transform))
-
+	# --- NEW: Reset counter after a special Nth attack ---
+	# --- FIX: Reset counter after the special Nth attack ---
+	# This logic runs *after* the controller has been called and used the counter.
+	# It checks if the count was >= 4, indicating the special attack just happened.
+	if blueprint_data.tracks_shot_count and weapon_entry["shot_counter"] >= 4:
+		var has_wrath = weapon_entry.specific_stats.get(&"has_wrath_of_the_wilds", false)
+		if has_wrath:
+			# If the special attack was triggered, reset the counter.
+			weapon_entry["shot_counter"] = 0
 	# --- Holy Infusion & Flurry Check ---
 	if weapon_entry.specific_stats.get(&"has_holy_infusion", false):
 		var owner_player = get_parent() as PlayerCharacter
@@ -181,15 +206,19 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, 
 			var local_pos = owner_player.melee_aiming_dot.position if is_instance_valid(owner_player.melee_aiming_dot) and blueprint_data.tags.has("melee") else Vector2.ZERO
 			spawn_position = owner_player.to_global(local_pos)
 		final_transform = Transform2D(final_direction.angle(), spawn_position)
-
+	
 	owner_player.add_child(weapon_instance)
 	weapon_instance.global_transform = final_transform
 	
-	var stats_to_pass = {}
+	# --- FIX: More robust stat passing logic ---
+	# 1. Start with a full copy of all stats, including flags and arrays.
+	var stats_to_pass = weapon_entry.specific_stats.duplicate(true)
+	# 2. Then, iterate and overwrite only the numerical stats that need to be calculated.
 	for key in weapon_entry.specific_stats.keys():
 		var value = weapon_entry.specific_stats[key]
-		if value is int or value is float: stats_to_pass[key] = _calculate_final_weapon_stat(weapon_entry, key)
-		else: stats_to_pass[key] = value.duplicate(true) if value is Array or value is Dictionary else value
+		if value is int or value is float:
+			stats_to_pass[key] = _calculate_final_weapon_stat(weapon_entry, key)
+	# ----------------------------------------
 	
 	stats_to_pass["tags"] = weapon_entry.tags.duplicate(true)
 	var final_damage = owner_player.player_stats.get_calculated_player_damage(stats_to_pass[&"weapon_damage_percentage"], stats_to_pass["tags"])
@@ -215,6 +244,7 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, 
 
 	return weapon_instance
 
+
 func _on_attack_hit_enemy(hit_count: int, weapon_id: StringName):
 	if hit_count > 0:
 		var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
@@ -234,59 +264,65 @@ func _spawn_persistent_summon(weapon_entry: Dictionary):
 	var owner_player = get_parent() as PlayerCharacter
 	if not is_instance_valid(blueprint_data) or not is_instance_valid(owner_player): return
 
-	var base_max_summons = int(_calculate_final_weapon_stat(weapon_entry, PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAX_SUMMONS_OF_TYPE]))
+	var base_max_summons = int(_calculate_final_weapon_stat(weapon_entry, &"max_summons_of_type"))
 	var global_summon_add = int(owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COUNT_ADD))
 	var final_max_summons = base_max_summons + global_summon_add
 	
-	if not _active_summons.has(blueprint_data.id): _active_summons[blueprint_data.id] = []
-	else: _active_summons[blueprint_data.id] = _active_summons[blueprint_data.id].filter(func(s): return is_instance_valid(s))
-
-	if _active_summons[blueprint_data.id].size() >= final_max_summons: return
-
-	var summon_instance = blueprint_data.weapon_scene.instantiate()
-	if not is_instance_valid(summon_instance): return
-
-	get_tree().current_scene.add_child(summon_instance)
-	summon_instance.global_position = owner_player.global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
-	
-	var calculated_summon_stats = {}
-	var p_stats = owner_player.player_stats
-	
-	for key in weapon_entry.specific_stats.keys():
-		var value = weapon_entry.specific_stats[key]
-		if value is int or value is float:
-			calculated_summon_stats[key] = _calculate_final_weapon_stat(weapon_entry, key)
-		else:
-			calculated_summon_stats[key] = value.duplicate(true) if value is Array or value is Dictionary else value
-	
-	calculated_summon_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE]] *= p_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
-	calculated_summon_stats[&"base_lifetime"] = blueprint_data.base_lifetime * p_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_LIFETIME_MULTIPLIER)
-	calculated_summon_stats[&"weapon_id"] = weapon_entry.id
-	calculated_summon_stats[&"tags"] = weapon_entry.tags.duplicate(true)
-
-	if summon_instance.has_signal("instances_spawned"):
-		if not summon_instance.is_connected("instances_spawned", _on_lesser_spirit_controller_instances_spawned):
-			summon_instance.instances_spawned.connect(_on_lesser_spirit_controller_instances_spawned, CONNECT_ONE_SHOT)
-	elif summon_instance.has_method("set_attack_properties"):
-		_active_summons[blueprint_data.id].append(summon_instance)
-		summon_instance.tree_exiting.connect(_on_summon_destroyed.bind(blueprint_data.id, summon_instance))
-	
-	if summon_instance.has_method("set_attack_properties"):
-		(summon_instance as Node2D).set_attack_properties(Vector2.ZERO, calculated_summon_stats, p_stats)
+	# --- REVISED "DESTROY AND RE-CREATE" LOGIC ---
+	# 1. Clear out all existing summons for this weapon ID.
+	if _active_summons.has(blueprint_data.id):
+		# Create a copy of the array because queue_free might modify it during iteration.
+		for existing_summon in _active_summons[blueprint_data.id].duplicate():
+			if is_instance_valid(existing_summon):
+				existing_summon.queue_free()
+		_active_summons[blueprint_data.id].clear()
 	else:
-		push_warning("WeaponManager: Summon instance '", blueprint_data.id, "' missing set_attack_properties method.")
+		_active_summons[blueprint_data.id] = []
 
-func _on_lesser_spirit_controller_instances_spawned(summon_weapon_id: StringName, spawned_instances: Array[Node2D]):
-	if not _active_summons.has(summon_weapon_id): _active_summons[summon_weapon_id] = []
-	for instance in spawned_instances:
-		if is_instance_valid(instance):
-			_active_summons[summon_weapon_id].append(instance)
-			if not instance.is_connected("tree_exiting", Callable(self, "_on_summon_destroyed").bind(summon_weapon_id, instance)):
-				instance.tree_exiting.connect(_on_summon_destroyed.bind(summon_weapon_id, instance))
+	# 2. Spawn a completely new set of summons up to the new maximum.
+	for i in range(final_max_summons):
+		var summon_instance = blueprint_data.weapon_scene.instantiate()
+		if not is_instance_valid(summon_instance): continue
+
+		get_tree().current_scene.add_child(summon_instance)
+		summon_instance.global_position = owner_player.global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
+		
+		# Add the new instance to the tracking array.
+		_active_summons[blueprint_data.id].append(summon_instance)
+		# Connect its 'tree_exiting' signal to the cleanup function.
+		summon_instance.tree_exiting.connect(_on_summon_destroyed.bind(blueprint_data.id, summon_instance))
+		
+		if summon_instance.has_method("initialize"):
+			var stats_to_pass = _get_calculated_stats_for_instance(weapon_entry)
+			# This logic now correctly spaces ALL spirits evenly.
+			var start_angle = float(i) / float(final_max_summons) * TAU
+			(summon_instance as Node2D).initialize(owner_player, stats_to_pass, start_angle)
 
 func _on_summon_destroyed(weapon_id: StringName, summon_instance: Node):
 	if _active_summons.has(weapon_id) and _active_summons[weapon_id].has(summon_instance):
 		_active_summons[weapon_id].erase(summon_instance)
+
+# NEW HELPER: Consolidates the logic for calculating the final stats to pass to an instance.
+func _get_calculated_stats_for_instance(weapon_entry: Dictionary) -> Dictionary:
+	var calculated_stats = {}
+	var owner_player_stats = (get_parent() as PlayerCharacter).player_stats
+	
+	for key in weapon_entry.specific_stats.keys():
+		var value = weapon_entry.specific_stats[key]
+		if value is int or value is float:
+			calculated_stats[key] = _calculate_final_weapon_stat(weapon_entry, key)
+		else:
+			calculated_stats[key] = value.duplicate(true) if value is Array or value is Dictionary else value
+	
+	calculated_stats["tags"] = weapon_entry.tags.duplicate(true)
+	calculated_stats["weapon_id"] = weapon_entry.id # Pass the ID for tracking
+	calculated_stats["weapon_level"] = weapon_entry.weapon_level # Pass the current level
+	
+	if calculated_stats.has(&"weapon_damage_percentage"):
+		calculated_stats[&"weapon_damage_percentage"] *= owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
+	
+	return calculated_stats
+
 
 # --- [The rest of the file is unchanged] ---
 func _restart_weapon_cooldown(weapon_entry: Dictionary):
@@ -296,15 +332,26 @@ func _restart_weapon_cooldown(weapon_entry: Dictionary):
 		timer.start()
 
 func get_weapon_cooldown_value(weapon_entry: Dictionary) -> float:
-	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
-	var final_cooldown = blueprint_data.cooldown
+	# 1. Calculate the weapon's own final cooldown stat first. This now correctly
+	# includes direct modifiers from upgrades like "Quick Cast".
+	var final_cooldown = _calculate_final_weapon_stat(weapon_entry, &"cooldown")
+	
+	# 2. Get the player's stats to apply global and weapon-specific attack speed multipliers.
 	var p_stats = (get_parent() as PlayerCharacter).player_stats
 	if is_instance_valid(p_stats):
+		# 3. Get both the player's global and the weapon's specific attack speed multipliers.
 		var global_atk_speed_mult = p_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
 		var weapon_atk_speed_mult = _calculate_final_weapon_stat(weapon_entry, &"attack_speed_multiplier")
+		
+		# 4. Combine them into a final multiplier.
 		var final_atk_speed_mult = global_atk_speed_mult * weapon_atk_speed_mult
-		if final_atk_speed_mult > 0: final_cooldown /= final_atk_speed_mult
-	return maxf(0.05, final_cooldown)
+		
+		# 5. Apply the combined speed multiplier. A higher speed results in a lower cooldown.
+		if final_atk_speed_mult > 0: 
+			final_cooldown /= final_atk_speed_mult
+			
+	return maxf(0.05, final_cooldown) # Ensure cooldown doesn't drop below a minimum threshold.
+
 
 func _calculate_final_weapon_stat(weapon_entry: Dictionary, stat_key: StringName) -> float:
 	var base_value = float(weapon_entry.specific_stats.get(stat_key, 0.0))
@@ -320,48 +367,72 @@ func apply_weapon_upgrade(weapon_id: StringName, upgrade_data: WeaponUpgradeData
 	var weapon_entry = active_weapons[weapon_index]
 	var owner_player = get_parent() as PlayerCharacter
 
+	# Set the acquired flag on the weapon itself for prerequisite checks
 	if upgrade_data.set_acquired_flag_on_weapon != &"":
 		weapon_entry.specific_stats[upgrade_data.set_acquired_flag_on_weapon] = true
 
+	# Iterate through all effects provided by the upgrade
 	for effect in upgrade_data.effects:
+		if not is_instance_valid(effect): continue
+		
+		# Correctly handle all effect types based on their target scope
 		if effect is StatModificationEffectData:
 			var stat_mod = effect as StatModificationEffectData
-			match stat_mod.target_scope:
-				&"player_stats":
-					owner_player.player_stats.apply_stat_modification(stat_mod)
-				&"weapon_specific_stats":
-					var key = stat_mod.stat_key
-					var value = stat_mod.get_value()
-					match stat_mod.modification_type:
-						&"flat_add": weapon_entry._flat_mods[key] = weapon_entry._flat_mods.get(key, 0.0) + value
-						&"percent_add_to_base": weapon_entry._percent_add_mods[key] = weapon_entry._percent_add_mods.get(key, 0.0) + value
-						&"percent_mult_final": weapon_entry._percent_mult_final_mods[key] = weapon_entry._percent_mult_final_mods.get(key, 1.0) * (1.0 + value)
+			if stat_mod.target_scope == &"player_stats":
+				owner_player.player_stats.apply_stat_modification(stat_mod)
+			else: # Assumes weapon_specific_stats
+				var key = stat_mod.stat_key
+				var value = stat_mod.get_value()
+				match stat_mod.modification_type:
+					&"flat_add": weapon_entry._flat_mods[key] = weapon_entry._flat_mods.get(key, 0.0) + value
+					&"percent_add_to_base": weapon_entry._percent_add_mods[key] = weapon_entry._percent_add_mods.get(key, 0.0) + value
+					&"percent_mult_final": weapon_entry._percent_mult_final_mods[key] = weapon_entry._percent_mult_final_mods.get(key, 1.0) * (1.0 + value)
+					&"override_value": weapon_entry.specific_stats[key] = value
+		
 		elif effect is CustomFlagEffectData:
 			var flag_mod = effect as CustomFlagEffectData
-			if flag_mod.target_scope == &"weapon_specific_stats" or flag_mod.target_scope == &"weapon_behavior":
+			# FIX: Correctly route flags to the player or the weapon
+			if flag_mod.target_scope == &"player_stats":
+				owner_player.player_stats.apply_custom_flag(flag_mod)
+			else: # Assumes weapon_specific_stats or weapon_behavior
 				weapon_entry.specific_stats[flag_mod.flag_key] = flag_mod.flag_value
+		
 		elif effect is StatusEffectApplicationData:
 			if not weapon_entry.specific_stats.has(&"on_hit_status_applications"):
 				weapon_entry.specific_stats[&"on_hit_status_applications"] = []
 			weapon_entry.specific_stats[&"on_hit_status_applications"].append(effect)
-		## NEW: Handle the new AddTagEffectData type
+		
 		elif effect is AddTagEffectData:
 			var add_tag_effect = effect as AddTagEffectData
+			# FIX: Added the missing target_scope check for consistency.
 			if add_tag_effect.target_scope == &"weapon_behavior":
 				var tag_to_add: StringName = add_tag_effect.tag_to_add
 				if not weapon_entry.tags.has(tag_to_add):
 					weapon_entry.tags.append(tag_to_add)
-		## NEW: Handle the new AddToSequenceEffectData type
+		
 		elif effect is AddToSequenceEffectData:
 			var seq_effect = effect as AddToSequenceEffectData
-			# Ensure the target key exists and is an array in the weapon's stats
-			if weapon_entry.specific_stats.has(seq_effect.array_key) and weapon_entry.specific_stats[seq_effect.array_key] is Array:
-				weapon_entry.specific_stats[seq_effect.array_key].append(seq_effect.dictionary_to_add)
-			else:
-				push_warning("WeaponManager: AddToSequenceEffectData failed. Key '", seq_effect.array_key, "' not found or not an Array in weapon stats.")
+			# This effect type is inherently weapon-specific, but checking the scope is still good practice.
+			if seq_effect.target_scope == &"weapon_specific_stats":
+				if weapon_entry.specific_stats.has(seq_effect.array_key) and weapon_entry.specific_stats[seq_effect.array_key] is Array:
+					weapon_entry.specific_stats[seq_effect.array_key].append(seq_effect.dictionary_to_add)
+				else:
+					push_warning("WeaponManager: AddToSequenceEffectData failed. Key '", seq_effect.array_key, "' not found or not an Array in weapon stats.")
 	
 	weapon_entry.weapon_level += 1
 	weapon_entry.acquired_upgrade_ids.append(upgrade_data.upgrade_id)
+	
+	# --- NEW: Push stat updates to active summons ---
+	# --- CORE FIX FOR SUMMONS ---
+	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
+	if blueprint_data.tags.has("summon"):
+		_spawn_persistent_summon(weapon_entry)
+		if _active_summons.has(weapon_id):
+			var calculated_summon_stats = _get_calculated_stats_for_instance(weapon_entry)
+			for summon_instance in _active_summons[weapon_id]:
+				if is_instance_valid(summon_instance) and summon_instance.has_method("update_stats"):
+					summon_instance.update_stats(calculated_summon_stats)
+				
 	emit_signal("weapon_upgraded", weapon_id, weapon_entry.weapon_level)
 	emit_signal("active_weapons_changed")
 

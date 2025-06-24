@@ -1,0 +1,50 @@
+[gd_scene load_steps=8 format=3 uid="uid://c5v1ly0jstta2"]
+
+[ext_resource type="Script" uid="uid://bi8pd5meq3kc2" path="res://Scripts/Weapons/Projectiles/RimeheartExplosion.gd" id="1_6f4ry"]
+[ext_resource type="Texture2D" uid="uid://6y2wdkqh1xi6" path="res://Assets/SFX/Rimeheart Explosion Animation.png" id="2_8xb8u"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hwcqy"]
+atlas = ExtResource("2_8xb8u")
+region = Rect2(0, 0, 215, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3q3jg"]
+atlas = ExtResource("2_8xb8u")
+region = Rect2(215, 0, 215, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4j06g"]
+atlas = ExtResource("2_8xb8u")
+region = Rect2(430, 0, 215, 200)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2s2xe"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hwcqy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3q3jg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4j06g")
+}],
+"loop": false,
+"name": &"default",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_6f4ry"]
+radius = 103.446
+
+[node name="RimeheartExplosion" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_6f4ry")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2s2xe")
+frame = 2
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(4, 20)
+shape = SubResource("CircleShape2D_6f4ry")

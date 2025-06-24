@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://fpxpkftggndc"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_4rpio"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_8y5hv"]
+[ext_resource type="Resource" uid="uid://c8w030ounkv8b" path="res://DataResources/Weapons/LesserSpirit/Effects/ls_rapid_fire_effect.tres" id="2_gd8ua"]
+
+[resource]
+script = ExtResource("2_8y5hv")
+upgrade_id = &"ls_rapid_fire"
+title = "Rapid Fire"
+description = "The spirit attacks more frequently. Reduces attack cooldown by 33%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_4rpio")]([ExtResource("2_gd8ua")])
+set_acquired_flag_on_weapon = &"ls_rapid_fire_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://66bnk66dmrdq"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_e0iuk"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_82pfd"]
+[ext_resource type="Resource" uid="uid://c6qdp24jah5y" path="res://DataResources/Weapons/MothGolem/Effects/mg_primal_fury_chance_effect.tres" id="2_ivcf1"]
+[ext_resource type="Resource" uid="uid://b5sxb1xciwv6" path="res://DataResources/Weapons/MothGolem/Effects/mg_primal_fury_flag_effect.tres" id="3_k1en4"]
+
+[resource]
+script = ExtResource("2_82pfd")
+upgrade_id = &"mg_primal_fury"
+title = "Primal Fury"
+description = "The Moth Golem periodically becomes enraged, increasing its attack speed by 50%, damage by 100%, and increasing its damage area with its attacks significantly for a short duration."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_e0iuk")]([ExtResource("2_ivcf1"), ExtResource("3_k1en4")])
+set_acquired_flag_on_weapon = &"mg_primal_fury_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

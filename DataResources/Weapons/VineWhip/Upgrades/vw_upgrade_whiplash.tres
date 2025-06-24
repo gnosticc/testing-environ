@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dmdnx40t3cu1p"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_q73gl"]
+[ext_resource type="Resource" uid="uid://cged2jcx4g7gl" path="res://DataResources/Weapons/VineWhip/Effects/vw_whiplash_stun_effect.tres" id="2_n5mmp"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ojses"]
+[ext_resource type="Resource" uid="uid://dftqwm2mrfenu" path="res://DataResources/Weapons/VineWhip/Effects/vw_whiplash_damage_effect.tres" id="3_wfynu"]
+
+[resource]
+script = ExtResource("2_ojses")
+upgrade_id = &"vw_whiplash"
+title = "Whiplash"
+description = "The vine whip has a 15% chance to apply a 2 second stun. Vine whip now deals an additional 80% damage."
+prerequisites_on_this_weapon = Array[StringName]([&"vw_barbed_thorns"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_q73gl")]([ExtResource("2_n5mmp"), ExtResource("3_wfynu")])
+set_acquired_flag_on_weapon = &"vw_whiplash_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

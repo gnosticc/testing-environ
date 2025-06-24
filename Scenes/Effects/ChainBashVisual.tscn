@@ -1,0 +1,29 @@
+[gd_scene load_steps=5 format=3 uid="uid://dvx6afovs2jqy"]
+
+[ext_resource type="Script" uid="uid://dkgag4ws47x4c" path="res://Scripts/VFX/ChainBashVisual.gd" id="1_nhd7s"]
+[ext_resource type="Texture2D" uid="uid://02dqma1xgpee" path="res://Assets/SFX/Chain Bash Animation.png" id="2_rj6vp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lwj13"]
+atlas = ExtResource("2_rj6vp")
+region = Rect2(0, 0, 130, 75)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_52wuq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lwj13")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="ChainBashVisual" type="Node2D"]
+script = ExtResource("1_nhd7s")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+rotation = 2.61799
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_52wuq")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
