@@ -5,9 +5,13 @@ extends Node2D
 
 @export var torrent_attack_scene: PackedScene
 
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+var _weapon_manager: WeaponManager # Reference to call back for cooldown reduction
+
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	if not is_instance_valid(torrent_attack_scene):
 		push_error("TorrentAttackController: Torrent Attack Scene not assigned!"); queue_free(); return
+		
+	_weapon_manager = _p_weapon_manager
 	
 	# Spawn the primary torrent at the target location
 	_spawn_torrent(p_attack_stats, p_player_stats)
@@ -44,4 +48,4 @@ func _spawn_torrent(stats: Dictionary, p_player_stats: PlayerStats):
 	torrent_instance.global_position = self.global_position + offset
 
 	if torrent_instance.has_method("set_attack_properties"):
-		torrent_instance.set_attack_properties(Vector2.ZERO, stats, p_player_stats)
+		torrent_instance.set_attack_properties(Vector2.ZERO, stats, p_player_stats, _weapon_manager)

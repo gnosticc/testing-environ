@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=3 format=3 uid="uid://cxyx80bjgkxm5"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_xsn6k"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_xj0nw"]
+
+[resource]
+script = ExtResource("2_xj0nw")
+id = &"living_conduit"
+display_name = "Living Conduit"
+duration = 3.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.5
+tick_on_application = true
+effects_while_active = Array[ExtResource("1_xsn6k")]([])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

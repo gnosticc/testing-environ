@@ -14,6 +14,7 @@ duration = 8.0
 is_stackable = false
 max_stacks = 1
 refresh_duration_on_reapply = true
+has_effect_on_expire = false
 tick_interval = 0.0
 tick_on_application = false
 effects_while_active = Array[ExtResource("1_aipl3")]([ExtResource("2_5m11e"), ExtResource("3_f2t3a"), ExtResource("4_7an32")])

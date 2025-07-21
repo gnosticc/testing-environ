@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://banm1m11xcwda"]
+
+[ext_resource type="Script" uid="uid://ndh40upyjq" path="res://Scripts/DataResources/Weapons/Advanced/ExperimentalMaterialsManager.gd" id="1_w4mm7"]
+[ext_resource type="PackedScene" uid="uid://b30km701e8115" path="res://Scenes/Weapons/Advanced/Effect Scenes/VialProjectile.tscn" id="2_ni0oo"]
+[ext_resource type="PackedScene" uid="uid://dwujjcx31hbvm" path="res://Scenes/Weapons/Advanced/Effect Scenes/ChemtrailSegment.tscn" id="3_q8161"]
+
+[node name="ExperimentalMaterialsManager" type="Node2D"]
+script = ExtResource("1_w4mm7")
+vial_projectile_scene = ExtResource("2_ni0oo")
+chemtrail_scene = ExtResource("3_q8161")
+
+[node name="PrimaryAttackTimer" type="Timer" parent="."]
+
+[node name="SelfExperimentationTimer" type="Timer" parent="."]
+wait_time = 12.0
+
+[node name="PhilosophersStoneCooldownTimer" type="Timer" parent="."]
+wait_time = 360.0
+one_shot = true
+
+[node name="ChemtrailSpawnTimer" type="Timer" parent="."]
+wait_time = 0.5

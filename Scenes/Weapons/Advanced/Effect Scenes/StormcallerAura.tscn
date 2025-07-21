@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://b5i68knjtxf4l"]
+
+[ext_resource type="Script" uid="uid://ooaxuf3b2p0s" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/StormcallerAura.gd" id="1_28ud4"]
+
+[node name="StormcallerAura" type="Node2D"]
+script = ExtResource("1_28ud4")
+
+[node name="ArcTimer" type="Timer" parent="."]

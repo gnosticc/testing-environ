@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cjbfomgy1otai"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_7d8p6"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_wg3vn"]
+[ext_resource type="Resource" uid="uid://gt07etlixs2v" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/transmutation_flag.tres" id="2_wj54u"]
+
+[resource]
+script = ExtResource("2_wg3vn")
+upgrade_id = &"exp_mat_transmutation"
+title = "Transmutation"
+description = "Enemies recently defeated while Soaked have a chance to drop a second EXP orb on death. Chance increases by 5% with Luck. Base 25% chance."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_7d8p6")]([ExtResource("2_wj54u")])
+set_acquired_flag_on_weapon = &"exp_mat_transmutation_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

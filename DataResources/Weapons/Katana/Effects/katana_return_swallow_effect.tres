@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="AddToSequenceEffectData" load_steps=2 format=3 uid="uid://db3g0e0uxndiy"]
+
+[ext_resource type="Script" uid="uid://bw1q2xvs7r761" path="res://Scripts/DataResources/Effects/AddToSequenceEffectData.gd" id="1_ho240"]
+
+[resource]
+script = ExtResource("1_ho240")
+array_key = &"attack_sequence"
+dictionary_to_add = {
+"damage_multiplier": 3.0,
+"delay": 0.15,
+"rotation_offset": -10.0
+}
+effect_type_id = &"add_to_sequence"
+target_scope = &"weapon_specific_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://bw1q2xvs7r761"

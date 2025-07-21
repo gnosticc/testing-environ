@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dfq6inyv8q8v4"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_etnj2"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_mnyji"]
+[ext_resource type="Resource" uid="uid://bbcpsj8vfpeue" path="res://DataResources/Weapons/Reinforcements/Effects/effect_deploy_artillery.tres" id="2_vygr1"]
+
+[resource]
+script = ExtResource("2_mnyji")
+upgrade_id = &"reinforcements_deploy_artillery"
+title = " New Unit: Artillery Bot"
+description = "Deploys the schematics for the Artillery Bot, a rocket-launching turret that seeks crowds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_etnj2")]([ExtResource("2_vygr1")])
+set_acquired_flag_on_weapon = &"reinforcements_deploy_artillery_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

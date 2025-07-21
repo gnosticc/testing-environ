@@ -11,6 +11,7 @@ extends Area2D
 # This should point to the AnimatedSprite2D node in your Explosion.tscn
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
+var _specific_stats: Dictionary
 
 func _ready():
 	# Safety check to ensure the required nodes are present in the scene.
@@ -24,7 +25,7 @@ func _ready():
 	animated_sprite.animation_finished.connect(queue_free)
 
 # This function is called by the node that creates the explosion (e.g., CrossbowBolt).
-func detonate(damage_amount: int, radius: float, source_node: Node, attack_stats: Dictionary):
+func detonate(damage_amount: int, radius: float, source_node: Node, attack_stats: Dictionary, _can_echo: bool = false, p_weapon_stats: Dictionary = {}):
 	# Set the radius of the explosion's collision shape.
 	if collision_shape.shape is CircleShape2D:
 		# FIX: Use call_deferred to safely set the radius.
@@ -66,5 +67,7 @@ func detonate(damage_amount: int, radius: float, source_node: Node, attack_stats
 		if body.is_in_group("enemies") and body.has_method("take_damage"):
 			var enemy_target = body as BaseEnemy
 			if is_instance_valid(enemy_target) and not enemy_target.is_dead():
-				# Deal damage to each enemy in the area.
-				enemy_target.take_damage(damage_amount, source_node, attack_stats)
+				var weapon_tags: Array[StringName] = []
+				if _specific_stats.has("tags"):
+					weapon_tags = _specific_stats.get("tags")
+				enemy_target.take_damage(damage_amount, source_node, attack_stats, weapon_tags)

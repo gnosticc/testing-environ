@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://qfjff6ynvqjc"]
+
+[ext_resource type="Script" uid="uid://cq8wxh3f4aivq" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ThornBurst.gd" id="1_h76jt"]
+
+[node name="ThornBurst" type="Node2D"]
+script = ExtResource("1_h76jt")
+
+[node name="Projectiles" type="Node2D" parent="."]

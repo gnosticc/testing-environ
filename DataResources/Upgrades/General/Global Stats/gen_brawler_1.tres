@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=3 format=3 uid="uid://7ed7dsb6uue6"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_1n32s"]
+[ext_resource type="Script" uid="uid://c3gbs6gwsa23p" path="res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd" id="2_yi6ui"]
+
+[resource]
+script = ExtResource("2_yi6ui")
+id = &""
+title = "General Upgrade Title"
+description = "General upgrade description."
+class_tag_filter = Array[int]([])
+effects = Array[ExtResource("1_1n32s")]([])
+weight = 60.0
+max_stacks = 1
+prerequisites = Array[StringName]([])
+metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

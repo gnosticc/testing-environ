@@ -1,0 +1,101 @@
+[gd_scene load_steps=11 format=3 uid="uid://dtswcl5mbax7o"]
+
+[ext_resource type="Script" uid="uid://me3gu6url3mj" path="res://Scripts/DataResources/Weapons/Advanced/ConjoinedSpirit.gd" id="1_8b6sg"]
+[ext_resource type="Texture2D" uid="uid://bt7xa5qly4svl" path="res://Assets/Pets and Summons/Spirit Master/Spirit Animation.png" id="1_jme2n"]
+[ext_resource type="PackedScene" uid="uid://bopg3ge4httxh" path="res://Scenes/Weapons/Advanced/Effect Scenes/IceShard.tscn" id="2_5enp8"]
+[ext_resource type="PackedScene" uid="uid://cj7011p82apco" path="res://Scenes/Weapons/Advanced/Effect Scenes/WaterBall.tscn" id="3_oh4l5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_itplm"]
+atlas = ExtResource("1_jme2n")
+region = Rect2(0, 0, 850, 670)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2gdcd"]
+atlas = ExtResource("1_jme2n")
+region = Rect2(850, 0, 850, 670)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8b6sg"]
+atlas = ExtResource("1_jme2n")
+region = Rect2(1700, 0, 850, 670)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_5enp8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_itplm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2gdcd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8b6sg")
+}],
+"loop": true,
+"name": &"attune",
+"speed": 3.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_itplm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2gdcd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8b6sg")
+}],
+"loop": true,
+"name": &"roam",
+"speed": 3.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oh4l5"]
+size = Vector2(50, 35)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cqepu"]
+size = Vector2(58, 37)
+
+[node name="ConjoinedSpirit" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 128
+script = ExtResource("1_8b6sg")
+ice_shard_scene = ExtResource("2_5enp8")
+water_ball_scene = ExtResource("3_oh4l5")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.075, 0.075)
+sprite_frames = SubResource("SpriteFrames_5enp8")
+animation = &"roam"
+frame_progress = 0.827064
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2.5)
+shape = SubResource("RectangleShape2D_oh4l5")
+
+[node name="ContactDamageArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ContactDamageArea"]
+position = Vector2(0, 2.5)
+shape = SubResource("RectangleShape2D_cqepu")
+
+[node name="RoamingTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="AttunementTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="IceShardAttackTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="WaterBallAttackTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="PermafrostStormTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="IceProjectileSpawn" type="Marker2D" parent="."]
+position = Vector2(15, 0)
+
+[node name="WaterProjectileSpawn" type="Marker2D" parent="."]
+position = Vector2(-20, 0)

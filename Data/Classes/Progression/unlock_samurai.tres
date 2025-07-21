@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://dewv5i0dmy4t3"]
+
+[ext_resource type="Resource" uid="uid://cb2gprrr4ga1x" path="res://Data/Classes/Tiers/samurai_advanced.tres" id="1_6pgr3"]
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_vkeut"]
+
+[resource]
+script = ExtResource("1_vkeut")
+progression_id = &"unlock_samurai"
+class_tier_to_unlock = ExtResource("1_6pgr3")
+unlock_description = "A master of the blade who focuses on precision and deadly combos. Unlocks the Katana weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 12
+Crit Chance:	5.0%
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 1,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 3,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

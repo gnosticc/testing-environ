@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=3 uid="uid://bypae624hn3hd"]
+
+[ext_resource type="Script" uid="uid://c04pt7g47e8ja" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/PhantomReachProjectile.gd" id="1_nnyg0"]
+[ext_resource type="Script" uid="uid://b863wrn26sn30" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/PhantomReachHomingComponent.gd" id="2_0ol14"]
+[ext_resource type="Texture2D" uid="uid://bp3h2bic1ybm4" path="res://Assets/Pets and Summons/Summoner/Phantom Reach Projectile Animation.png" id="2_hgj6f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jd44m"]
+atlas = ExtResource("2_hgj6f")
+region = Rect2(0, 0, 125, 125)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_35o6a"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jd44m")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hndp5"]
+radius = 64.0
+
+[node name="PhantomReachProjectile" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_nnyg0")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_35o6a")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_hndp5")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="HomingComponent" type="Node" parent="."]
+script = ExtResource("2_0ol14")

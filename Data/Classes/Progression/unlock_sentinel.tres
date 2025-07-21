@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://dbiay8tq6jwqh"]
+
+[ext_resource type="Resource" uid="uid://dra45hiwmvrn1" path="res://Data/Classes/Tiers/sentinel_advanced.tres" id="1_cm0n7"]
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_sv63a"]
+
+[resource]
+script = ExtResource("1_sv63a")
+progression_id = &"unlock_sentinel"
+class_tier_to_unlock = ExtResource("1_cm0n7")
+unlock_description = "A steadfast defender who controls the battlefield with superior reach and tactical positioning. Unlocks the Polearm weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Armor: 5
+Crit Chance: 5.0%
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 2,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 3,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

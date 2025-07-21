@@ -1,0 +1,93 @@
+[gd_scene load_steps=6 format=3 uid="uid://corog51ww70gj"]
+
+[ext_resource type="Script" uid="uid://ee2eq445wxb5" path="res://Scripts/DataResources/Weapons/Advanced/WarhammerAttack.gd" id="1_m2tw3"]
+[ext_resource type="Texture2D" uid="uid://dvlutxp856s2s" path="res://Assets/Weapons/Advanced Weapons/Warhammer Animation.png" id="2_l1ldu"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l1ldu"]
+size = Vector2(393.724, 503.639)
+
+[sub_resource type="Animation" id="Animation_53eds"]
+resource_name = "swing"
+length = 0.6
+step = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Pivot:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.3, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [-0.576038, 1.78125, -0.577579]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Pivot/Sprite2D:flip_v")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [false, true]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Pivot/Sprite2D:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2(-211.978, -307.008), Vector2(-100.231, 119.577)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Pivot/Sprite2D:rotation")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [-0.187398, -1.18135]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_eg5jo"]
+_data = {
+&"swing": SubResource("Animation_53eds")
+}
+
+[node name="Warhammer" type="Node2D"]
+script = ExtResource("1_m2tw3")
+
+[node name="Pivot" type="Node2D" parent="."]
+rotation = -0.577579
+
+[node name="Sprite2D" type="Sprite2D" parent="Pivot"]
+position = Vector2(-100.231, 119.577)
+rotation = -1.18135
+texture = ExtResource("2_l1ldu")
+centered = false
+flip_v = true
+
+[node name="DamageArea" type="Area2D" parent="Pivot"]
+rotation = 0.577579
+collision_layer = 4
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Pivot/DamageArea"]
+position = Vector2(74.7712, -215.802)
+rotation = 0.456313
+shape = SubResource("RectangleShape2D_l1ldu")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_eg5jo")
+}

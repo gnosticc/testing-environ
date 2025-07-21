@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b8dkrs8pxcxyw"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_1l1hx"]
+[ext_resource type="Resource" uid="uid://dkdbytdyjflhi" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_stormcaller_effect.tres" id="2_1v7cd"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_qldbv"]
+
+[resource]
+script = ExtResource("2_qldbv")
+upgrade_id = &"living_conduit_stormcaller"
+title = "Stormcaller"
+description = "You become the eye of the storm, a permanent living conduit yourself."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_1l1hx")]([ExtResource("2_1v7cd")])
+set_acquired_flag_on_weapon = &"living_conduit_stormcaller_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

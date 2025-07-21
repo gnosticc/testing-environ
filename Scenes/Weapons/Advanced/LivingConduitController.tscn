@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://jbk4c4jj7pxw"]
+
+[ext_resource type="Script" uid="uid://xv8sbssbgvlo" path="res://Scripts/DataResources/Weapons/Advanced/LivingConduitController.gd" id="1_vlisg"]
+
+[node name="LivingConduitController" type="Node2D"]
+script = ExtResource("1_vlisg")

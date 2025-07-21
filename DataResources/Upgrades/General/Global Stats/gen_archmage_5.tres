@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=4 format=3 uid="uid://daqtreociylp8"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_rmgna"]
+[ext_resource type="Resource" uid="uid://bol0xnrsl4wxr" path="res://DataResources/Upgrades/General/Effects/Global Damage Multiplier/archmage_15.tres" id="2_4kflu"]
+[ext_resource type="Script" uid="uid://c3gbs6gwsa23p" path="res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd" id="3_1hfly"]
+
+[resource]
+script = ExtResource("3_1hfly")
+id = &"gen_archmage_5"
+title = "Archmage V"
+description = "Increases damage of all Magical weapons by 15%."
+class_tag_filter = Array[int]([])
+effects = Array[ExtResource("1_rmgna")]([ExtResource("2_4kflu")])
+weight = 60.0
+max_stacks = 1
+prerequisites = Array[StringName]([&"gen_archmage_4"])
+metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=6 format=3 uid="uid://djpj54bhwlfrc"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_lp6w0"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_7jhjd"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_g5wqc"]
+[ext_resource type="Resource" uid="uid://prm5rikppyij" path="res://Data/Classes/Effects/warrior_unlock_bonus_damage.tres" id="3_afgos"]
+[ext_resource type="Resource" uid="uid://bu6ytjrwayyg8" path="res://Data/Classes/Effects/druid_unlock_speed.tres" id="4_4em78"]
+
+[resource]
+script = ExtResource("2_g5wqc")
+class_id = &"berserker_advanced"
+display_name = "Berserker"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_lp6w0")]([ExtResource("2_7jhjd"), ExtResource("3_afgos"), ExtResource("4_4em78")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"berserker_throwing_axe"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Warrior and Druid weapons to unlock the path of the Berserker. A furious warrior who thrives in the heart of battle, fueled by primal rage. Unlocks the Throwing Axe weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

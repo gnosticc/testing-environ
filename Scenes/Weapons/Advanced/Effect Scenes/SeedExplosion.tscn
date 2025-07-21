@@ -1,0 +1,62 @@
+[gd_scene load_steps=9 format=3 uid="uid://bth0ln8vcveev"]
+
+[ext_resource type="Script" uid="uid://bp3piw5wp7u7a" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/SeedExplosion.gd" id="1_sd31q"]
+[ext_resource type="Texture2D" uid="uid://dil3hovt7bgfv" path="res://Assets/SFX/Seed Explosion Animation.png" id="2_n4oll"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s0his"]
+atlas = ExtResource("2_n4oll")
+region = Rect2(0, 0, 270, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2jaet"]
+atlas = ExtResource("2_n4oll")
+region = Rect2(270, 0, 270, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_l5bwb"]
+atlas = ExtResource("2_n4oll")
+region = Rect2(540, 0, 270, 200)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_622we"]
+atlas = ExtResource("2_n4oll")
+region = Rect2(810, 0, 270, 200)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_msm1v"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s0his")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2jaet")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_l5bwb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_622we")
+}],
+"loop": false,
+"name": &"explode",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_n4oll"]
+radius = 128.016
+
+[node name="SeedExplosion" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_sd31q")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_msm1v")
+animation = &"explode"
+frame = 3
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 11)
+shape = SubResource("CircleShape2D_n4oll")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true

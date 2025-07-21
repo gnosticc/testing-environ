@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://nukd8a0ern7p"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_b8bpe"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_4t2yh"]
+[ext_resource type="Resource" uid="uid://sheun56xg3wl" path="res://DataResources/Weapons/Bramble Censer/Effects/bramble_censer_swing_length_effect.tres" id="2_xbat1"]
+[ext_resource type="Resource" uid="uid://caoicjjguvu5c" path="res://DataResources/Weapons/Bramble Censer/Effects/bramble_censer_swing_width_effect.tres" id="3_lt46t"]
+
+[resource]
+script = ExtResource("2_4t2yh")
+upgrade_id = &"bc_wider_swing"
+title = "Wider Swing"
+description = "You learn to swing the censer in a broader arc, increasing its area of effect by 30%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_b8bpe")]([ExtResource("2_xbat1"), ExtResource("3_lt46t")])
+set_acquired_flag_on_weapon = &"bc_wider_swing_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://botdoo8p6eer4"]
+
+[ext_resource type="Script" uid="uid://byaae1iac8xw5" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/PolearmBaseSlam.gd" id="1_i8e2w"]
+[ext_resource type="Texture2D" uid="uid://ce5y1svlubvwu" path="res://Assets/Weapons/Advanced Weapons/Polearm Base Slam Animation.png" id="1_lcwsy"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i8e2w"]
+atlas = ExtResource("1_lcwsy")
+region = Rect2(0, 0, 180, 165)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yhywb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i8e2w")
+}],
+"loop": false,
+"name": &"slam",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k0b32"]
+size = Vector2(170, 167.5)
+
+[node name="PolearmBaseSlam" type="Area2D"]
+script = ExtResource("1_i8e2w")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_yhywb")
+animation = &"slam"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0.5, 0.625)
+scale = Vector2(0.1, 0.1)
+shape = SubResource("RectangleShape2D_k0b32")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true

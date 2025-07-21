@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cqtmunkbnssqv"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_fmm6r"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_5m3he"]
+[ext_resource type="Resource" uid="uid://bl44m8bbah6tu" path="res://DataResources/Weapons/ConjoinedSpirits/Effects/planar_attachment_effect.tres" id="2_u8sii"]
+
+[resource]
+script = ExtResource("2_5m3he")
+upgrade_id = &"cs_planar_attachment"
+title = "Planar Attachment"
+description = "The Conjoined Spirit's physical form becomes hazardous, dealing low-but-constant contact damage to any enemy it passes through."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_fmm6r")]([ExtResource("2_u8sii")])
+set_acquired_flag_on_weapon = &"cs_planar_attachment_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

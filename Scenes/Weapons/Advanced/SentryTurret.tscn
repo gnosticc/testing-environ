@@ -1,0 +1,135 @@
+[gd_scene load_steps=14 format=3 uid="uid://dlew01vkkte3f"]
+
+[ext_resource type="Script" uid="uid://tn0ailvtr8sl" path="res://Scripts/DataResources/Weapons/Advanced/SentryTurret.gd" id="1_ktk71"]
+[ext_resource type="Texture2D" uid="uid://bv8pun85sk2cj" path="res://Assets/Pets and Summons/Mechamaster Pets/Rapid Turret Fire Animation.png" id="1_ot0bs"]
+[ext_resource type="Texture2D" uid="uid://bct080k4vivrw" path="res://Assets/Pets and Summons/Mechamaster Pets/Rapid Turret Animation.png" id="2_ktk71"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n85o7"]
+atlas = ExtResource("1_ot0bs")
+region = Rect2(0, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hf2tk"]
+atlas = ExtResource("1_ot0bs")
+region = Rect2(600, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i11a5"]
+atlas = ExtResource("1_ot0bs")
+region = Rect2(300, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hv1ed"]
+atlas = ExtResource("1_ot0bs")
+region = Rect2(900, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_adsd4"]
+atlas = ExtResource("2_ktk71")
+region = Rect2(0, 0, 200, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a224t"]
+atlas = ExtResource("2_ktk71")
+region = Rect2(400, 0, 200, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m0mgi"]
+atlas = ExtResource("2_ktk71")
+region = Rect2(200, 0, 200, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_liock"]
+atlas = ExtResource("2_ktk71")
+region = Rect2(600, 0, 200, 180)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_71yp3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n85o7")
+}],
+"loop": false,
+"name": &"fire_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hf2tk")
+}],
+"loop": false,
+"name": &"fire_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i11a5")
+}],
+"loop": false,
+"name": &"fire_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hv1ed")
+}],
+"loop": false,
+"name": &"fire_west",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_adsd4")
+}],
+"loop": false,
+"name": &"idle_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a224t")
+}],
+"loop": false,
+"name": &"idle_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m0mgi")
+}],
+"loop": false,
+"name": &"idle_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_liock")
+}],
+"loop": false,
+"name": &"idle_west",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_nfuqs"]
+radius = 226.009
+
+[node name="SentryTurret" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 136
+script = ExtResource("1_ktk71")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_71yp3")
+animation = &"fire_east"
+
+[node name="TargetingRange" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TargetingRange"]
+shape = SubResource("CircleShape2D_nfuqs")
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="ProjectileSpawnPoint" type="Marker2D" parent="."]
+
+[node name="FireAnimTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true

@@ -34,7 +34,7 @@ func _physics_process(delta: float):
 	velocity = direction * final_speed
 	move_and_slide()
 
-func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	direction = p_direction.normalized() if p_direction.length_squared() > 0 else Vector2.RIGHT
 	_received_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
@@ -47,7 +47,13 @@ func _apply_all_stats_effects():
 
 	var weapon_damage_percent = float(_received_stats.get(&"weapon_damage_percentage", 1.8))
 	var weapon_tags: Array[StringName] = _received_stats.get(&"tags", [])
-	final_base_damage = int(round(maxf(1.0, _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags))))
+
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+	var final_damage = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	# --- END REFACTOR ---
+	
+	final_base_damage = int(round(maxf(1.0, final_damage)))
 	
 	var base_speed = float(_received_stats.get(&"projectile_speed", 200.0))
 	var player_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
@@ -90,7 +96,10 @@ func _handle_hit(body: Node2D):
 		var attack_stats_for_enemy = {
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 		}
-		enemy_target.take_damage(damage_dealt_this_hit, owner_player_char, attack_stats_for_enemy)
+		var weapon_tags: Array[StringName] = []
+		if _received_stats.has("tags"):
+			weapon_tags = _received_stats.get("tags")
+		enemy_target.take_damage(damage_dealt_this_hit, owner_player_char, attack_stats_for_enemy, weapon_tags) # Pass tags
 		
 		_start_destruction(damage_dealt_this_hit)
 
@@ -126,23 +135,33 @@ func _start_destruction(p_damage_from_hit: int):
 	# Use a timer to safely remove the node from the scene tree.
 	get_tree().create_timer(0.1, true, false, true).timeout.connect(queue_free)
 
+# REFACTORED: This function now has more explicit logic to guarantee an explosion
+# when the echo upgrade is active.
 func _try_spawn_explosion(p_proccing_hit_damage: int):
-	if not _received_stats.get(&"has_explosion", false):
-		return
+	var can_echo = _received_stats.get(&"explosion_echoes", false)
 
-	var chance = float(_received_stats.get(&"explosion_chance", 0.0))
-	if randf() < chance:
-		var can_echo = _received_stats.get(&"explosion_echoes", false)
-		var explosion_damage = int(round(p_proccing_hit_damage * 0.5))
-		
-		var base_radius = float(_received_stats.get(&"explosion_radius", 50.0))
-		var aoe_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER)
-		var final_radius = base_radius * aoe_multiplier
-		
-		var explosion = EXPLOSION_SCENE.instantiate()
-		get_tree().current_scene.add_child(explosion)
-		explosion.global_position = self.global_position
-		
-		if explosion.has_method("detonate"):
-			# Since this whole function is now deferred, we can call detonate directly.
-			explosion.detonate(explosion_damage, final_radius, _owner_player_stats.get_parent(), {}, can_echo)
+	# If the projectile can echo, we must spawn an explosion.
+	if can_echo:
+		_spawn_the_explosion(p_proccing_hit_damage, true)
+		return # Exit the function to prevent the chance-based check below.
+
+	# If it cannot echo, proceed with the normal chance-based explosion.
+	if _received_stats.get(&"has_explosion", false):
+		var chance = float(_received_stats.get(&"explosion_chance", 0.0))
+		if randf() < chance:
+			_spawn_the_explosion(p_proccing_hit_damage, false)
+
+# NEW HELPER FUNCTION: Contains the consolidated logic for spawning the explosion.
+func _spawn_the_explosion(p_proccing_hit_damage: int, p_can_echo: bool):
+	var explosion_damage = int(round(p_proccing_hit_damage * 0.5))
+	
+	var base_radius = float(_received_stats.get(&"explosion_radius", 50.0))
+	var aoe_multiplier = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER)
+	var final_radius = base_radius * aoe_multiplier
+	
+	var explosion = EXPLOSION_SCENE.instantiate()
+	get_tree().current_scene.add_child(explosion)
+	explosion.global_position = self.global_position
+	
+	if explosion.has_method("detonate"):
+		explosion.call_deferred("detonate", explosion_damage, final_radius, _owner_player_stats.get_parent(), {}, p_can_echo, _received_stats)

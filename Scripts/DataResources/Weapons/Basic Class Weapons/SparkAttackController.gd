@@ -9,28 +9,26 @@ extends Node2D
 # --- Internal State ---
 var _specific_stats: Dictionary
 var _owner_player_stats: PlayerStats
+var _weapon_manager: WeaponManager # Reference to call back for cooldown reduction
 var _direction: Vector2
 
-func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	if not is_instance_valid(projectile_scene):
 		push_error("SparkAttackController ERROR: Projectile Scene not assigned!"); queue_free(); return
 
 	_specific_stats = p_attack_stats
 	_owner_player_stats = p_player_stats
 	_direction = p_direction
+	_weapon_manager = _p_weapon_manager
 
-	# --- Twin Flames Logic ---
 	var has_twin_flames = _specific_stats.get(&"has_twin_flames", false)
 	
-	_fire_projectile() # Fire the first projectile immediately.
+	_fire_projectile()
 	
 	if has_twin_flames:
-		# If the upgrade is active, create a timer to fire the second projectile.
 		var twin_flame_timer = get_tree().create_timer(0.2, true, false, true)
 		twin_flame_timer.timeout.connect(_fire_projectile)
 
-	# This controller has served its purpose. It sets timers and then removes itself.
-	# We need to make sure it exists long enough for the timer to fire.
 	get_tree().create_timer(0.3).timeout.connect(queue_free)
 
 func _fire_projectile():
@@ -49,4 +47,4 @@ func _fire_projectile():
 	projectile_instance.global_position = owner_player.global_position
 	
 	if projectile_instance.has_method("set_attack_properties"):
-		projectile_instance.set_attack_properties(_direction, _specific_stats, _owner_player_stats)
+		projectile_instance.set_attack_properties(_direction, _specific_stats, _owner_player_stats, _weapon_manager)

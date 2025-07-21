@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=5 format=3 uid="uid://b7n2si8n62gm6"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_fkgoo"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_ja2a1"]
+[ext_resource type="Resource" uid="uid://biiupa0sun6sb" path="res://DataResources/StatusEffects/root_effect.tres" id="2_rtu80"]
+[ext_resource type="PackedScene" uid="uid://bayugqqxr3o15" path="res://Scenes/Weapons/Projectiles/EntangledEffect.tscn" id="4_rtu80"]
+
+[resource]
+script = ExtResource("2_ja2a1")
+id = &"rooted"
+display_name = "Rooted"
+duration = -1.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_fkgoo")]([ExtResource("2_rtu80")])
+next_status_effect_on_expire = &""
+visual_effect_scene = ExtResource("4_rtu80")
+visual_anchor_point = 2
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

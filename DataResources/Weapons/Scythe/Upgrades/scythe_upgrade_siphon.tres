@@ -9,7 +9,7 @@
 script = ExtResource("2_miahx")
 upgrade_id = &"scythe_siphon"
 title = "Soul Siphon"
-description = "10% chance on kill to heal 3HP for each point invested in Luck (minimum 3HP)."
+description = "10% chance on kill to heal 3HP for each point invested in Luck (minimum 3HP). Applies to enemies not directly killed by the scythe within a small window."
 icon = ExtResource("4_fb6as")
 prerequisites_on_this_weapon = Array[StringName]([])
 weight = 100.0

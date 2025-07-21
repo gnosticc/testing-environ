@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://p54upnv1o28r"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_jol3w"]
+[ext_resource type="Resource" uid="uid://b7ov3op8il7m1" path="res://Data/Classes/Tiers/magus_advanced.tres" id="1_kuuia"]
+
+[resource]
+script = ExtResource("1_jol3w")
+progression_id = &"unlock_magus"
+class_tier_to_unlock = ExtResource("1_kuuia")
+unlock_description = "A disciplined warrior who channels raw arcane energy, turning enemies into conduits of destruction. Unlocks the Living Conduit weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Armor: 5
+Crit Damage:	 35%
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 2,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 4,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

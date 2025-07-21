@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://xqdw4amq3jdp"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_uwpjj"]
+[ext_resource type="Resource" uid="uid://d01ug4mgwvt2w" path="res://DataResources/Weapons/ChromaticAberration/Effects/ca_cinderbloom_flag.tres" id="2_wf8l2"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ymtg0"]
+
+[resource]
+script = ExtResource("2_ymtg0")
+upgrade_id = &"ca_cinderbloom"
+title = "Cinderbloom"
+description = "The Fire explosion now triggers two additional, smaller explosions at random locations nearby."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_uwpjj")]([ExtResource("2_wf8l2")])
+set_acquired_flag_on_weapon = &"ca_cinderbloom_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

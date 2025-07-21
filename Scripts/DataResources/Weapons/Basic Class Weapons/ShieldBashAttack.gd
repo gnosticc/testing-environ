@@ -26,7 +26,7 @@ func _ready():
 
 	collision_shape.disabled = false
 
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	specific_stats = p_attack_stats.duplicate(true)
 	owner_player_stats = p_player_stats
 	
@@ -68,7 +68,12 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 		
 		var weapon_damage_percent = float(specific_stats.get(&"weapon_damage_percentage", 1.2))
 		var weapon_tags: Array[StringName] = specific_stats.get(&"tags", [])
-		var explosion_damage = int(round(owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)))
+		
+		# --- REFACTORED DAMAGE CALCULATION ---
+		var base_damage = owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+		var final_damage = owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+		var explosion_damage = int(round(final_damage))
+		# --- END REFACTOR ---
 		
 		var explosion_radius = float(specific_stats.get(&"phantom_bash_radius", 50.0))
 		var owner_player = p_player_stats.get_parent()
@@ -77,7 +82,8 @@ func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_pla
 			explosion_damage,
 			explosion_radius,
 			owner_player,
-			{}
+			{},
+			specific_stats
 		))
 
 func _on_body_entered(body: Node2D):
@@ -90,8 +96,15 @@ func _on_body_entered(body: Node2D):
 			push_error("ERROR (ShieldBashAttack): owner_player_stats is invalid. Cannot deal damage."); return
 
 		var weapon_damage_percent = float(specific_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.WEAPON_DAMAGE_PERCENTAGE], 1.2))
-		var weapon_tags: Array[StringName] = specific_stats.get(&"tags", [])
-		var calculated_damage_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
+		var weapon_tags: Array[StringName] = []
+		if specific_stats.has("tags"):
+			weapon_tags = specific_stats.get("tags")
+			
+		# --- REFACTORED DAMAGE CALCULATION ---
+		var base_damage = owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+		var calculated_damage_float = owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+		# --- END REFACTOR ---
+
 		var final_damage_to_deal = int(round(maxf(1.0, calculated_damage_float)))
 		
 		var owner_player_char = owner_player_stats.get_parent()
@@ -99,7 +112,8 @@ func _on_body_entered(body: Node2D):
 		var attack_stats_for_enemy: Dictionary = {
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 		}
-		enemy_target.take_damage(final_damage_to_deal, owner_player_char, attack_stats_for_enemy)
+		enemy_target.take_damage(final_damage_to_deal, owner_player_char, attack_stats_for_enemy, weapon_tags) # Pass tags
+
 		
 		var global_lifesteal_percent = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
 		if global_lifesteal_percent > 0:

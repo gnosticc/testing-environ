@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://b5ycelkluctef"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_1y83k"]
+
+[resource]
+script = ExtResource("1_1y83k")
+id = &""
+modification_type = &"percent_mult_final"
+stat_key = &"attack_speed_multiplier"
+value_type = 1
+value_float = 0.2
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"player_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

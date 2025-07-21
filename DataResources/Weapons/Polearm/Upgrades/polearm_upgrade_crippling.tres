@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://wpd842lv6hmv"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_r7dxy"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_18gcn"]
+[ext_resource type="Resource" uid="uid://lvgnmlwt0wfj" path="res://DataResources/Weapons/Polearm/Effects/polearm_crippling_flag.tres" id="2_gnxou"]
+
+[resource]
+script = ExtResource("2_18gcn")
+upgrade_id = &"polearm_crippling_sweep"
+title = "Crippling Sweep"
+description = "Your wide attacks are aimed at your foes' legs, hindering their movement. Sweeps now apply Slow."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_r7dxy")]([ExtResource("2_gnxou")])
+set_acquired_flag_on_weapon = &"polearm_crippling_sweep_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

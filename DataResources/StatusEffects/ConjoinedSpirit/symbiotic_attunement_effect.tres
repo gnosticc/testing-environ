@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://cp6bcrnhp5ah6"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_75tc3"]
+
+[resource]
+script = ExtResource("1_75tc3")
+id = &""
+modification_type = &"percent_add_to_base"
+stat_key = &"global_damage_multiplier"
+value_type = 1
+value_float = 0.25
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"player_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

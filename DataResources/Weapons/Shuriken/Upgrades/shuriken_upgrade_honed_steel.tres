@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dh5opg2cy3n0u"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_n5xgu"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_meuoc"]
+[ext_resource type="Resource" uid="uid://cso66jkjpmatw" path="res://DataResources/Weapons/Shuriken/Effects/shuriken_effect_honed_damage.tres" id="2_n11jn"]
+[ext_resource type="Resource" uid="uid://dy2f5u4u16b1c" path="res://DataResources/Weapons/Shuriken/Effects/shuriken_effect_honed_crit.tres" id="3_l12uc"]
+
+[resource]
+script = ExtResource("2_meuoc")
+upgrade_id = &"shuriken_honed_steel"
+title = "Honed Steel"
+description = "The shuriken's edges are sharpened to a razor's edge. Increases Shuriken base damage by 60% and its critical hit chance by 10%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_n5xgu")]([ExtResource("2_n11jn"), ExtResource("3_l12uc")])
+set_acquired_flag_on_weapon = &"shuriken_honed_steel_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

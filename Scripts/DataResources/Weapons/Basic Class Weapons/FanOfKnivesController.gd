@@ -13,7 +13,7 @@ extends Node2D
 
 # This function is called by DaggerStrikeController.gd on the final hit.
 # It receives the damage calculated from that final, powerful dagger slash.
-func initialize(damage_per_knife: int, p_player_stats: PlayerStats):
+func initialize(damage_per_knife: int, p_player_stats: PlayerStats, p_weapon_stats: Dictionary):
 	if not is_instance_valid(knife_projectile_scene):
 		push_error("FanOfKnivesController: knife_projectile_scene is not set!")
 		queue_free()
@@ -38,7 +38,7 @@ func initialize(damage_per_knife: int, p_player_stats: PlayerStats):
 		if knife_instance.has_method("setup"):
 			# Pass damage, direction, and player stats to the projectile.
 			# The projectile will handle its own speed and lifetime.
-			knife_instance.setup(damage_per_knife, direction, p_player_stats)
+			knife_instance.setup(damage_per_knife, direction, p_player_stats, p_weapon_stats)
 	
 	# The controller's job is done after spawning the volley.
 	queue_free()

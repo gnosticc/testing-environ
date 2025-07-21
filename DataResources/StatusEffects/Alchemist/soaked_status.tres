@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://cf3vbce6ot1wu"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_608tm"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_ed4gk"]
+[ext_resource type="Resource" uid="uid://rlx8uwkq7s20" path="res://DataResources/StatusEffects/Alchemist/soaked_effect.tres" id="2_t6mdb"]
+
+[resource]
+script = ExtResource("2_ed4gk")
+id = &"soaked"
+display_name = "Soaked"
+duration = 4.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_608tm")]([ExtResource("2_t6mdb")])
+next_status_effect_on_expire = &"transmutation_mark_status"
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

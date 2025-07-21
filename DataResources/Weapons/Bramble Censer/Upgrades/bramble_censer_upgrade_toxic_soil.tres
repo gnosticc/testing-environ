@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bkcqildp17i83"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_f7sfw"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_7fu1l"]
+[ext_resource type="Resource" uid="uid://bspn5ag2qfkqb" path="res://DataResources/Weapons/Bramble Censer/Effects/bramble_censer_toxic_soil_effect.tres" id="2_jo54i"]
+
+[resource]
+script = ExtResource("2_7fu1l")
+upgrade_id = &"bc_toxic_soil"
+title = "Toxic Soil"
+description = "The ground your roots corrupt becomes poisonous, inflicting a damaging toxin on enemies who enter."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_f7sfw")]([ExtResource("2_jo54i")])
+set_acquired_flag_on_weapon = &"bc_toxic_soil_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

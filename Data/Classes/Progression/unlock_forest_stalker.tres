@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://jx26gli3qel0"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_7buow"]
+[ext_resource type="Resource" uid="uid://bwhnx27mw4j84" path="res://Data/Classes/Tiers/forest_stalker_advanced.tres" id="1_37vyt"]
+
+[resource]
+script = ExtResource("1_7buow")
+progression_id = &"unlock_forest_stalker"
+class_tier_to_unlock = ExtResource("1_37vyt")
+unlock_description = "A swift hunter who uses the unpredictable flight of their chakram to strike from all angles. Unlocks the Sylvan Chakram weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Crit Chance: 5.0%
+Movement Speed: 15
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 3,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 5,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

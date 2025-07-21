@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://biyojsrqhk1f0"]
+
+[ext_resource type="Script" uid="uid://cbovva8xwdhtu" path="res://Scripts/DataResources/Weapons/Advanced/LuringPrismController.gd" id="1_btgat"]
+[ext_resource type="PackedScene" uid="uid://dh2ionib1cta" path="res://Scenes/Weapons/Advanced/LuringPrismProjectile.tscn" id="2_3vp8m"]
+
+[node name="LuringPrismController" type="Node2D"]
+script = ExtResource("1_btgat")
+projectile_scene = ExtResource("2_3vp8m")

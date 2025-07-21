@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://dwujjcx31hbvm"]
+
+[ext_resource type="Script" uid="uid://dti5xn2mmud2l" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ChemtrailSegment.gd" id="1_el3jx"]
+[ext_resource type="Texture2D" uid="uid://dkbl4k6vjjr6m" path="res://Assets/Weapons/Advanced Weapons/Experimental Materials/Chemtrail Animation.png" id="2_nma4y"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3r6xi"]
+atlas = ExtResource("2_nma4y")
+region = Rect2(0, 0, 250, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nma4y"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3r6xi")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_j4xpv"]
+radius = 105.683
+
+[node name="ChemtrailSegment" type="Area2D"]
+z_index = -1
+collision_layer = 0
+collision_mask = 8
+script = ExtResource("1_el3jx")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_nma4y")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_j4xpv")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[node name="DamageTickTimer" type="Timer" parent="."]

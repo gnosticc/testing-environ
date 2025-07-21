@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://baq4v4fvrba7l"]
+
+[ext_resource type="Script" uid="uid://brtt0u522goh0" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ThornSplinterProjectile.gd" id="1_7ckgh"]
+[ext_resource type="Texture2D" uid="uid://cmfney8lfx7my" path="res://Assets/Weapons/Advanced Weapons/Chakram/Leaf Projectile Animation.png" id="2_mv070"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_almqe"]
+radius = 44.0
+height = 248.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nx806"]
+atlas = ExtResource("2_mv070")
+region = Rect2(0, 0, 250, 100)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mv070"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nx806")
+}],
+"loop": false,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[node name="ThornSplinterProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_7ckgh")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_almqe")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_mv070")
+animation = &"fly"
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.75
+one_shot = true

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://u0gdbx8dv5wt"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_moqdc"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_ovcpl"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_wwlkj"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_30dpj"]
+[ext_resource type="Resource" uid="uid://bu6ytjrwayyg8" path="res://Data/Classes/Effects/druid_unlock_speed.tres" id="4_bdymu"]
+[ext_resource type="Resource" uid="uid://b80qa4hsk1ki5" path="res://Data/Classes/Effects/conjurer_unlock_luck.tres" id="5_vtfu8"]
+
+[resource]
+script = ExtResource("2_ovcpl")
+class_id = &"spirit_master_advanced"
+display_name = "Spirit Master"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_moqdc")]([ExtResource("2_wwlkj"), ExtResource("3_30dpj"), ExtResource("4_bdymu"), ExtResource("5_vtfu8")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"spirit_master_conjoined_spirit"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Conjurer and Druid weapons to unlock the path of the Spirit Master. A powerful shaman who commands wandering spirits of water and ice to assail their foes. Unlocks the Conjoined Spirit weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

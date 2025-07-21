@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://v73htcedornp"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_g1ggr"]
+[ext_resource type="Resource" uid="uid://dh7lnnfadf18s" path="res://DataResources/StatusEffects/arcane_surge_effect.tres" id="2_a2is4"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_ufr2i"]
+
+[resource]
+script = ExtResource("2_ufr2i")
+id = &"arcane_surge_buff"
+display_name = "Arcane Surge"
+duration = 4.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_g1ggr")]([ExtResource("2_a2is4")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

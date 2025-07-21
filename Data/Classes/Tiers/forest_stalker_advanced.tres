@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://bwhnx27mw4j84"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_lhy4a"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_63n3b"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_eqsw3"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_y31o1"]
+[ext_resource type="Resource" uid="uid://dnh2nswm5k4mx" path="res://Data/Classes/Effects/rogue_unlock_crit_chance.tres" id="4_ntvmm"]
+[ext_resource type="Resource" uid="uid://bu6ytjrwayyg8" path="res://Data/Classes/Effects/druid_unlock_speed.tres" id="5_hcmgy"]
+
+[resource]
+script = ExtResource("2_eqsw3")
+class_id = &"forest_stalker_advanced"
+display_name = "Forest Stalker"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_lhy4a")]([ExtResource("2_63n3b"), ExtResource("3_y31o1"), ExtResource("4_ntvmm"), ExtResource("5_hcmgy")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"warden_sylvan_chakram"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Rogue and Druid weapons to unlock the path of the Forest Stalker. A swift hunter who uses the unpredictable flight of their chakram to strike from all angles. Unlocks the Sylvan Chakram weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

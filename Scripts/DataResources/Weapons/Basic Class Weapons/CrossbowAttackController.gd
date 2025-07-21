@@ -13,6 +13,8 @@ extends Node2D
 var _specific_stats: Dictionary
 var _owner_player_stats: PlayerStats
 var _base_direction: Vector2
+var _weapon_manager: WeaponManager # Reference to call back for cooldown reduction
+
 
 func _ready():
 	# The controller's logic is entirely driven by the set_attack_properties function.
@@ -20,13 +22,14 @@ func _ready():
 	pass
 
 # This is the main entry point, called by WeaponManager.
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	if not is_instance_valid(bolt_scene):
 		push_error("CrossbowAttackController ERROR: Bolt Scene is not assigned! Aborting attack."); queue_free(); return
 	
 	_specific_stats = p_attack_stats
 	_owner_player_stats = p_player_stats
 	_base_direction = direction
+	_weapon_manager = _p_weapon_manager
 
 	# Determine the firing pattern based on flags.
 	var has_triple_shot = _specific_stats.get(&"has_triple_shot", false)
@@ -76,4 +79,4 @@ func _spawn_bolt(direction: Vector2):
 	
 	# Pass all the necessary stats to the projectile instance.
 	if bolt_instance.has_method("set_attack_properties"):
-		bolt_instance.set_attack_properties(direction, _specific_stats, _owner_player_stats)
+		bolt_instance.set_attack_properties(direction, _specific_stats, _owner_player_stats, _weapon_manager)

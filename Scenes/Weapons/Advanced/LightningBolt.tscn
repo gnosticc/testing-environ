@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3 uid="uid://duv2hg1hadbn8"]
+
+[ext_resource type="Texture2D" uid="uid://duqami38jn8ee" path="res://Assets/Weapons/Advanced Weapons/Lightning Bolt Animation.png" id="1_8ht77"]
+[ext_resource type="Script" uid="uid://c62c4xu081x13" path="res://Scripts/DataResources/Weapons/Advanced/LightningBolt.gd" id="2_lbth1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lbth1"]
+atlas = ExtResource("1_8ht77")
+region = Rect2(0, 0, 650, 850)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a0cy3"]
+atlas = ExtResource("1_8ht77")
+region = Rect2(650, 0, 650, 850)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hmdpe"]
+atlas = ExtResource("1_8ht77")
+region = Rect2(1300, 0, 650, 850)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1xgg3"]
+atlas = ExtResource("1_8ht77")
+region = Rect2(1950, 0, 650, 850)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ay0w6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lbth1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a0cy3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hmdpe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1xgg3")
+}],
+"loop": false,
+"name": &"strike",
+"speed": 12.0
+}]
+
+[node name="LightningBolt" type="AnimatedSprite2D"]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_ay0w6")
+animation = &"strike"
+frame = 3
+script = ExtResource("2_lbth1")

@@ -1,0 +1,74 @@
+[gd_scene load_steps=13 format=3 uid="uid://b7seycefrri28"]
+
+[ext_resource type="Script" uid="uid://6hk5ewo8dogc" path="res://Scripts/DataResources/Weapons/Advanced/EtherealEcho.gd" id="1_xfucv"]
+[ext_resource type="PackedScene" uid="uid://c28lq7v5urqmy" path="res://Scenes/Weapons/Advanced/Effect Scenes/EchoPrimaryProjectile.tscn" id="2_6u5gd"]
+[ext_resource type="PackedScene" uid="uid://bypae624hn3hd" path="res://Scenes/Weapons/Advanced/Effect Scenes/PhantomReachProjectile.tscn" id="3_dtk82"]
+[ext_resource type="PackedScene" uid="uid://bxprx5o6e4dtl" path="res://Scenes/Weapons/Advanced/Effect Scenes/EldritchOrb.tscn" id="4_edt22"]
+[ext_resource type="PackedScene" uid="uid://cnhbp1jjdxrfg" path="res://Scenes/Weapons/Advanced/Effect Scenes/EchoingDemise.tscn" id="5_hjwvl"]
+[ext_resource type="Texture2D" uid="uid://6x7rm8buuyyl" path="res://Assets/Pets and Summons/Summoner/Ethereal Echo Animation.png" id="6_dtk82"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_edt22"]
+atlas = ExtResource("6_dtk82")
+region = Rect2(0, 0, 200, 275)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hjwvl"]
+atlas = ExtResource("6_dtk82")
+region = Rect2(200, 0, 200, 275)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0jup6"]
+atlas = ExtResource("6_dtk82")
+region = Rect2(400, 0, 200, 275)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpc4k"]
+atlas = ExtResource("6_dtk82")
+region = Rect2(600, 0, 200, 275)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_utd5k"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_edt22")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hjwvl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0jup6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cpc4k")
+}],
+"loop": true,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1wkr7"]
+radius = 125.674
+
+[node name="EtherealEcho" type="CharacterBody2D"]
+collision_layer = 0
+collision_mask = 0
+script = ExtResource("1_xfucv")
+primary_projectile_scene = ExtResource("2_6u5gd")
+phantom_reach_projectile_scene = ExtResource("3_dtk82")
+eldritch_orb_scene = ExtResource("4_edt22")
+echoing_demise_scene = ExtResource("5_hjwvl")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_utd5k")
+frame_progress = 0.60654
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1wkr7")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="PrimaryAttackTimer" type="Timer" parent="."]
+
+[node name="PhantomReachTimer" type="Timer" parent="."]
+
+[node name="EncroachingDarknessTimer" type="Timer" parent="."]
+
+[node name="ProjectileSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(37, -55)

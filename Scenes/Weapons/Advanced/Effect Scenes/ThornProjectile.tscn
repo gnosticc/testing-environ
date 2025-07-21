@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bv2vf8qr2qdyg"]
+
+[ext_resource type="Script" uid="uid://b04hsdke1uh6o" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ThornProjectile.gd" id="1_dwrif"]
+[ext_resource type="Texture2D" uid="uid://c2vd3tt02hdu1" path="res://Assets/Weapons/Advanced Weapons/Thorn Projectile.png" id="2_0rn5s"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rgdon"]
+size = Vector2(118, 36)
+
+[node name="ThornProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_dwrif")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_0rn5s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_rgdon")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

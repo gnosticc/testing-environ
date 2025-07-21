@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b7vqgg7hctlmm"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_l4wr1"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_anp3h"]
+[ext_resource type="Resource" uid="uid://dnhsijkfwup1r" path="res://DataResources/Weapons/ReturnFromBeyond/Effects/encroaching_darkness_effect.tres" id="2_c0htl"]
+
+[resource]
+script = ExtResource("2_anp3h")
+upgrade_id = &"rfb_encroaching_darkness"
+title = "Encroaching Darkness"
+description = "The Echo gains a third weapon system that launches a slow-moving orb which periodically fires a volley of small projectiles."
+prerequisites_on_this_weapon = Array[StringName]([&"rfb_phantom_reach"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_l4wr1")]([ExtResource("2_c0htl")])
+set_acquired_flag_on_weapon = &"rfb_encroaching_darkness_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

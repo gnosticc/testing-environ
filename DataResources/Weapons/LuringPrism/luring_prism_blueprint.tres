@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://dxl27xid3ehl7"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_ehupn"]
+[ext_resource type="Resource" uid="uid://bs7l7bio3ynji" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_enervating_field.tres" id="2_4aog4"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_h6ybm"]
+[ext_resource type="PackedScene" uid="uid://biyojsrqhk1f0" path="res://Scenes/Weapons/Advanced/LuringPrismController.tscn" id="3_h6ybm"]
+[ext_resource type="Resource" uid="uid://cbfi0b4rvgimu" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_hidden_knife.tres" id="3_yutji"]
+[ext_resource type="Resource" uid="uid://240v2bjhumpt" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_honing_shards.tres" id="4_tbuna"]
+[ext_resource type="Resource" uid="uid://bn2dfwell8tev" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_illusion_becomes_real.tres" id="5_pueu8"]
+[ext_resource type="Resource" uid="uid://cfq5eunouf0fb" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_lasting_mirage.tres" id="6_ev2y7"]
+[ext_resource type="Resource" uid="uid://bj36f6uubl24q" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_mesmerizing_glow.tres" id="7_d8e74"]
+[ext_resource type="Resource" uid="uid://7cjkkhbgbyir" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_shattered_illusion.tres" id="8_42yse"]
+[ext_resource type="Resource" uid="uid://6msge34c2b3n" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_territory_expansion.tres" id="9_2og41"]
+[ext_resource type="Resource" uid="uid://um4yeeeawtwd" path="res://DataResources/Weapons/LuringPrism/Upgrades/lp_upgrade_unstable_visage.tres" id="10_npk0y"]
+
+[resource]
+script = ExtResource("2_h6ybm")
+id = &"illusionist_luring_prism"
+title = "Luring Prism"
+description = "Throws a dagger that seeks grouped enemies, shattering into a ring of illusory, razor sharp shards. Enemies are entranced by the display, voluntarily entering the field of effect."
+weapon_scene = ExtResource("3_h6ybm")
+tags = Array[StringName]([&"projectile", &"magical", &"aoe", &"illusionist weapon", &"controller"])
+class_tag_restrictions = [&"illusionist_advanced"]
+cooldown = 4.5
+max_level = 10
+base_lifetime = 2.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+weight = 50.0
+initial_specific_stats = {
+"has_enervating_field": false,
+"has_hidden_knife": false,
+"has_shattered_illusion": false,
+"has_unstable_visage": false,
+"impact_damage_percentage": 2.2,
+"projectile_scale": 0.1,
+"ring_duration": 2.5,
+"ring_radius": 80.0,
+"ring_tick_damage_percentage": 0.4,
+"ring_tick_interval": 0.5,
+"taunt_radius_multiplier": 1.5,
+"taunt_strength": 1200.0,
+"unstable_visage_damage_percentage": 3.0,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_ehupn")]([ExtResource("2_4aog4"), ExtResource("3_yutji"), ExtResource("4_tbuna"), ExtResource("5_pueu8"), ExtResource("6_ev2y7"), ExtResource("7_d8e74"), ExtResource("8_42yse"), ExtResource("9_2og41"), ExtResource("10_npk0y")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

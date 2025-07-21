@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://dra45hiwmvrn1"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_i4iqa"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_rabqw"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_silvq"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_xpsc2"]
+[ext_resource type="Resource" uid="uid://bd6w7o53m5e28" path="res://Data/Classes/Effects/knight_unlock_bonus_armor.tres" id="4_d7338"]
+[ext_resource type="Resource" uid="uid://dnh2nswm5k4mx" path="res://Data/Classes/Effects/rogue_unlock_crit_chance.tres" id="5_85x54"]
+
+[resource]
+script = ExtResource("2_silvq")
+class_id = &"sentinel_advanced"
+display_name = "Sentinel"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_i4iqa")]([ExtResource("2_rabqw"), ExtResource("3_xpsc2"), ExtResource("4_d7338"), ExtResource("5_85x54")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"sentinel_polearm"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Knight and Rogue weapons to unlock the path of the Sentinel. A steadfast defender who controls the battlefield with superior reach and tactical positioning. Unlocks the Polearm weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

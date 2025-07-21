@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://dii31ohgkindb"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_h565o"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_bqrj0"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_qo0en"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_8lpc4"]
+[ext_resource type="Resource" uid="uid://bt4k2ct5yhm6s" path="res://Data/Classes/Effects/wizard_unlock_crit_damage.tres" id="4_2w7ui"]
+[ext_resource type="Resource" uid="uid://b80qa4hsk1ki5" path="res://Data/Classes/Effects/conjurer_unlock_luck.tres" id="5_n4nx2"]
+
+[resource]
+script = ExtResource("2_qo0en")
+class_id = &"summoner_advanced"
+display_name = "Summoner"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_h565o")]([ExtResource("2_bqrj0"), ExtResource("3_8lpc4"), ExtResource("4_2w7ui"), ExtResource("5_n4nx2")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"summoner_return_from_beyond"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Wizard and Conjurer weapons to unlock the path of the Summoner. A master of portals who calls forth ethereal echoes from other dimensions to fight. Unlocks the Return from Beyond weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

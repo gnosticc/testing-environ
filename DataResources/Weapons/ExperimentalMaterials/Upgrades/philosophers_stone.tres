@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b2x3nojiuabgp"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_1iqow"]
+[ext_resource type="Resource" uid="uid://g5v1yufvplqf" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/philosophers_stone_flag.tres" id="2_475bn"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_xkwu2"]
+
+[resource]
+script = ExtResource("2_xkwu2")
+upgrade_id = &"exp_mat_philosophers_stone"
+title = "Philosopher's Stone"
+description = "Once every 6 minutes, cheat death and return to full health."
+prerequisites_on_this_weapon = Array[StringName]([&"exp_mat_self_experimentation"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_1iqow")]([ExtResource("2_475bn")])
+set_acquired_flag_on_weapon = &"exp_mat_philosophers_stone_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dofy7qf588pr4"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_4xyms"]
+[ext_resource type="Resource" uid="uid://cpeux5vbym1ot" path="res://DataResources/Weapons/SwordCoil/Effects/sc_spell_siphon_effect.tres" id="2_xghjs"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_y7qvq"]
+
+[resource]
+script = ExtResource("2_y7qvq")
+upgrade_id = &"sc_spell_siphon"
+title = "Spell-Siphon"
+description = "Each time the Sword Coil damages an enemy, there is a 25% chance the cooldown of this weapon is reduced by 0.1 seconds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_4xyms")]([ExtResource("2_xghjs")])
+set_acquired_flag_on_weapon = &"sc_spell_siphon_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -8,14 +8,15 @@ extends Node2D
 
 var _specific_stats: Dictionary
 var _owner_player_stats: PlayerStats
+var _weapon_manager: WeaponManager # Reference to call back for cooldown reduction
 
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	if not is_instance_valid(whip_attack_scene):
 		push_error("VineWhipController ERROR: whip_attack_scene is not assigned! Aborting attack."); queue_free(); return
 	
 	_specific_stats = p_attack_stats
 	_owner_player_stats = p_player_stats
-
+	_weapon_manager = _p_weapon_manager
 	# --- Nature's Fury (Proc Chance) ---
 	if _specific_stats.get(&"has_natures_fury", false):
 		var proc_chance = float(_specific_stats.get(&"natures_fury_proc_chance", 0.0))
@@ -64,7 +65,7 @@ func _spawn_whip_instance(direction: Vector2, stats_to_pass: Dictionary):
 		whip_instance.global_position = owner_player.global_position
 	
 	if whip_instance.has_method("set_attack_properties"):
-		whip_instance.set_attack_properties(direction, stats_to_pass, _owner_player_stats)
+		whip_instance.set_attack_properties(direction, stats_to_pass, _owner_player_stats, _weapon_manager)
 	
 	# Connect the signal for Constricting Grip to work
 	if not whip_instance.is_connected("enemy_hit", _on_whip_enemy_hit):

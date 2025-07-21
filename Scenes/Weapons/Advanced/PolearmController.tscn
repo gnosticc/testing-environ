@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://ctg1tyljie1a4"]
+
+[ext_resource type="Script" uid="uid://c2fgqimpduoi2" path="res://Scripts/DataResources/Weapons/Advanced/PolearmController.gd" id="1_w24li"]
+[ext_resource type="PackedScene" uid="uid://b1e6husjtrbxh" path="res://Scenes/Weapons/Advanced/PolearmAttack.tscn" id="2_dtnsp"]
+[ext_resource type="PackedScene" uid="uid://botdoo8p6eer4" path="res://Scenes/Weapons/Advanced/Effect Scenes/PolearmBaseSlam.tscn" id="3_0tghh"]
+
+[node name="PolearmController" type="Node2D"]
+script = ExtResource("1_w24li")
+attack_scene = ExtResource("2_dtnsp")
+base_slam_scene = ExtResource("3_0tghh")
+
+[node name="PhalanxStanceTimer" type="Timer" parent="."]
+wait_time = 0.25
+one_shot = true
+
+[node name="PhalanxMasteryTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true

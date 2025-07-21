@@ -10,6 +10,7 @@ extends CharacterBody2D
 enum State { IDLE, FOLLOWING_PLAYER, CHASING_TARGET, ATTACKING, GUARDIAN_READY, PRIMAL_FURY }
 var current_state: State = State.IDLE
 
+@export var pacing_distance_buffer: float = 20.0
 # --- Node References ---
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var attack_cooldown_timer: Timer = $AttackCooldownTimer
@@ -33,6 +34,7 @@ var _last_attacker: BaseEnemy
 # --- Core Stats & State ---
 var movement_speed: float = 100.0
 var player_detection_range: float = 150.0
+var follow_distance: float = 150.0 # NEW: Added class variable for tethering
 var attack_range: float = 30.0
 var attack_cooldown: float = 1.8
 var damage: int = 20
@@ -99,9 +101,10 @@ func update_stats(new_stats: Dictionary = {}):
 		specific_weapon_stats = new_stats.duplicate(true)
 	if not is_instance_valid(_owner_player_stats): return
 
-	# Get base stats from the weapon's dictionary
 	movement_speed = float(specific_weapon_stats.get(&"movement_speed", 100.0))
 	player_detection_range = float(specific_weapon_stats.get(&"player_detection_range", 150.0))
+	# FIX: Correctly read the follow_distance from the stats.
+	follow_distance = float(specific_weapon_stats.get(&"follow_distance", 150.0))
 	attack_range = float(specific_weapon_stats.get(&"attack_range", 30.0))
 	attack_cooldown = float(specific_weapon_stats.get(&"attack_cooldown", 1.8))
 	golem_crit_chance = float(specific_weapon_stats.get(&"crit_chance", 0.0))
@@ -109,47 +112,40 @@ func update_stats(new_stats: Dictionary = {}):
 	var scale_increase_per_level = float(specific_weapon_stats.get(&"scale_increase_per_level", 0.0))
 	var weapon_level = int(specific_weapon_stats.get("weapon_level", 1))
 
-	# --- SCALING LOGIC ---
 	var bonus_scale = float(weapon_level - 1) * scale_increase_per_level
 	base_scale = base_visual_scale + bonus_scale
 	
 	var final_attack_area_scale = float(specific_weapon_stats.get(&"attack_area_scale", 1.0))
 	
-	# --- PRIMAL FURY FIX: Apply local buff modifiers ---
 	if is_instance_valid(status_effect_component):
-		# Get the area multiplier from the golem's own status effects.
 		var fury_area_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"attack_area_scale")
 		final_attack_area_scale *= fury_area_mult
 
 	melee_attack_area.scale = Vector2.ONE * final_attack_area_scale * base_scale
 	animated_sprite.scale = Vector2.ONE * base_scale
 	
-	# --- DAMAGE CALCULATION ---
 	var weapon_damage_percent = float(specific_weapon_stats.get(&"weapon_damage_percentage", 1.8))
 	var weapon_tags: Array[StringName] = specific_weapon_stats.get(&"tags", [])
 	var summon_damage_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_DAMAGE_MULTIPLIER)
 	var final_damage_percent = weapon_damage_percent * summon_damage_mult
 
-	# --- PRIMAL FURY FIX: Apply local damage buff ---
 	if is_instance_valid(status_effect_component):
 		var fury_damage_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"weapon_damage_percentage")
 		final_damage_percent *= fury_damage_mult
-		
-	damage = int(round(maxf(1.0, _owner_player_stats.get_calculated_player_damage(final_damage_percent, weapon_tags))))
 	
-	# --- COOLDOWN CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(final_damage_percent)
+	var final_damage = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	damage = int(round(maxf(1.0, final_damage)))
+	
 	var final_cooldown = attack_cooldown
 	
-	# --- PRIMAL FURY FIX: Apply local cooldown buff ---
 	if is_instance_valid(status_effect_component):
 		var fury_cooldown_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"attack_cooldown")
 		final_cooldown *= fury_cooldown_mult
 		
-	# Apply global attack speed from player
 	final_cooldown /= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
 	attack_cooldown_timer.wait_time = maxf(0.1, final_cooldown)
 	
-	# --- AURA LOGIC ---
 	var has_caustic_aura = specific_weapon_stats.get(&"has_caustic_aura", false)
 	if has_caustic_aura and not is_instance_valid(_caustic_aura_instance):
 		_caustic_aura_instance = CAUSTIC_AURA_SCENE.instantiate()
@@ -162,6 +158,7 @@ func update_stats(new_stats: Dictionary = {}):
 		_caustic_aura_instance.initialize(self, specific_weapon_stats, self.damage)
 	
 	_update_visual_state()
+
 
 # --- State Machine & AI Logic ---
 
@@ -182,7 +179,22 @@ func _physics_process(delta: float):
 			velocity = (owner_player.global_position - global_position).normalized() * movement_speed
 		State.CHASING_TARGET:
 			if _is_target_valid(target_enemy):
-				velocity = (target_enemy.global_position - global_position).normalized() * movement_speed
+				var distance_to_target = global_position.distance_to(target_enemy.global_position)
+				var pacing_range = attack_range + pacing_distance_buffer
+				
+				if distance_to_target > pacing_range:
+					# Rush the target directly when far away.
+					velocity = (target_enemy.global_position - global_position).normalized() * movement_speed
+				else:
+					# When close, pace the enemy by matching its velocity and adding a nudge.
+					var steering_force = (target_enemy.global_position - global_position).normalized() * (movement_speed * 0.5)
+					var desired_velocity = target_enemy.velocity + steering_force
+					
+					# Clamp the golem's speed to its maximum.
+					if desired_velocity.length() > movement_speed:
+						desired_velocity = desired_velocity.normalized() * movement_speed
+						
+					velocity = velocity.lerp(desired_velocity, delta * 5.0)
 			else:
 				velocity = Vector2.ZERO
 		State.ATTACKING:
@@ -192,27 +204,41 @@ func _physics_process(delta: float):
 		animated_sprite.flip_h = velocity.x < 0
 	move_and_slide()
 
+
 func _get_next_state() -> State:
 	if current_state == State.ATTACKING:
 		return State.ATTACKING
 
+	# FIX: If the golem is currently returning to the player, it must finish before doing anything else.
+	if current_state == State.FOLLOWING_PLAYER:
+		# Check if it has arrived back at the player.
+		if global_position.distance_squared_to(owner_player.global_position) <= 25 * 25:
+			# It has arrived. Now it can look for a target.
+			pass # Allow the rest of the function to execute.
+		else:
+			# Still too far, must continue following.
+			return State.FOLLOWING_PLAYER
+
+	# If not currently returning, check if it SHOULD be returning.
+	if global_position.distance_squared_to(owner_player.global_position) > follow_distance * follow_distance:
+		return State.FOLLOWING_PLAYER
+
 	_find_new_target()
 	
 	if _is_target_valid(target_enemy):
-		if global_position.distance_squared_to(target_enemy.global_position) <= attack_range * attack_range and attack_cooldown_timer.is_stopped():
+		var is_in_range = global_position.distance_squared_to(target_enemy.global_position) <= attack_range * attack_range
+		
+		if is_in_range and attack_cooldown_timer.is_stopped():
 			return State.ATTACKING
 		else:
 			return State.CHASING_TARGET
 	else:
-		if global_position.distance_squared_to(owner_player.global_position) > 25 * 25:
-			return State.FOLLOWING_PLAYER
+		if status_effect_component.has_status_effect(&"primal_fury_buff"):
+			return State.PRIMAL_FURY
+		elif _guardian_spirit_buff_active:
+			return State.GUARDIAN_READY
 		else:
-			if status_effect_component.has_status_effect(&"primal_fury_buff"):
-				return State.PRIMAL_FURY
-			elif _guardian_spirit_buff_active:
-				return State.GUARDIAN_READY
-			else:
-				return State.IDLE
+			return State.IDLE
 
 func _change_state(new_state: State):
 	if current_state == new_state: return
@@ -227,9 +253,11 @@ func _change_state(new_state: State):
 			get_node("MeleeAttackArea/CollisionShape2D").disabled = false
 
 func _find_new_target():
-	if _is_target_valid(_last_attacker):
+	# FIX: Check if _last_attacker is still a valid instance before using it.
+	if is_instance_valid(_last_attacker) and _is_target_valid(_last_attacker):
 		target_enemy = _last_attacker
 		return
+		
 	_last_attacker = null
 	target_enemy = null
 	var enemies = get_tree().get_nodes_in_group("enemies")
@@ -250,10 +278,14 @@ func _on_attack_animation_finished():
 	if animated_sprite.animation == "attack":
 		get_node("MeleeAttackArea/CollisionShape2D").disabled = true
 		attack_cooldown_timer.start()
-		if _is_target_valid(target_enemy) and target_enemy == _last_attacker:
-			_last_attacker = null
+		
+		# FIX: Add a guard clause to check if target_enemy is still valid before accessing it.
+		if is_instance_valid(target_enemy):
+			if _is_target_valid(target_enemy) and target_enemy == _last_attacker:
+				_last_attacker = null
+
 		_change_state(State.IDLE)
-		_update_visual_state() # Update visuals now that attack is done
+		_update_visual_state()
 
 func _on_melee_attack_area_hit(body: Node2D):
 	if not (body is BaseEnemy and _is_target_valid(body)): return
@@ -268,13 +300,16 @@ func _on_melee_attack_area_hit(body: Node2D):
 	if randf() < total_crit_chance:
 		final_damage *= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
 
-	body.take_damage(int(round(final_damage)), owner_player)
+	var weapon_tags: Array[StringName] = []
+	if specific_weapon_stats.has("tags"):
+		weapon_tags = specific_weapon_stats.get("tags")
+	body.take_damage(int(round(final_damage)), owner_player, {}, weapon_tags) # Pass tags
 	
 	if specific_weapon_stats.get(&"has_crushing_blows", false):
 		if randf() < float(specific_weapon_stats.get(&"crushing_blow_chance", 0.0)):
 			var smash_effect = CRUSHING_BLOW_SCENE.instantiate()
 			get_tree().current_scene.add_child(smash_effect)
-			smash_effect.initialize(global_position, damage, specific_weapon_stats, owner_player)
+			smash_effect.initialize(global_position, damage, specific_weapon_stats, owner_player, self)
 
 func on_player_damaged(attacker_node: Node2D):
 	if not is_instance_valid(attacker_node) or not (attacker_node is BaseEnemy): return

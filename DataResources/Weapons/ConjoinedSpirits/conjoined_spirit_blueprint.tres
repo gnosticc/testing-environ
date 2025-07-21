@@ -1,0 +1,61 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://cjecy7lxo054p"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_o5n2k"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ck1to"]
+[ext_resource type="Resource" uid="uid://dlx0qrc32ohp8" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_riptide.tres" id="2_sfdx5"]
+[ext_resource type="Resource" uid="uid://c8a5gvdrrylhs" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_geyser.tres" id="3_54u8n"]
+[ext_resource type="Resource" uid="uid://cdvqj70md1d64" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_splintering_chill.tres" id="4_hk3dj"]
+[ext_resource type="Resource" uid="uid://b8mmfgb8ulbys" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_hoarfrost.tres" id="5_vxatb"]
+[ext_resource type="Resource" uid="uid://cjklksxk47dse" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_hypothermia.tres" id="6_5dkkp"]
+[ext_resource type="Resource" uid="uid://cdxww5071qiw1" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_symbiotic_attunement.tres" id="7_rix61"]
+[ext_resource type="Resource" uid="uid://cqtmunkbnssqv" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_planar_attachment.tres" id="8_ovh7q"]
+[ext_resource type="Resource" uid="uid://bjx5jjgu3vmjk" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_elemental_fusion.tres" id="9_tkt18"]
+[ext_resource type="Resource" uid="uid://nq0ppkn6lt28" path="res://DataResources/Weapons/ConjoinedSpirits/Upgrades/cs_upgrade_permafrost_storm.tres" id="10_gd0ma"]
+[ext_resource type="PackedScene" uid="uid://dtswcl5mbax7o" path="res://Scenes/Weapons/Advanced/ConjoinedSpirit.tscn" id="12_o6mrf"]
+
+[resource]
+script = ExtResource("2_ck1to")
+id = &"spirit_master_conjoined_spirit"
+title = "Conjoined Spirit"
+description = "A wandering spirit of water and ice that assaults nearby foes. After a short duration, it must attune with the caster before resuming activity."
+weapon_scene = ExtResource("12_o6mrf")
+tags = Array[StringName]([&"magical", &"water", &"ice", &"spirit master weapon", &"pet", &"summon"])
+class_tag_restrictions = [&"spirit_master_advanced"]
+cooldown = 0.0
+max_level = 10
+base_lifetime = -1.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+weight = 50.0
+initial_specific_stats = {
+"attunement_duration": 4.0,
+"geyser_damage_percentage": 0.75,
+"geyser_radius": 35.0,
+"has_elemental_fusion": false,
+"has_geyser": false,
+"has_hoarfrost": false,
+"has_hypothermia": false,
+"has_permafrost_storm": false,
+"has_planar_attachment": false,
+"has_riptide": false,
+"has_splintering_chill": false,
+"has_symbiotic_attunement": false,
+"ice_shard_cooldown": 0.5,
+"ice_shard_damage_percentage": 0.4,
+"ice_shard_scale": 0.03,
+"max_summons_of_type": 1,
+"movement_speed": 120.0,
+"permafrost_storm_interval": 3.0,
+"planar_attachment_damage": 0.8,
+"roaming_duration": 10.0,
+"roaming_radius": 170.0,
+"water_ball_cooldown": 2.0,
+"water_ball_damage_percentage": 0.9,
+"water_ball_lifetime": 2.0,
+"water_ball_scale": 0.06,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_o5n2k")]([ExtResource("2_sfdx5"), ExtResource("3_54u8n"), ExtResource("4_hk3dj"), ExtResource("5_vxatb"), ExtResource("6_5dkkp"), ExtResource("7_rix61"), ExtResource("8_ovh7q"), ExtResource("9_tkt18"), ExtResource("10_gd0ma")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

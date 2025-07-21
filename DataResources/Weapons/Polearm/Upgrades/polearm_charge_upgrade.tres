@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://ucnyfhddyncn"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_sdbub"]
+[ext_resource type="Resource" uid="uid://ctdhf6j21bwhe" path="res://DataResources/Weapons/Polearm/Effects/polearm_charge_effect.tres" id="2_0vj6v"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_4toxv"]
+
+[resource]
+script = ExtResource("2_4toxv")
+upgrade_id = &"polearm_set_for_charge"
+title = "Set for Charge"
+description = "Bracing your polearm against the ground massively increases the power of your thrusts. +150% Thrust Damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_sdbub")]([ExtResource("2_0vj6v")])
+set_acquired_flag_on_weapon = &"polearm_set_for_charge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

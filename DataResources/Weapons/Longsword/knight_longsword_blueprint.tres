@@ -20,13 +20,14 @@ title = "Longsword"
 description = "A standard, reliable sword that slashes in front of the wielder."
 weapon_scene = ExtResource("3_ebrbk")
 tags = Array[StringName]([&"melee", &"knight weapon", &"physical"])
-class_tag_restrictions = Array[int]([2])
+class_tag_restrictions = [2]
 cooldown = 2.0
 max_level = 10
 base_lifetime = 0.25
 spawn_as_child = true
 requires_direction = true
 targeting_type = &"mouse_direction"
+tracks_shot_count = false
 initial_specific_stats = {
 "area_scale": 1.0,
 "attack_speed_multiplier": 1.0,

@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://cb2au52c40a3h"]
+
+[ext_resource type="Texture2D" uid="uid://efcbnky3k5be" path="res://Assets/Pets and Summons/Mechamaster Pets/Rapid Turret Projectile Animation.png" id="1_kk2s3"]
+[ext_resource type="Script" uid="uid://xyxxvlj41rjc" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/SentryProjectile.gd" id="1_musof"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_musof"]
+atlas = ExtResource("1_kk2s3")
+region = Rect2(0, 0, 125, 60)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wqo37"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_musof")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xqiel"]
+radius = 30.0
+height = 130.0
+
+[node name="SentryProjectile" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_musof")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_wqo37")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_xqiel")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

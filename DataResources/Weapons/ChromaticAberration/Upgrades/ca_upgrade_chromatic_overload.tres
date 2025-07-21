@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c8vldmy1dh0r0"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_g218b"]
+[ext_resource type="Resource" uid="uid://dcwojukladcqs" path="res://DataResources/Weapons/ChromaticAberration/Effects/ca_chromatic_overload_flag.tres" id="2_h1bae"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_nkg0m"]
+
+[resource]
+script = ExtResource("2_nkg0m")
+upgrade_id = &"ca_chromatic_overload"
+title = "Chromatic Overload"
+description = "After the initial orb detonates, it spawns a second Unstable Orb that seeks a new random target and repeats the full detonation effect."
+prerequisites_on_this_weapon = Array[StringName]([&"ca_elemental_attunement"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_g218b")]([ExtResource("2_h1bae")])
+set_acquired_flag_on_weapon = &"ca_chromatic_overload_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

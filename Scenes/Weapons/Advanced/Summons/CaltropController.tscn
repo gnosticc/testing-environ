@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwhbu5pqo55cm"]
+
+[ext_resource type="Script" uid="uid://bpwbp5j5o3l7o" path="res://Scripts/DataResources/Weapons/Advanced/Summons/CaltropController.gd" id="1_a0w7y"]
+[ext_resource type="PackedScene" uid="uid://cdr2484sgq6up" path="res://Scenes/Weapons/Advanced/Summons/Caltrop.tscn" id="2_rhj6v"]
+
+[node name="CaltropController" type="Node2D"]
+script = ExtResource("1_a0w7y")
+caltrop_scene = ExtResource("2_rhj6v")

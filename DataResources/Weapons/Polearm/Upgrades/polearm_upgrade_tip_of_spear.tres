@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c5qsei4lsvwr6"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_fstrn"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_nhx6d"]
+[ext_resource type="Resource" uid="uid://blb0bsv3q1orx" path="res://DataResources/Weapons/Polearm/Effects/polearm_tip_of_spear_effect.tres" id="2_oroje"]
+
+[resource]
+script = ExtResource("2_nhx6d")
+upgrade_id = &"polearm_tip_of_spear"
+title = "Tip of the Spear"
+description = "You learn to strike with pinpoint accuracy. Enemies at the end of the thrust attack are hit critically (100% chance to crit) with an additional 100% critical damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_fstrn")]([ExtResource("2_oroje")])
+set_acquired_flag_on_weapon = &"polearm_tip_of_spear_upgrade"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

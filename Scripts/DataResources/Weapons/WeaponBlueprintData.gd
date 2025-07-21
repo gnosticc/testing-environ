@@ -19,7 +19,7 @@ extends Resource
 ## Tags for categorizing the weapon (e.g., "Melee", "Projectile", "Piercing", "Summon").
 @export var tags: Array[StringName] = [] # Changed to StringName array for consistency
 ## Defines which basic player classes this weapon contributes level-up points to.
-@export var class_tag_restrictions: Array[PlayerCharacter.BasicClass] = []
+@export var class_tag_restrictions: Array = []
 
 
 @export_group("Base Behavior & Stats")
@@ -37,6 +37,8 @@ extends Resource
 @export var targeting_type: StringName = &"mouse_direction" # Changed to StringName, example default
 # NEW: Add this boolean export. If true, WeaponManager will count attacks for this weapon.
 @export var tracks_shot_count: bool = false
+# Lower than the default upgrade weight of 100 to make new weapons less common.
+@export var weight: float = 50.0
 
 ## A dictionary holding the initial, inherent stats for this weapon type.
 # Keys here should be consistent within the weapon's specific domain.

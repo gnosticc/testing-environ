@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://fdpi5tfn6ytn"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_cc5ht"]
+[ext_resource type="Resource" uid="uid://bkijtxk1eddcl" path="res://DataResources/Weapons/Warhammer/Effects/crushing_force_damage_effect_2.tres" id="2_pji10"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="3_ycuxa"]
+
+[resource]
+script = ExtResource("3_ycuxa")
+upgrade_id = &"wh_crushing_force_2"
+title = "Crushing Force II"
+description = "Further enhances the Warhammer's power, increasing damage by an additional 125%."
+prerequisites_on_this_weapon = Array[StringName]([&"wh_crushing_force_1"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_cc5ht")]([ExtResource("2_pji10")])
+set_acquired_flag_on_weapon = &"wh_crushing_force_2_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

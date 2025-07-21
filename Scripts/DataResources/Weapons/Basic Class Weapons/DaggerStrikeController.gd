@@ -15,6 +15,7 @@ extends Node2D
 
 var _specific_stats: Dictionary
 var _owner_player_stats: PlayerStats
+var _weapon_manager: WeaponManager # FIX: Add variable to store the manager
 var _base_direction: Vector2
 var _attack_sequence: Array
 
@@ -28,9 +29,10 @@ func _ready():
 	if fan_of_knives_scene == null and ResourceLoader.exists(FAN_OF_KNIVES_SCENE_PATH):
 		fan_of_knives_scene = load(FAN_OF_KNIVES_SCENE_PATH)
 
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, p_weapon_manager: WeaponManager):
 	_specific_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
+	_weapon_manager = p_weapon_manager # Store the reference
 	_base_direction = direction.normalized() if direction.length_squared() > 0 else Vector2.RIGHT
 	_attack_sequence = _specific_stats.get(&"attack_sequence", [])
 	_has_thousand_cuts = _specific_stats.get(&"has_thousand_cuts", false)
@@ -93,7 +95,7 @@ func _spawn_hitbox(hit_index: int):
 	if is_instance_valid(hitbox_scene):
 		hit_specific_stats["scene_file_path"] = hitbox_scene.resource_path
 		
-	hitbox_instance.set_attack_properties(final_direction, hit_specific_stats, _owner_player_stats)
+	hitbox_instance.set_attack_properties(final_direction, hit_specific_stats, _owner_player_stats, _weapon_manager)
 
 	if _has_thousand_cuts:
 		hitbox_instance.hit_enemy_for_combo.connect(_on_dagger_hit_enemy_for_combo.bind(hit_index))
@@ -108,13 +110,16 @@ func _spawn_hitbox(hit_index: int):
 		add_child(fok_instance)
 		fok_instance.global_position = owner_player.global_position
 		
-		var final_slash_damage = _owner_player_stats.get_calculated_player_damage(
-			hit_specific_stats.get(&"weapon_damage_percentage", 1.0) * hit_specific_stats["damage_multiplier"],
-			hit_specific_stats.get("tags", [])
-		)
+		var weapon_tags = hit_specific_stats.get("tags", []) as Array[StringName]
+		var damage_percent = hit_specific_stats.get(&"weapon_damage_percentage", 1.0) * hit_specific_stats["damage_multiplier"]
+
+		# --- REFACTORED DAMAGE CALCULATION ---
+		var base_damage = _owner_player_stats.get_calculated_base_damage(damage_percent)
+		var final_slash_damage = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+		# --- END REFACTOR ---
 		
 		if fok_instance.has_method("initialize"):
-			fok_instance.initialize(int(round(final_slash_damage)), _owner_player_stats)
+			fok_instance.initialize(int(round(final_slash_damage)), _owner_player_stats, _specific_stats)
 
 func _on_dagger_dealt_damage(enemy_node: Node, damage_dealt: int):
 	if not _is_target_valid_for_combo(enemy_node): return

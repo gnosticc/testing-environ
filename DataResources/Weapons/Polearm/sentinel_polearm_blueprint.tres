@@ -1,0 +1,45 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://da3emvk2oevu5"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_ia36i"]
+[ext_resource type="Resource" uid="uid://ds7r2b6h1m2eo" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_aegis_upgrade.tres" id="2_dtsrl"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_yri33"]
+[ext_resource type="Resource" uid="uid://ucnyfhddyncn" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_charge_upgrade.tres" id="3_pmfdh"]
+[ext_resource type="PackedScene" uid="uid://ctg1tyljie1a4" path="res://Scenes/Weapons/Advanced/PolearmController.tscn" id="3_yri33"]
+[ext_resource type="Resource" uid="uid://c7d5t3dqmqtjx" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_unstoppable_upgrade.tres" id="4_hspv7"]
+[ext_resource type="Resource" uid="uid://wpd842lv6hmv" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_upgrade_crippling.tres" id="5_3rfsb"]
+[ext_resource type="Resource" uid="uid://cwbfq7raa7lr8" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_upgrade_flowing.tres" id="6_8j1tu"]
+[ext_resource type="Resource" uid="uid://ceffmtx7x5rhw" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_upgrade_momentum.tres" id="7_3a6ta"]
+[ext_resource type="Resource" uid="uid://c5qsei4lsvwr6" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_upgrade_tip_of_spear.tres" id="8_5bvih"]
+[ext_resource type="Resource" uid="uid://2v6s0il4o01g" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_upgrade_retreating.tres" id="9_my6we"]
+[ext_resource type="Resource" uid="uid://gqary4pjarhk" path="res://DataResources/Weapons/Polearm/Upgrades/polearm_upgrade_mastery.tres" id="10_6mf4i"]
+
+[resource]
+script = ExtResource("2_yri33")
+id = &"sentinel_polearm"
+title = "Polearm"
+description = "A versatile weapon that sweeps around you while moving, or enters Phalanx Stance, performing a powerful long-range thrust while standing still."
+weapon_scene = ExtResource("3_yri33")
+tags = Array[StringName]([&"melee", &"physical", &"reach", &"aoe", &"sentinel weapon", &"centered_melee", &"controller"])
+class_tag_restrictions = [&"sentinel_advanced"]
+cooldown = 1.8
+max_level = 10
+base_lifetime = 0.4
+spawn_as_child = true
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+initial_specific_stats = {
+"cooldown": 1.8,
+"flowing_strikes_chance": 0.4,
+"has_crippling_sweep": false,
+"has_momentum": false,
+"phalanx_stance_time": 0.25,
+"sweep_damage_percentage": 1.8,
+"sweep_radius_scale": 1.0,
+"thrust_cooldown_modifier": 0.7,
+"thrust_damage_percentage": 2.5,
+"thrust_length_scale": 1.0,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_ia36i")]([ExtResource("2_dtsrl"), ExtResource("3_pmfdh"), ExtResource("4_hspv7"), ExtResource("5_3rfsb"), ExtResource("6_8j1tu"), ExtResource("7_3a6ta"), ExtResource("8_5bvih"), ExtResource("9_my6we"), ExtResource("10_6mf4i")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

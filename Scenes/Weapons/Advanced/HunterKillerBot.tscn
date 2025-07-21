@@ -1,0 +1,132 @@
+[gd_scene load_steps=13 format=3 uid="uid://cmesf8dcsluqm"]
+
+[ext_resource type="Texture2D" uid="uid://do4bthuxfmvb7" path="res://Assets/Pets and Summons/Mechamaster Pets/Laser Turret Animation.png" id="1_63jc7"]
+[ext_resource type="Script" uid="uid://s1b1ikes8eq" path="res://Scripts/DataResources/Weapons/Advanced/HunterKillerBot.gd" id="1_nye1o"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nye1o"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(1200, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fln2m"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(1800, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cpsrh"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(1500, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rhcfk"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(2100, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ab4du"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(900, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4qo2j"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(600, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dscah"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(300, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_243ud"]
+atlas = ExtResource("1_63jc7")
+region = Rect2(0, 0, 300, 185)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8oofm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nye1o")
+}],
+"loop": false,
+"name": &"fire_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fln2m")
+}],
+"loop": false,
+"name": &"fire_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cpsrh")
+}],
+"loop": false,
+"name": &"fire_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rhcfk")
+}],
+"loop": false,
+"name": &"fire_west",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ab4du")
+}],
+"loop": false,
+"name": &"idle_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4qo2j")
+}],
+"loop": false,
+"name": &"idle_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dscah")
+}],
+"loop": false,
+"name": &"idle_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_243ud")
+}],
+"loop": false,
+"name": &"idle_west",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_j8hs1"]
+radius = 556.166
+
+[node name="HunterKillerBot" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 136
+script = ExtResource("1_nye1o")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_8oofm")
+animation = &"idle_west"
+
+[node name="TargetingRange" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TargetingRange"]
+shape = SubResource("CircleShape2D_j8hs1")
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="ProjectileSpawnPoint" type="Marker2D" parent="."]
+
+[node name="FireAnimTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true

@@ -1,0 +1,29 @@
+[gd_scene load_steps=6 format=3 uid="uid://c4tq6u0g68bjb"]
+
+[ext_resource type="Script" uid="uid://cx0xkv6ew8ggh" path="res://Scripts/DataResources/Weapons/Advanced/ReinforcementsController.gd" id="1_rj2cn"]
+[ext_resource type="PackedScene" uid="uid://dlew01vkkte3f" path="res://Scenes/Weapons/Advanced/SentryTurret.tscn" id="2_ppn77"]
+[ext_resource type="PackedScene" uid="uid://cche0gfq825b1" path="res://Scenes/Weapons/Advanced/ArtilleryBot.tscn" id="3_a1tuh"]
+[ext_resource type="PackedScene" uid="uid://cmesf8dcsluqm" path="res://Scenes/Weapons/Advanced/HunterKillerBot.tscn" id="4_6pu82"]
+[ext_resource type="PackedScene" uid="uid://x8p1x2yjddhs" path="res://Scenes/Weapons/Advanced/AegisProtector.tscn" id="5_5rpu5"]
+
+[node name="ReinforcementsController" type="Node2D"]
+script = ExtResource("1_rj2cn")
+sentry_turret_scene = ExtResource("2_ppn77")
+artillery_bot_scene = ExtResource("3_a1tuh")
+hunter_killer_bot_scene = ExtResource("4_6pu82")
+aegis_protector_scene = ExtResource("5_5rpu5")
+
+[node name="SentryTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="ArtilleryTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="HunterKillerTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="AegisTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="AssemblyLineTimer" type="Timer" parent="."]
+one_shot = true

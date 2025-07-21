@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=5 format=3 uid="uid://dyha44stt8od5"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_xwm40"]
+[ext_resource type="Resource" uid="uid://dx61h5v6fn7yn" path="res://DataResources/StatusEffects/Alchemist/caustic_injection_effect.tres" id="2_j3wjk"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_jwl78"]
+[ext_resource type="PackedScene" uid="uid://d0kmf4o2bhx4d" path="res://Scenes/Weapons/Advanced/Effect Scenes/CausticInjectionEffect.tscn" id="4_j3wjk"]
+
+[resource]
+script = ExtResource("2_jwl78")
+id = &"caustic_injection"
+display_name = "Caustic Injection"
+duration = 2.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.5
+tick_on_application = true
+effects_while_active = Array[ExtResource("1_xwm40")]([ExtResource("2_j3wjk")])
+next_status_effect_on_expire = &""
+visual_effect_scene = ExtResource("4_j3wjk")
+visual_anchor_point = 1
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

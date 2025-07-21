@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=7 format=3 uid="uid://c1yn6coxrvmcc"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_jh0hj"]
+[ext_resource type="Resource" uid="uid://cqu00b4ba82h2" path="res://DataResources/Weapons/Reinforcements/Effects/effect_fortified_plating_sentry.tres" id="2_gi4wx"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ka066"]
+[ext_resource type="Resource" uid="uid://bohh3hr78768k" path="res://DataResources/Weapons/Reinforcements/Effects/effect_fortified_plating_artillery.tres" id="3_r2u2p"]
+[ext_resource type="Resource" uid="uid://n7ukrc6y8iim" path="res://DataResources/Weapons/Reinforcements/Effects/effect_fortified_plating_hk.tres" id="4_368lt"]
+[ext_resource type="Resource" uid="uid://dkxg8ewmvtf4l" path="res://DataResources/Weapons/Reinforcements/Effects/effect_fortified_plating_aegis.tres" id="5_qa107"]
+
+[resource]
+script = ExtResource("2_ka066")
+upgrade_id = &"reinforcements_fortified_plating"
+title = "Fortified Plating"
+description = "Increases the lifetime of all turrets by 30%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_jh0hj")]([ExtResource("2_gi4wx"), ExtResource("3_r2u2p"), ExtResource("4_368lt"), ExtResource("5_qa107")])
+set_acquired_flag_on_weapon = &"reinforcements_fortified_plating_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

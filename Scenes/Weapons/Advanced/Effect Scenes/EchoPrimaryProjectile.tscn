@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://c28lq7v5urqmy"]
+
+[ext_resource type="Script" uid="uid://4iwqm382sebl" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/EchoPrimaryProjectile.gd" id="1_jw3w0"]
+[ext_resource type="Texture2D" uid="uid://dgsx1ye7dcxrn" path="res://Assets/Pets and Summons/Summoner/Echo Primary Projectile Animation.png" id="2_2p54g"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4noq8"]
+atlas = ExtResource("2_2p54g")
+region = Rect2(0, 0, 325, 180)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uccog"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4noq8")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ksf3w"]
+radius = 70.0
+height = 334.0
+
+[node name="EchoPrimaryProjectile" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_jw3w0")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_uccog")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_ksf3w")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

@@ -1,0 +1,57 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://dk5nus0ot1qfk"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_d8iy4"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_0vhih"]
+[ext_resource type="Resource" uid="uid://s4e04yj1sdk7" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/potent_volatility.tres" id="2_1v2mx"]
+[ext_resource type="PackedScene" uid="uid://banm1m11xcwda" path="res://Scenes/Weapons/Advanced/ExperimentalMaterialsManager.tscn" id="3_0vhih"]
+[ext_resource type="Resource" uid="uid://bhs041yq058rx" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/lingering_fumes.tres" id="3_tciou"]
+[ext_resource type="Resource" uid="uid://b3tdhjsd4lylk" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/concentrated_acid.tres" id="4_3bwle"]
+[ext_resource type="Resource" uid="uid://dtp5um78xpbd4" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/chain_reaction.tres" id="5_w3qve"]
+[ext_resource type="Resource" uid="uid://dhlnlb8nkd8e6" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/dual_lobs.tres" id="6_vvpru"]
+[ext_resource type="Resource" uid="uid://r65utg3lrs02" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/leaky_canisters.tres" id="7_racqq"]
+[ext_resource type="Resource" uid="uid://cjbfomgy1otai" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/transmutation.tres" id="8_qioi1"]
+[ext_resource type="Resource" uid="uid://6end64pxc6s0" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/self_experimentation.tres" id="9_rq681"]
+[ext_resource type="Resource" uid="uid://b2x3nojiuabgp" path="res://DataResources/Weapons/ExperimentalMaterials/Upgrades/philosophers_stone.tres" id="10_0sf03"]
+
+[resource]
+script = ExtResource("2_0vhih")
+id = &"alchemist_experimental_materials"
+title = "Experimental Materials"
+description = "Hurls vials of reagent that Soak enemies. Subsequent physical attacks on \"Soaked\" enemies trigger a highly damaging DoT while magical attacks on Soaked enemies trigger powerful catalytic explosions. These effects remove the Soaked status. Soaked enemies lose Soaked status over time."
+weapon_scene = ExtResource("3_0vhih")
+tags = Array[StringName]([&"aoe", &"chemical", &"alchemist weapon", &"controller", &"magical"])
+class_tag_restrictions = [&"alchemist_advanced"]
+cooldown = 1.5
+max_level = 10
+base_lifetime = 5.0
+spawn_as_child = true
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+initial_specific_stats = {
+"chemtrail_damage_percent": 1.5,
+"chemtrail_segment_duration": 2.0,
+"chemtrail_segment_scale": 0.1,
+"chemtrail_tick_interval": 1.0,
+"deals_impact_damage": false,
+"impact_damage_percent": 1.0,
+"magical_reaction_aoe_damage_mult": 1.4,
+"magical_reaction_aoe_radius": 35.0,
+"magical_reaction_visual_scale": 0.25,
+"philosophers_stone_cooldown": 360.0,
+"philosophers_stone_ready": true,
+"physical_reaction_dot_damage_mult": 1.0,
+"physical_reaction_dot_duration": 2.0,
+"puddle_duration": 5.0,
+"puddle_radius": 45.0,
+"puddle_visual_scale": 0.7,
+"self_experimentation_cooldown": 12.0,
+"self_experimentation_duration": 6.0,
+"transmutation_chance": 0.25,
+"vial_lob_distance": 70.0,
+"vial_lob_height": 40.0,
+"vial_projectile_scale": 0.1,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_d8iy4")]([ExtResource("2_1v2mx"), ExtResource("3_tciou"), ExtResource("4_3bwle"), ExtResource("5_w3qve"), ExtResource("6_vvpru"), ExtResource("7_racqq"), ExtResource("8_qioi1"), ExtResource("9_rq681"), ExtResource("10_0sf03")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

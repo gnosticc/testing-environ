@@ -17,6 +17,7 @@ signal hardcore_phase_activated()
 
 # --- Node References ---
 @onready var player_health_bar: ProgressBar = $HUDLayer/PlayerHealthBar
+@onready var temp_health_bar: ProgressBar = $HUDLayer/TempHealthBar # NEW: Reference for the temp health bar
 @onready var gameplay_timer_label: Label = $HUDLayer/GameplayTimerLabel
 @onready var one_second_tick_timer: Timer = $HUDLayer/OneSecondTickTimer
 @onready var temp_exp_bar: ProgressBar = $HUDLayer/TempExpBar
@@ -38,6 +39,7 @@ var player_node: PlayerCharacter # Reference to the player character instance
 # --- UI Positioning Constants ---
 const HEALTH_BAR_Y_OFFSET: float = -40.0
 const HEALTH_BAR_X_OFFSET: float = -5.0
+const TEMP_HEALTH_BAR_Y_OFFSET: float = -7.0 # NEW: Small offset to stack above main bar
 const EXP_BAR_Y_OFFSET_FROM_HEALTH: float = 3.0
 
 # --- DDS Variables (Now Tunable) ---
@@ -70,6 +72,15 @@ func _ready():
 		player_health_bar.max_value = 100 # Initial max_value
 		player_health_bar.value = 100 # Initial value
 	else: push_error("GameUI: PlayerHealthBar node not found.")
+	
+	# --- NEW: Temporary Health Bar Setup ---
+	if temp_health_bar:
+		temp_health_bar.visible = false # Start hidden
+		var temp_health_style = StyleBoxFlat.new()
+		temp_health_style.bg_color = Color("#4a90e2") # A nice blue color
+		temp_health_bar.add_theme_stylebox_override("fill", temp_health_style)
+	else:
+		push_error("GameUI: TempHealthBar node not found.")
 
 	if temp_exp_bar: temp_exp_bar.visible = false
 	else: push_error("GameUI: TempExpBar node not found.")
@@ -118,6 +129,9 @@ func _attempt_player_connections():
 			if player_node.has_signal("health_changed"): player_node.health_changed.connect(self._on_player_health_changed)
 			if player_node.has_signal("experience_changed"): player_node.experience_changed.connect(self._on_player_experience_changed)
 			if player_node.has_signal("player_level_up"): player_node.player_level_up.connect(self._on_player_level_up_for_dds)
+			# NEW: Connect to the new temporary health signal
+			if player_node.has_signal("temp_health_changed"): player_node.temp_health_changed.connect(self._on_player_temp_health_changed)
+
 			time_of_last_level_up = elapsed_seconds # Initialize for rapid level-up calculation
 		else: push_error("GameUI: Player node became invalid during connection setup. Check player scene.")
 	else: push_error("GameUI: Player node not found in group 'player_char_group'. Ensure player is in the scene and grouped correctly.")
@@ -155,13 +169,29 @@ func _process(delta: float): # UI Positioning Logic (e.g., health bar above play
 	var final_health_bar_position = Vector2(health_bar_pos_x, health_bar_pos_y)
 	player_health_bar.global_position = final_health_bar_position
 
+	# --- NEW: Position the temporary health bar ---
+	if is_instance_valid(temp_health_bar):
+		# Position it slightly above the main health bar
+		var temp_health_bar_pos = final_health_bar_position + Vector2(0, TEMP_HEALTH_BAR_Y_OFFSET)
+		temp_health_bar.global_position = temp_health_bar_pos
+		# Ensure its size matches the main health bar
+		temp_health_bar.size = player_health_bar.size
+		
 	# Position temporary EXP bar if visible.
 	if is_instance_valid(temp_exp_bar) and temp_exp_bar.visible:
 		var exp_bar_pos_x = anchor_screen_pos.x - (temp_exp_bar.size.x / 2.0) + HEALTH_BAR_X_OFFSET
 		# Position below health bar. Use the calculated bottom of the health bar as a reference.
 		var exp_bar_pos_y = final_health_bar_position.y + player_health_bar.size.y + EXP_BAR_Y_OFFSET_FROM_HEALTH
 		temp_exp_bar.global_position = Vector2(exp_bar_pos_x, exp_bar_pos_y)
-
+		
+# --- NEW: Handler for the temporary health signal ---
+func _on_player_temp_health_changed(current_temp_health: float):
+	if not is_instance_valid(temp_health_bar): return
+	
+	# The cap for Champion's Resolve is 300
+	temp_health_bar.max_value = 300.0
+	temp_health_bar.value = current_temp_health
+	temp_health_bar.visible = current_temp_health > 0.01
 
 # Called every second by one_second_tick_timer.
 func _on_one_second_tick_timer_timeout():

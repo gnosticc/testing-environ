@@ -15,14 +15,14 @@ animations = [{
 }],
 "loop": false,
 "name": &"flash",
-"speed": 2.0
+"speed": 4.0
 }]
 
 [node name="TipFlash" type="Node2D"]
 script = ExtResource("1_aa7gb")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-modulate = Color(0.910156, 0.862937, 0.554626, 1)
+modulate = Color(0.91, 0.863, 0.555, 0.326)
 scale = Vector2(0.4, 0.4)
 sprite_frames = SubResource("SpriteFrames_v4s7b")
 animation = &"flash"

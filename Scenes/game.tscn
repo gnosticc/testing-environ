@@ -1914,6 +1914,8 @@ sources/1 = SubResource("TileSetAtlasSource_h4fw4")
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_wrm1d")
+general_upgrade_card_paths = Array[String](["res://DataResources/Upgrades/General/Global Stats/gen_might_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_5.tres"])
+class_progression_data_paths = Array[String](["res://Data/Classes/Progression/unlock_champion.tres", "res://Data/Classes/Progression/unlock_sentinel.tres", "res://Data/Classes/Progression/unlock_alchemist.tres", "res://Data/Classes/Progression/unlock_berserker.tres", "res://Data/Classes/Progression/unlock_elementalist.tres", "res://Data/Classes/Progression/unlock_forest_stalker.tres", "res://Data/Classes/Progression/unlock_illusionist.tres", "res://Data/Classes/Progression/unlock_magus.tres", "res://Data/Classes/Progression/unlock_mechamaster.tres", "res://Data/Classes/Progression/unlock_samurai.tres", "res://Data/Classes/Progression/unlock_shinobi.tres", "res://Data/Classes/Progression/unlock_spellsword.tres", "res://Data/Classes/Progression/unlock_spirit_master.tres", "res://Data/Classes/Progression/unlock_summoner.tres", "res://Data/Classes/Progression/unlock_warden.tres"])
 
 [node name="TileMapLayer" parent="." instance=ExtResource("2_qxrlw")]
 position = Vector2(1, 0)

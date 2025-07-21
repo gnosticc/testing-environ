@@ -1,0 +1,87 @@
+[gd_scene load_steps=12 format=3 uid="uid://gub6hn0rw551"]
+
+[ext_resource type="Script" uid="uid://cnc64b5q8ok0" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/RingOfShards.gd" id="1_cmm8o"]
+[ext_resource type="Texture2D" uid="uid://beht82tjl6jpx" path="res://Assets/Weapons/Advanced Weapons/Luring Prism/Field Animation.png" id="2_ewgys"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aepje"]
+atlas = ExtResource("2_ewgys")
+region = Rect2(0, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dsb5x"]
+atlas = ExtResource("2_ewgys")
+region = Rect2(360, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hkone"]
+atlas = ExtResource("2_ewgys")
+region = Rect2(720, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pvgy8"]
+atlas = ExtResource("2_ewgys")
+region = Rect2(1080, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_34q0d"]
+atlas = ExtResource("2_ewgys")
+region = Rect2(720, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vew1s"]
+atlas = ExtResource("2_ewgys")
+region = Rect2(360, 0, 360, 350)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0u4a7"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aepje")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dsb5x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hkone")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pvgy8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_34q0d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vew1s")
+}],
+"loop": true,
+"name": &"active",
+"speed": 4.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_h2u45"]
+radius = 128.876
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_yn5g8"]
+radius = 123.037
+
+[node name="RingOfShards" type="Area2D"]
+collision_layer = 0
+collision_mask = 136
+script = ExtResource("1_cmm8o")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_0u4a7")
+animation = &"active"
+frame_progress = 0.731534
+
+[node name="DamageShape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_h2u45")
+
+[node name="TauntArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="TauntShape" type="CollisionShape2D" parent="TauntArea"]
+shape = SubResource("CircleShape2D_yn5g8")
+
+[node name="DamageTickTimer" type="Timer" parent="."]
+wait_time = 0.5
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 2.5
+one_shot = true

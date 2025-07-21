@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://dbsss4y6pj83n"]
+
+[ext_resource type="Texture2D" uid="uid://bmq2gc7lsu6h7" path="res://Assets/Weapons/Advanced Weapons/Experimental Materials/Caustic Injection Status Effect Animation.png" id="1_qk86v"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lb0my"]
+atlas = ExtResource("1_qk86v")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1dwbm"]
+atlas = ExtResource("1_qk86v")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xvgio"]
+atlas = ExtResource("1_qk86v")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_y4kkn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lb0my")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1dwbm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xvgio")
+}],
+"loop": true,
+"name": &"default",
+"speed": 12.0
+}]
+
+[node name="CausticInjectionStatus" type="Node2D"]
+scale = Vector2(0.03, 0.03)
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_y4kkn")

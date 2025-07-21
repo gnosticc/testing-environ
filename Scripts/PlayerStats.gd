@@ -1,42 +1,18 @@
-# player_stats.gd
-# This script manages all player statistics. It will now use the standardized keys
-# defined via the 'PlayerStatKeys' Autoload.
-# It is designed to be a child node of PlayerCharacter.
-#
-# IMPORTANT: This script should replace your existing PlayerStats.gd.
-# 'PlayerStatKeys' must be set as an Autoload (see Step 2 in previous instructions).
-#
-# UPDATED: Added new global stat properties and their recalculation.
-# UPDATED: get_calculated_player_damage now accepts weapon tags to apply tag-specific multipliers.
-# FIXED: Ensured ALL PlayerStatKeys are properly initialized in base_stat_values and modifier dictionaries.
-# ADDED: More comprehensive debug prints for stat initialization and recalculation.
 
 extends Node
 class_name PlayerStats # Explicit class name for clarity and type hinting
 
-# Signal to notify listeners (e.g., PlayerCharacter, UI) when player stats have been recalculated.
-# It's good practice to emit more specific signals or pass a dictionary of changed stats
-# if performance becomes an issue with many UI updates.
 signal stats_recalculated(current_max_health_val, current_movement_speed_val)
 
-# Dictionary to hold the final calculated base stats after initialization.
-# This represents the player's core stats before temporary buffs/debuffs are applied.
 var base_stat_values: Dictionary = {}
 
-# Dictionaries to hold modifiers. These will accumulate modifications from upgrades
-# and temporary effects.
 var flat_modifiers: Dictionary = {} 		   # For flat additions (e.g., +5 Health)
 var percent_add_modifiers: Dictionary = {} 	   # For percentage additions to base (e.g., +10% Movement Speed)
 var percent_mult_final_modifiers: Dictionary = {} # For final percentage multipliers (e.g., +20% Global Damage)
 
-# Reference to the StatusEffectComponent to query for temporary buffs/debuffs.
 @onready var status_effect_component: StatusEffectComponent = get_parent().get_node_or_null("StatusEffectComponent")
 
 
-# --- CURRENT CALCULATED STATS ---
-# These variables hold the final, fully calculated values of key stats, updated
-# every time recalculate_all_stats() is called. This provides quick access
-# without needing to call get_final_stat() repeatedly for common values.
 var current_max_health: float = 0.0
 var current_numerical_damage: float = 0.0
 var current_global_damage_multiplier: float = 1.0
@@ -56,7 +32,6 @@ var current_crit_damage_multiplier: float = 1.0
 var current_luck: float = 0.0
 var current_health_regeneration: float = 0.0
 
-# NEW: Current calculated values for recently added global stats
 var current_global_percent_damage_reduction: float = 0.0
 var current_global_status_effect_chance_add: float = 0.0
 var current_global_projectile_fork_count_add: int = 0
@@ -77,19 +52,21 @@ var current_dodge_chance: float = 0.0
 
 # Add other 'current_' stats here as needed, based on your PlayerStatKeys.Keys
 # For Tag-Specific Multipliers (these are read directly from get_final_stat_by_string, not cached here)
-# MELEE_DAMAGE_MULTIPLIER
-# PROJECTILE_DAMAGE_MULTIPLIER
-# MAGIC_DAMAGE_MULTIPLIER
-# PHYSICAL_DAMAGE_MULTIPLIER
-# FIRE_DAMAGE_MULTIPLIER
-# ICE_DAMAGE_MULTIPLIER
-# MELEE_ATTACK_SPEED_MULTIPLIER
-# PROJECTILE_ATTACK_SPEED_MULTIPLIER
-# MAGIC_ATTACK_SPEED_MULTIPLIER
-# MELEE_AOE_AREA_MULTIPLIER
-# MAGIC_AOE_AREA_MULTIPLIER
-# PROJECTILE_PIERCE_COUNT_ADD (already cached as int)
-# PROJECTILE_MAX_RANGE_ADD (already cached as float)
+var current_melee_damage_multiplier: float = 1.0
+var current_projectile_damage_multiplier: float = 1.0
+var current_magic_damage_multiplier: float = 1.0
+var current_physical_damage_multiplier: float = 1.0
+var current_fire_damage_multiplier: float = 1.0
+var current_ice_damage_multiplier: float = 1.0
+var current_nature_damage_multiplier: float = 1.0
+var current_melee_attack_speed_multiplier: float = 1.0
+var current_projectile_attack_speed_multiplier: float = 1.0
+var current_magic_attack_speed_multiplier: float = 1.0
+var current_melee_aoe_area_multiplier: float = 1.0
+var current_magic_aoe_area_multiplier: float = 1.0
+var current_projectile_pierce_count_add: int = 1
+var current_projectile_max_range_add: float = 1.0
+
 
 # --- Initialization ---
 func _ready():
@@ -146,6 +123,7 @@ func initialize_base_stats(class_data: PlayerClassData):
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NATURE_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_ATTACK_SPEED_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_ATTACK_SPEED_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_ATTACK_SPEED_MULTIPLIER],
@@ -219,6 +197,7 @@ func initialize_base_stats_with_raw_dict(raw_stats_dict: Dictionary):
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NATURE_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_ATTACK_SPEED_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_ATTACK_SPEED_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_ATTACK_SPEED_MULTIPLIER],
@@ -250,9 +229,11 @@ func initialize_base_stats_with_raw_dict(raw_stats_dict: Dictionary):
 # --- Applying Stat Modifications from EffectData ---
 # This function is called by PlayerCharacter.gd or WeaponManager.gd
 # when a StatModificationEffectData is applied to "player_stats".
+# This function is for temporary or upgrade-based modifiers.
 func apply_stat_modification(effect_data: StatModificationEffectData):
 	if not is_instance_valid(effect_data): return
 	
+	# RESTORED: This more robust version handles potential data errors gracefully.
 	var key = PlayerStatKeys.KEY_NAMES.get(effect_data.stat_key, &"")
 	if key == &"":
 		key = effect_data.stat_key # Fallback for direct StringName
@@ -276,8 +257,33 @@ func apply_stat_modification(effect_data: StatModificationEffectData):
 
 	recalculate_all_stats()
 
+# NEW: This function is specifically for permanent bonuses from class unlocks.
+# It modifies the base_stat_values directly.
+func apply_permanent_base_stat_bonus(effect_data: StatModificationEffectData):
+	if not is_instance_valid(effect_data): return
+	
+	var key = effect_data.stat_key
+	var value = effect_data.get_value()
 
-
+	# This logic handles simple flat additions and base multipliers,
+	# which is typical for permanent class bonuses.
+	match effect_data.modification_type:
+		&"flat_add":
+			if base_stat_values.has(key):
+				base_stat_values[key] += value
+				print_debug("PlayerStats: Applied permanent bonus. '", key, "' base value is now ", base_stat_values[key])
+			else:
+				# This case should ideally not happen if stats are initialized correctly.
+				base_stat_values[key] = value
+				push_warning("PlayerStats: Added new base stat '", key, "' via permanent bonus.")
+		&"percent_add_to_base":
+			if base_stat_values.has(key):
+				base_stat_values[key] *= (1.0 + value)
+				print_debug("PlayerStats: Applied permanent bonus. '", key, "' base value is now ", base_stat_values[key])
+		_:
+			push_warning("PlayerStats: Unsupported modification type '", effect_data.modification_type, "' for permanent base stat bonus.")
+	
+	# The calling function (apply_upgrade) will handle the final recalculation.
 
 # --- Handling Custom Flags (Boolean states) ---
 # These are handled by CustomFlagEffectData and stored in a separate dictionary.
@@ -308,19 +314,29 @@ func get_flag(key_enum: PlayerStatKeys.Keys) -> bool:
 func get_final_stat(key_enum: PlayerStatKeys.Keys) -> float:
 	var key_string = PlayerStatKeys.KEY_NAMES[key_enum]
 	
+	# 1. Get permanent modifiers stored in this node
 	var base_val = float(base_stat_values.get(key_string, 0.0))
 	var permanent_flat_mod = float(flat_modifiers.get(key_string, 0.0))
 	var permanent_percent_add_mod = float(percent_add_modifiers.get(key_string, 0.0))
 	var permanent_percent_mult_final_mod = float(percent_mult_final_modifiers.get(key_string, 1.0))
 	
-	var temp_additive_mod = 0.0
+	# 2. Get temporary modifiers from the StatusEffectComponent
+	var temp_flat_mod = 0.0
+	var temp_percent_add_mod = 0.0
 	var temp_multiplicative_mod = 1.0
 	if is_instance_valid(status_effect_component):
-		temp_additive_mod = status_effect_component.get_sum_of_additive_modifiers(key_string)
+		temp_flat_mod = status_effect_component.get_sum_of_flat_add_modifiers(key_string)
+		temp_percent_add_mod = status_effect_component.get_sum_of_percent_add_modifiers(key_string)
 		temp_multiplicative_mod = status_effect_component.get_product_of_multiplicative_modifiers(key_string)
 
-	var final_value = (base_val + permanent_flat_mod + temp_additive_mod) * (1.0 + permanent_percent_add_mod) * permanent_percent_mult_final_mod * temp_multiplicative_mod
+	# 3. Apply modifiers in the correct order
+	#    (Base + All Flat) * (1 + All Percent Add) * (All Final Multipliers)
+	var final_value = (base_val + permanent_flat_mod + temp_flat_mod) * \
+					  (1.0 + permanent_percent_add_mod + temp_percent_add_mod) * \
+					  permanent_percent_mult_final_mod * \
+					  temp_multiplicative_mod
 	
+	# Special case logic (like for Leverage) remains the same
 	if key_enum == PlayerStatKeys.Keys.DODGE_CHANCE and get_flag(PlayerStatKeys.Keys.PLAYER_HAS_LEVERAGE):
 		var luck = get_final_stat(PlayerStatKeys.Keys.LUCK)
 		var bonus_from_luck = min(0.15, luck * 0.01)
@@ -364,50 +380,82 @@ func get_final_stat_by_string(key_string: StringName) -> float:
 	
 	return final_value
 
+
+# MODIFIED: get_calculated_player_damage is now get_calculated_base_damage
+# This function calculates damage BEFORE tag-specific multipliers are applied.
+func get_calculated_base_damage(weapon_damage_percentage: float = 1.0) -> float:
+	var damage_from_player_base = current_numerical_damage
+	var weapon_scaled_damage = damage_from_player_base * weapon_damage_percentage
+	var final_multiplied_damage = weapon_scaled_damage * current_global_damage_multiplier
+	var final_damage = final_multiplied_damage + current_global_flat_damage_add
+	return max(0.0, final_damage)
+
+# NEW: This is the new primary function for calculating final damage.
+# It takes the base damage and applies any relevant tag-based multipliers.
+func apply_tag_damage_multipliers(base_damage: float, weapon_tags: Array[StringName]) -> float:
+	var final_damage = base_damage
+	if weapon_tags.has(&"melee"):
+		final_damage *= current_melee_damage_multiplier
+	if weapon_tags.has(&"projectile"):
+		final_damage *= current_projectile_damage_multiplier
+	if weapon_tags.has(&"magical"): # Assuming "magical" is the tag for magic damage
+		final_damage *= current_magic_damage_multiplier
+	if weapon_tags.has(&"physical"):
+		final_damage *= current_physical_damage_multiplier
+	if weapon_tags.has(&"fire"):
+		final_damage *= current_fire_damage_multiplier
+	if weapon_tags.has(&"ice"):
+		final_damage *= current_ice_damage_multiplier
+	if weapon_tags.has(&"nature"):
+		final_damage *= current_nature_damage_multiplier
+	# ... (add checks for other tags like fire, ice, etc.) ...
+	return final_damage
+
 # --- Unified Damage Calculation ---
 # This method should be called by WeaponManager or individual attack scripts
 # when they need to determine the final damage output from the player.
 # It now accepts an array of weapon tags to apply tag-specific multipliers.
-func get_calculated_player_damage(weapon_damage_percentage: float = 1.0, weapon_tags: Array[StringName] = []) -> float:
-	# This function uses the 'current_' cached values from recalculate_all_stats()
-	# to ensure consistency and avoid re-calculating base stats.
-
-	# Formula: (player_base_numerical_damage * weapon_damage_percentage * tag_multipliers) * player_global_damage_multiplier + player_global_flat_damage_add
-
-	# 1. Start with the player's current numerical damage (which includes class base + flat/percent_add modifiers to it).
-	var damage_from_player_base = current_numerical_damage
-
-	# 2. Apply the weapon's specific percentage multiplier to the player's base damage component.
-	var weapon_scaled_damage = damage_from_player_base * weapon_damage_percentage
-
-	# 3. Apply tag-specific damage multipliers.
-	var tag_damage_multiplier = 1.0
-	for tag in weapon_tags:
-		# Map tags to their corresponding damage multiplier keys
-		var tag_key: StringName = &""
-		match tag:
-			&"melee": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER]
-			&"projectile": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER]
-			&"magic": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_DAMAGE_MULTIPLIER]
-			&"physical": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER] # Refers to the 'physical' tag
-			&"fire": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER]
-			&"ice": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER]
-			_: continue # Skip if tag doesn't have a corresponding damage multiplier stat
-
-		# Get and apply the multiplier for this tag.
-		# Note: get_final_stat_by_string will return 1.0 if the stat is not found/initialized.
-		tag_damage_multiplier *= get_final_stat_by_string(tag_key)
-
-	weapon_scaled_damage *= tag_damage_multiplier
-
-	# 4. Apply the player's global damage multiplier (from class, general upgrades, etc.).
-	var final_multiplied_damage = weapon_scaled_damage * current_global_damage_multiplier
-
-	# 5. Add any flat damage bonuses from global player upgrades.
-	var final_damage = final_multiplied_damage + current_global_flat_damage_add
-
-	# Ensure damage is never negative
-	return max(0.0, final_damage)
+#func get_calculated_player_damage(weapon_damage_percentage: float = 1.0, weapon_tags: Array[StringName] = []) -> float:
+	## This function uses the 'current_' cached values from recalculate_all_stats()
+	## to ensure consistency and avoid re-calculating base stats.
+#
+	## Formula: (player_base_numerical_damage * weapon_damage_percentage * tag_multipliers) * player_global_damage_multiplier + player_global_flat_damage_add
+#
+	## 1. Start with the player's current numerical damage (which includes class base + flat/percent_add modifiers to it).
+	#var damage_from_player_base = current_numerical_damage
+#
+	## 2. Apply the weapon's specific percentage multiplier to the player's base damage component.
+	#var weapon_scaled_damage = damage_from_player_base * weapon_damage_percentage
+#
+	## 3. Apply tag-specific damage multipliers.
+	#var tag_damage_multiplier = 1.0
+	#for tag in weapon_tags:
+		## Map tags to their corresponding damage multiplier keys
+		#var tag_key: StringName = &""
+		#match tag:
+			#&"melee": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER]
+			#&"projectile": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER]
+			#&"magic": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MAGIC_DAMAGE_MULTIPLIER]
+			#&"physical": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER] # Refers to the 'physical' tag
+			#&"fire": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER]
+			#&"ice": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER]
+			#&"nature": tag_key = PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NATURE_DAMAGE_MULTIPLIER]
+			#_: continue # Skip if tag doesn't have a corresponding damage multiplier stat
+#
+		## Get and apply the multiplier for this tag.
+		## Note: get_final_stat_by_string will return 1.0 if the stat is not found/initialized.
+		#tag_damage_multiplier *= get_final_stat_by_string(tag_key)
+#
+	#weapon_scaled_damage *= tag_damage_multiplier
+#
+	## 4. Apply the player's global damage multiplier (from class, general upgrades, etc.).
+	#var final_multiplied_damage = weapon_scaled_damage * current_global_damage_multiplier
+#
+	## 5. Add any flat damage bonuses from global player upgrades.
+	#var final_damage = final_multiplied_damage + current_global_flat_damage_add
+#
+	## Ensure damage is never negative
+	#return max(0.0, final_damage)
 
 
 # --- Debug Setters for Player Stats (Used by DebugPanel) ---
@@ -490,6 +538,20 @@ func recalculate_all_stats():
 	current_enemy_debuff_resistance_reduction = get_final_stat(PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION)
 	current_dodge_chance = get_final_stat(PlayerStatKeys.Keys.DODGE_CHANCE)
 	# Add more 'current_' stat updates here for any other relevant keys
+	current_melee_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER)
+	current_projectile_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER)
+	current_magic_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.MAGIC_DAMAGE_MULTIPLIER)
+	current_physical_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.PHYSICAL_DAMAGE_MULTIPLIER)
+	current_fire_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.FIRE_DAMAGE_MULTIPLIER)
+	current_ice_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.ICE_DAMAGE_MULTIPLIER)
+	current_nature_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.NATURE_DAMAGE_MULTIPLIER)
+	current_melee_attack_speed_multiplier = get_final_stat(PlayerStatKeys.Keys.MELEE_ATTACK_SPEED_MULTIPLIER)
+	current_projectile_attack_speed_multiplier = get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER)
+	current_magic_attack_speed_multiplier = get_final_stat(PlayerStatKeys.Keys.MAGIC_ATTACK_SPEED_MULTIPLIER)
+	current_melee_aoe_area_multiplier = get_final_stat(PlayerStatKeys.Keys.MELEE_AOE_AREA_MULTIPLIER)
+	current_magic_aoe_area_multiplier = get_final_stat(PlayerStatKeys.Keys.MAGIC_AOE_AREA_MULTIPLIER)
+	current_projectile_pierce_count_add = get_final_stat(PlayerStatKeys.Keys.PROJECTILE_PIERCE_COUNT_ADD)
+	current_projectile_max_range_add = get_final_stat(PlayerStatKeys.Keys.PROJECTILE_MAX_RANGE_ADD)
 
 	# Emit signal with current critical stats for listeners to update.
 	emit_signal("stats_recalculated",

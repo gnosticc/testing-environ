@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://dh2ionib1cta"]
+
+[ext_resource type="Script" uid="uid://b8xnfwda23hdj" path="res://Scripts/DataResources/Weapons/Advanced/LuringPrismProjectile.gd" id="1_5syoq"]
+[ext_resource type="Texture2D" uid="uid://cgws85q2rs8fr" path="res://Assets/Weapons/Advanced Weapons/Luring Prism/Glass Dagger Animation.png" id="2_xf074"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gxfpo"]
+atlas = ExtResource("2_xf074")
+region = Rect2(0, 0, 240, 175)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_hanip"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gxfpo")
+}],
+"loop": false,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pi53x"]
+radius = 50.0
+height = 298.0
+
+[node name="LuringPrismProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_5syoq")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+rotation = 2.51362
+sprite_frames = SubResource("SpriteFrames_hanip")
+animation = &"fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_pi53x")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

@@ -1,0 +1,55 @@
+[gd_scene load_steps=9 format=3 uid="uid://cnhbp1jjdxrfg"]
+
+[ext_resource type="Script" uid="uid://cxsypne80t55h" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/EchoingDemise.gd" id="1_cialo"]
+[ext_resource type="Texture2D" uid="uid://capjc4ygv3y2d" path="res://Assets/Pets and Summons/Summoner/Echoing Demise Animation.png" id="2_shx8q"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m0r4u"]
+atlas = ExtResource("2_shx8q")
+region = Rect2(0, 0, 300, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_05ei6"]
+atlas = ExtResource("2_shx8q")
+region = Rect2(300, 0, 300, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6q43c"]
+atlas = ExtResource("2_shx8q")
+region = Rect2(600, 0, 300, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f5hkn"]
+atlas = ExtResource("2_shx8q")
+region = Rect2(900, 0, 300, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lkcem"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m0r4u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_05ei6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6q43c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f5hkn")
+}],
+"loop": false,
+"name": &"explode",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xs4l7"]
+radius = 147.031
+
+[node name="EchoingDemise" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_cialo")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_lkcem")
+animation = &"explode"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_xs4l7")

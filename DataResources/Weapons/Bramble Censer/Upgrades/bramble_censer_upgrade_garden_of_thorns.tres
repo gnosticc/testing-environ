@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cf5b1qrtg3ya7"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_3jfkv"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_2sjfy"]
+[ext_resource type="Resource" uid="uid://cpmgcfg67gm0p" path="res://DataResources/Weapons/Bramble Censer/Effects/bramble_censer_garden_of_thorns_effect.tres" id="2_8kgfe"]
+
+[resource]
+script = ExtResource("2_2sjfy")
+upgrade_id = &"bc_garden_of_thorns"
+title = "Garden of Thorns"
+description = "You master the cycle of growth and decay. The 'Bloom of Thorns' explosion now also spawns a new root pool."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_3jfkv")]([ExtResource("2_8kgfe")])
+set_acquired_flag_on_weapon = &"bc_garden_of_thorns_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

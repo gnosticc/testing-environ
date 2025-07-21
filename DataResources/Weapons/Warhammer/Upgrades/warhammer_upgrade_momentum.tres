@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c54ipxu2v28ib"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ujftj"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ivpdl"]
+[ext_resource type="Resource" uid="uid://cj6pvhmqe3md8" path="res://DataResources/Weapons/Warhammer/Effects/momentum_cooldown_effect.tres" id="2_p805l"]
+
+[resource]
+script = ExtResource("2_ivpdl")
+upgrade_id = &"wh_momentum"
+title = "Momentum"
+description = "The Champion swings the Warhammer with remarkable agility, reducing its cooldown by 20%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ujftj")]([ExtResource("2_p805l")])
+set_acquired_flag_on_weapon = &"wh_momentum_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

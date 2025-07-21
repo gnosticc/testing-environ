@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b5lgvjy5t6slf"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_naa30"]
+[ext_resource type="Resource" uid="uid://2p7p1gh2kgkk" path="res://DataResources/Weapons/Shuriken/Effects/shuriken_effect_embrace.tres" id="2_75q4j"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_asgl2"]
+
+[resource]
+script = ExtResource("2_asgl2")
+upgrade_id = &"shuriken_shadows_embrace"
+title = "Shadow's Embrace"
+description = "Enemies defeated shortly after being struck by a shadow clone will spawn a new clone in their place."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_naa30")]([ExtResource("2_75q4j")])
+set_acquired_flag_on_weapon = &"shuriken_shadows_embrace_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

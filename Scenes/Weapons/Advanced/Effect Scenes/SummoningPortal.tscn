@@ -1,0 +1,94 @@
+[gd_scene load_steps=12 format=3 uid="uid://htl1elymvxfu"]
+
+[ext_resource type="Texture2D" uid="uid://boksackhi6ba1" path="res://Assets/Pets and Summons/Summoner/Portal Animation.png" id="1_2dqma"]
+[ext_resource type="Script" uid="uid://crar1541l5vgu" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/SummoningPortal.gd" id="2_ruscu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k8nja"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(0, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ubroi"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g6r2t"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(500, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ftsrm"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(750, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0vvrd"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(1000, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ay3fd"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(1250, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8ed1w"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(1500, 0, 250, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bq85h"]
+atlas = ExtResource("1_2dqma")
+region = Rect2(1750, 0, 250, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wwi0q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k8nja")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ubroi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g6r2t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ftsrm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0vvrd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ay3fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ed1w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bq85h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ay3fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ed1w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bq85h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ay3fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8ed1w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bq85h")
+}],
+"loop": false,
+"name": &"default",
+"speed": 14.0
+}]
+
+[node name="SummoningPortal" type="AnimatedSprite2D"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_wwi0q")
+script = ExtResource("2_ruscu")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

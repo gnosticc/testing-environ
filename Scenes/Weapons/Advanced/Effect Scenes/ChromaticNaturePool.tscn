@@ -1,0 +1,70 @@
+[gd_scene load_steps=10 format=3 uid="uid://cll73oqcrtpqk"]
+
+[ext_resource type="Script" uid="uid://oq5u4h316jwd" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ChromaticNaturePool.gd" id="1_pjqig"]
+[ext_resource type="Texture2D" uid="uid://skb7myl10j88" path="res://Assets/Weapons/Advanced Weapons/Chromatic Aberration/Chromatic Nature Pool Animation.png" id="2_75cm5"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7etuf"]
+atlas = ExtResource("2_75cm5")
+region = Rect2(0, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7dx61"]
+atlas = ExtResource("2_75cm5")
+region = Rect2(300, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3lwb1"]
+atlas = ExtResource("2_75cm5")
+region = Rect2(600, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4pknh"]
+atlas = ExtResource("2_75cm5")
+region = Rect2(900, 0, 300, 185)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_odk23"]
+atlas = ExtResource("2_75cm5")
+region = Rect2(1200, 0, 300, 185)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_bydlx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7etuf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7dx61")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3lwb1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4pknh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_odk23")
+}],
+"loop": true,
+"name": &"active",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ws8bj"]
+radius = 109.417
+
+[node name="ChromaticNaturePool" type="Area2D"]
+z_index = -1
+collision_layer = 0
+collision_mask = 136
+script = ExtResource("1_pjqig")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_bydlx")
+animation = &"active"
+autoplay = "active"
+frame_progress = 0.354439
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ws8bj")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="DamageTickTimer" type="Timer" parent="."]
+wait_time = 0.5

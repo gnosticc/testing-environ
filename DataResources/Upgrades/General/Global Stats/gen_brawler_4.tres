@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=4 format=3 uid="uid://c7bmrqo8p250c"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_wq508"]
+[ext_resource type="Resource" uid="uid://ci2g1y42y7ixi" path="res://DataResources/Upgrades/General/Effects/Global Damage Multiplier/brawler_25.tres" id="2_70jf3"]
+[ext_resource type="Script" uid="uid://c3gbs6gwsa23p" path="res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd" id="3_uiptm"]
+
+[resource]
+script = ExtResource("3_uiptm")
+id = &"gen_brawler_4"
+title = "Brawler IV"
+description = "Increases damage of all Melee weapons by 25%."
+class_tag_filter = Array[int]([])
+effects = Array[ExtResource("1_wq508")]([ExtResource("2_70jf3")])
+weight = 60.0
+max_stacks = 1
+prerequisites = Array[StringName]([&"gen_brawler_3"])
+metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

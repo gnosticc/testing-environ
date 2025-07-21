@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bj1hsdn3b172n"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_6283c"]
+[ext_resource type="Resource" uid="uid://dksgf8ts0kjg5" path="res://DataResources/Weapons/ReturnFromBeyond/Effects/arcane_potency_effect.tres" id="2_bl04p"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_frgk1"]
+
+[resource]
+script = ExtResource("2_frgk1")
+upgrade_id = &"rfb_arcane_potency"
+title = "Arcane Potency"
+description = "The Ethereal Echo's primary shotgun-style bolts deal 50% more damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_6283c")]([ExtResource("2_bl04p")])
+set_acquired_flag_on_weapon = &"rfb_arcane_potency_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

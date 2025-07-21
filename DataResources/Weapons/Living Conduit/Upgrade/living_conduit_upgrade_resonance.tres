@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cyxfwlj8xdket"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_po6rb"]
+[ext_resource type="Resource" uid="uid://c2hjxycf6qbt5" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_resonance_effect.tres" id="2_blm4c"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_jy3yx"]
+
+[resource]
+script = ExtResource("2_jy3yx")
+upgrade_id = &"living_conduit_arcane_resonance"
+title = "Arcane Resonance"
+description = "Arc strikes have a chance to grant 'Arcane Surge', increasing the attack speed of all Magical weapons by 30% for 4 seconds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_po6rb")]([ExtResource("2_blm4c")])
+set_acquired_flag_on_weapon = &"living_conduit_arcane_resonance_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

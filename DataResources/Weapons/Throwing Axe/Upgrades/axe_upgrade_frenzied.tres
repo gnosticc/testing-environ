@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dqhsw3qs7fi3n"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ltof6"]
+[ext_resource type="Resource" uid="uid://s1pwky0jslrf" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_frenzied_flag.tres" id="2_oew2k"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_x66rf"]
+[ext_resource type="Resource" uid="uid://d3x253kx0xygf" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_frenzied_cooldown.tres" id="3_rukdn"]
+
+[resource]
+script = ExtResource("2_x66rf")
+upgrade_id = &"axe_frenzied"
+title = "Frenzied Hurl"
+description = "You throw with wild abandon, reducing cooldown by 30% at the cost of some accuracy."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ltof6")]([ExtResource("2_oew2k"), ExtResource("3_rukdn")])
+set_acquired_flag_on_weapon = &"axe_frenzied_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

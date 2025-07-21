@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cauukwo68uc71"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_eekbs"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_lvulw"]
+[ext_resource type="Resource" uid="uid://bascsm7x08mo8" path="res://DataResources/Weapons/Reinforcements/Effects/effect_deploy_aegis.tres" id="2_ri21f"]
+
+[resource]
+script = ExtResource("2_lvulw")
+upgrade_id = &"reinforcements_deploy_aegis"
+title = "\"New Unit: Aegis Protector"
+description = "Deploys the schematics for the Aegis Protector, a short-range turret that attacks everything nearby."
+prerequisites_on_this_weapon = Array[StringName]([&"reinforcements_deploy_hk"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_eekbs")]([ExtResource("2_ri21f")])
+set_acquired_flag_on_weapon = &"reinforcements_deploy_aegis_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,48 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://kp7xwd0t8hsp"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_7xi5s"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_cv4n1"]
+[ext_resource type="Resource" uid="uid://u2y17280tfbt" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_empowered_conduit.tres" id="2_wpy75"]
+[ext_resource type="PackedScene" uid="uid://denb7n4x4oqd2" path="res://Scenes/Weapons/Advanced/SwordCoilController.tscn" id="3_cv4n1"]
+[ext_resource type="Resource" uid="uid://bked6ln1vfncr" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_runic_imbuement.tres" id="3_n5tqw"]
+[ext_resource type="Resource" uid="uid://e3kway23dfql" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_arcane_battery.tres" id="4_jdtnk"]
+[ext_resource type="Resource" uid="uid://c3cqriy2lo1mg" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_blade_echo.tres" id="5_epf58"]
+[ext_resource type="Resource" uid="uid://b0xibi2yce0gj" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_kinetic_resonance.tres" id="6_6drd0"]
+[ext_resource type="Resource" uid="uid://dntjpjh5g0wck" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_phase_blade.tres" id="7_ipw67"]
+[ext_resource type="Resource" uid="uid://dnaky3noijmwt" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_wider_gyre.tres" id="8_shr18"]
+[ext_resource type="Resource" uid="uid://dofy7qf588pr4" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_spell_siphon.tres" id="9_bojgl"]
+[ext_resource type="Resource" uid="uid://da3rfjxljpx2" path="res://DataResources/Weapons/SwordCoil/Upgrades/sword_coil_upgrade_blade_storm.tres" id="10_7eg6x"]
+
+[resource]
+script = ExtResource("2_cv4n1")
+id = &"spellsword_sword_coil"
+title = "Sword Coil"
+description = "Fires a rotating, firey coil from the tip of an enchanted sword."
+weapon_scene = ExtResource("3_cv4n1")
+tags = Array[StringName]([&"projectile", &"magical", &"fire", &"spellsword weapon", &"physical"])
+class_tag_restrictions = [&"spellsword_advanced"]
+cooldown = 2.8
+max_level = 10
+base_lifetime = 2.0
+spawn_as_child = true
+requires_direction = true
+targeting_type = &"mouse_direction"
+tracks_shot_count = false
+initial_specific_stats = {
+"arcane_battery_bonus_per_level": 0.05,
+"base_lifetime": 2.0,
+"blade_echo_bonus_per_level": 0.05,
+"blade_storm_angle": 35.0,
+"blade_storm_delay": 0.4,
+"kinetic_resonance_bonus": 0.1,
+"kinetic_resonance_distance": 80.0,
+&"max_cast_range": 300.0,
+&"pierce_count": 0,
+"projectile_size_multiplier": 0.7,
+&"projectile_speed": 200.0,
+"spell_siphon_chance": 0.25,
+"spell_siphon_cooldown_reduction": 0.1,
+&"weapon_damage_percentage": 1.5
+}
+available_upgrades = Array[ExtResource("1_7xi5s")]([ExtResource("2_wpy75"), ExtResource("3_n5tqw"), ExtResource("4_jdtnk"), ExtResource("5_epf58"), ExtResource("6_6drd0"), ExtResource("7_ipw67"), ExtResource("8_shr18"), ExtResource("9_bojgl"), ExtResource("10_7eg6x")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

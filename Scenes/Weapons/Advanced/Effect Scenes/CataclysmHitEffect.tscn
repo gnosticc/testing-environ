@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://dwq538djypw05"]
+
+[ext_resource type="Script" uid="uid://y4vdm0bt0sb8" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/CataclysmHitEffect.gd" id="1_4057w"]
+[ext_resource type="Texture2D" uid="uid://d2a8w7be46ad" path="res://Assets/SFX/Cataclysm Animation.png" id="2_c43wu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tf8lq"]
+atlas = ExtResource("2_c43wu")
+region = Rect2(0, 0, 250, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_8uewb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tf8lq")
+}],
+"loop": true,
+"name": &"impact",
+"speed": 5.0
+}]
+
+[node name="CataclysmHitEffect" type="Node2D"]
+z_index = 2
+script = ExtResource("1_4057w")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 2
+position = Vector2(0, 10)
+scale = Vector2(0.216, 0.2)
+sprite_frames = SubResource("SpriteFrames_8uewb")
+animation = &"impact"

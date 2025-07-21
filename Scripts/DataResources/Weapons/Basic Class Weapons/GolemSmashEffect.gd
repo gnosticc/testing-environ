@@ -5,8 +5,11 @@ class_name GolemSmashEffect
 extends Node2D
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+var _golem_node: Node2D
 
-func initialize(p_position: Vector2, damage: int, golem_stats: Dictionary, owner_player: PlayerCharacter):
+func initialize(p_position: Vector2, damage: int, golem_stats: Dictionary, owner_player: PlayerCharacter, p_golem_node: Node2D):
+	_golem_node = p_golem_node
+
 	global_position = p_position
 	animated_sprite.play("smash")
 	animated_sprite.animation_finished.connect(queue_free)
@@ -24,4 +27,10 @@ func initialize(p_position: Vector2, damage: int, golem_stats: Dictionary, owner
 	var results = space_state.intersect_shape(query)
 	for result in results:
 		if result.collider is BaseEnemy and not result.collider.is_dead():
-			result.collider.take_damage(damage, owner_player)
+			var weapon_tags: Array[StringName] = []
+			if is_instance_valid(_golem_node) and _golem_node.has_method("get"):
+				var golem_specific_stats = _golem_node.get("specific_weapon_stats")
+				if golem_specific_stats.has("tags"):
+					weapon_tags = golem_specific_stats.get("tags")
+			
+			result.collider.take_damage(damage, owner_player, {}, weapon_tags)

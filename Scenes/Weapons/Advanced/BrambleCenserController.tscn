@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://08vpkg7rnxg1"]
+
+[ext_resource type="Script" uid="uid://dfw0ndo2neana" path="res://Scripts/DataResources/Weapons/Advanced/BrambleCenserController.gd" id="1_g8rpq"]
+[ext_resource type="PackedScene" uid="uid://dwfbtut2g5soq" path="res://Scenes/Weapons/Advanced/CenserSwing.tscn" id="2_bqpep"]
+
+[node name="BrambleCenserController" type="Node2D"]
+script = ExtResource("1_g8rpq")
+attack_scene = ExtResource("2_bqpep")

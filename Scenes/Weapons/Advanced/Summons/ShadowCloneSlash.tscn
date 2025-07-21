@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://v5j4tusosy2p"]
+
+[ext_resource type="Script" uid="uid://dhp87tnpil31s" path="res://Scripts/DataResources/Weapons/Advanced/Summons/ShadowCloneSlash.gd" id="1_675h6"]
+[ext_resource type="Texture2D" uid="uid://ci3hqsqt1qan0" path="res://Assets/Weapons/Advanced Weapons/Shadow Clone Slash Animation Curved.png" id="2_inpe8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jqdb2"]
+atlas = ExtResource("2_inpe8")
+region = Rect2(0, 0, 120, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3rvsl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jqdb2")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="ShadowCloneSlash" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_675h6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+modulate = Color(0.140625, 0.0527344, 0.0527344, 1)
+scale = Vector2(0.3, 0.3)
+sprite_frames = SubResource("SpriteFrames_3rvsl")
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionPolygon2D" parent="."]
+position = Vector2(-31.7351, 2.7346)
+rotation = -0.606601
+polygon = PackedVector2Array(21.7133, -8.95374, 29.4933, -9.64123, 41.5656, -2.48173, 48.5743, 8.46716, 43.4939, 28.0679, 32.2265, 37.2899, 17.2367, 37.8433, 3.26966, 28.1519, 6.43862, 21.8307, 11.1837, 20.2546, 18.8295, 26.777, 30.2144, 26.1565, 37.8769, 16.8675, 36.1834, 3.52092, 24.111, -3.63858, 19.7516, -7.88064)
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.3
+one_shot = true

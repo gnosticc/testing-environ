@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://emfwcp05jnyo"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_6y4pe"]
+
+[resource]
+script = ExtResource("1_6y4pe")
+id = &""
+modification_type = &"percent_add_to_base"
+stat_key = &"area_scale"
+value_type = 1
+value_float = 0.3
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

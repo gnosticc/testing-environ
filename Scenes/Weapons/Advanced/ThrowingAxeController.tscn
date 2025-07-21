@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://bnptnkhd7f5yk"]
+
+[ext_resource type="Script" uid="uid://d3ftcnujj2nix" path="res://Scripts/DataResources/Weapons/Advanced/ThrowingAxeController.gd" id="1_svhpb"]
+[ext_resource type="PackedScene" uid="uid://di0ynaa0xydc3" path="res://Scenes/Weapons/Advanced/ThrowingAxeProjectile.tscn" id="2_54je8"]
+[ext_resource type="PackedScene" uid="uid://bdu2hd7bg5s3h" path="res://Scenes/Weapons/Advanced/Effect Scenes/SplinterProjectile.tscn" id="3_orjms"]
+
+[node name="ThrowingAxeController" type="Node2D"]
+script = ExtResource("1_svhpb")
+axe_projectile_scene = ExtResource("2_54je8")
+splinter_scene = ExtResource("3_orjms")

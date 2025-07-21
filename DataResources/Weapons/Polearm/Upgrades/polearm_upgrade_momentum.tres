@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://ceffmtx7x5rhw"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_rpd7o"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_hqvr0"]
+[ext_resource type="Resource" uid="uid://dqnjqfuf7wa3y" path="res://DataResources/Weapons/Polearm/Effects/polearm_momentum_effect.tres" id="2_xe5e5"]
+
+[resource]
+script = ExtResource("2_hqvr0")
+upgrade_id = &"polearm_momentum"
+title = "Momentum"
+description = "Your attack sweeps fuel your speed. Gain +4% movement speed per Rogue weapon level for 2 seconds on hit."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_rpd7o")]([ExtResource("2_xe5e5")])
+set_acquired_flag_on_weapon = &"polearm_momentum_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

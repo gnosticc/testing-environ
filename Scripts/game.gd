@@ -125,7 +125,22 @@ const ORIGINAL_RANDOM_EVENT_CHECK_INTERVAL: float = 35.0
 	"res://DataResources/Weapons/VineWhip/druid_vine_whip_blueprint.tres",
 	"res://DataResources/Weapons/Torrent/druid_torrent_blueprint.tres",
 	"res://DataResources/Weapons/LesserSpirit/conjurer_lesser_spirit_blueprint.tres",
-	"res://DataResources/Weapons/MothGolem/conjurer_moth_golem_blueprint.tres"
+	"res://DataResources/Weapons/MothGolem/conjurer_moth_golem_blueprint.tres",
+	"res://DataResources/Weapons/Warhammer/champion_warhammer_blueprint.tres",
+	"res://DataResources/Weapons/Katana/samurai_katana_blueprint.tres",
+	"res://DataResources/Weapons/SwordCoil/spellsword_sword_coil_blueprint.tres",
+	"res://DataResources/Weapons/Throwing Axe/berserker_throwing_axe_blueprint.tres",
+	"res://DataResources/Weapons/Shuriken/shuriken_blueprint.tres",
+	"res://DataResources/Weapons/Polearm/sentinel_polearm_blueprint.tres",
+	"res://DataResources/Weapons/Living Conduit/living_conduit_blueprint.tres",
+	"res://DataResources/Weapons/Bramble Censer/bramble_censer_blueprint.tres",
+	"res://DataResources/Weapons/Reinforcements/mechamaster_reinforcements_blueprint.tres",
+	"res://DataResources/Weapons/ExperimentalMaterials/alchemist_experimental_materials_blueprint.tres",
+	"res://DataResources/Weapons/SylvanChakram/sylvan_chakram_blueprint.tres",
+	"res://DataResources/Weapons/LuringPrism/luring_prism_blueprint.tres",
+	"res://DataResources/Weapons/ConjoinedSpirits/conjoined_spirit_blueprint.tres",
+	"res://DataResources/Weapons/ReturnFromBeyond/return_from_beyond_blueprint.tres",
+	"res://DataResources/Weapons/ChromaticAberration/chromatic_aberration_blueprint.tres"
 ]
 
 var all_loaded_weapon_blueprints: Array[WeaponBlueprintData] = [] # All blueprints loaded at startup
@@ -135,15 +150,22 @@ var weapon_blueprints_by_id: Dictionary = {} # Dictionary for quick lookup by ID
 @export var general_upgrade_card_paths: Array[String] = [] # Paths to GeneralUpgradeCardData.tres files
 var loaded_general_upgrades: Array[GeneralUpgradeCardData] = [] # Loaded GeneralUpgradeCardData resources
 
+# NEW: Array to hold class progression data resources.
+@export var class_progression_data_paths: Array[String] = []
+var loaded_class_progressions: Array[PlayerClassProgressionData] = []
+
 # Signal to indicate that all weapon blueprints are loaded and ready.
 # PlayerCharacter.gd will connect to this to ensure proper initialization.
 signal weapon_blueprints_ready
+signal enemy_was_killed(attacker_node, killed_enemy_node)
+
 
 
 func _ready():
 	_load_all_weapon_blueprints()
-	_test_print_loaded_weapon_blueprints() # For debug purposes
 	_load_all_general_upgrades()
+	# NEW: Load the class progression data.
+	_load_all_class_progressions()
 	# Crucial: Emit this signal AFTER all blueprints are loaded.
 	emit_signal("weapon_blueprints_ready")
 
@@ -201,6 +223,16 @@ func _ready():
 	culling_check_timer.timeout.connect(Callable(self, "_on_culling_check_timer_timeout"))
 	add_child(culling_check_timer); culling_check_timer.start()
 
+# NEW: Function to load all PlayerClassProgressionData resources.
+func _load_all_class_progressions():
+	loaded_class_progressions.clear()
+	for path in class_progression_data_paths:
+		var prog_res = load(path) as PlayerClassProgressionData
+		if is_instance_valid(prog_res):
+			loaded_class_progressions.append(prog_res)
+		else:
+			push_error("game.gd: Failed to load PlayerClassProgressionData from path: ", path)
+
 # Loads all WeaponBlueprintData resources from specified paths.
 func _load_all_weapon_blueprints():
 	all_loaded_weapon_blueprints.clear()
@@ -228,62 +260,62 @@ func _load_all_general_upgrades():
 
 
 # Debug function to print details of all loaded weapon blueprints.
-func _test_print_loaded_weapon_blueprints():
-	print("--- Loaded Weapon Blueprints Test ---")
-	if all_loaded_weapon_blueprints.is_empty():
-		print("No weapon blueprints were loaded or found in 'weapon_blueprint_files' array.")
-		return
-
-	for bp_data in all_loaded_weapon_blueprints:
-		if not is_instance_valid(bp_data):
-			print("  Found an invalid blueprint in the loaded list.")
-			continue
-		
-		print("Weapon ID: '", bp_data.id, "', Title: '", bp_data.title, "'")
-		var scene_path_str = "N/A"
-		if is_instance_valid(bp_data.weapon_scene) and bp_data.weapon_scene.resource_path != "":
-			scene_path_str = bp_data.weapon_scene.resource_path
-		print("  Scene: ", scene_path_str)
-		print("  Cooldown: ", bp_data.cooldown, ", Max Level: ", bp_data.max_level)
-		print("  Initial Specific Stats: ", bp_data.initial_specific_stats)
-		print("  Available Upgrades (%s):" % bp_data.available_upgrades.size())
-		for upgrade_res_idx in range(bp_data.available_upgrades.size()):
-			var upgrade_res = bp_data.available_upgrades[upgrade_res_idx]
-			if not is_instance_valid(upgrade_res) or not upgrade_res is WeaponUpgradeData:
-				print("    - Invalid upgrade resource found at index ", upgrade_res_idx, " in blueprint's available_upgrades array. Type: ", typeof(upgrade_res))
-				continue
-			
-			var upg_data = upgrade_res as WeaponUpgradeData
-			print("    - Upgrade [", upgrade_res_idx, "] ID: '", upg_data.upgrade_id, "', Title: '", upg_data.title, "'")
-			print("      Effects (%s):" % upg_data.effects.size())
-			for effect_res_idx in range(upg_data.effects.size()):
-				var effect_res = upg_data.effects[effect_res_idx]
-				if not is_instance_valid(effect_res):
-					print("        Effect [", effect_res_idx, "]: Invalid resource.")
-					continue
-				print("        Effect [", effect_res_idx, "] TypeID: '", effect_res.effect_type_id, "' (Class: '", effect_res.get_class(),"')")
-				
-				if effect_res is StatModificationEffectData:
-					var stat_mod = effect_res as StatModificationEffectData
-					# CORRECTED: Use get_value() from StatModificationEffectData
-					var effect_val = stat_mod.get_value()
-					print("          StatMod: Scope='", stat_mod.target_scope, "', Key='", stat_mod.stat_key, "', Type='", stat_mod.modification_type, "', Val=", effect_val)
-				
-				elif effect_res is CustomFlagEffectData:
-					var flag_mod = effect_res as CustomFlagEffectData
-					print("          FlagMod: Scope='", flag_mod.target_scope, "', Key='", flag_mod.flag_key, "', Val=", flag_mod.flag_value)
-				
-				elif effect_res is TriggerAbilityEffectData:
-					var trigger_mod = effect_res as TriggerAbilityEffectData
-					print("          TriggerAbility: Scope='", trigger_mod.target_scope, "', ID='", trigger_mod.ability_id, "', Params=", trigger_mod.ability_params)
-				
-				elif effect_res is StatusEffectApplicationData:
-					var status_app_mod = effect_res as StatusEffectApplicationData
-					print("          StatusApp: Scope='", status_app_mod.target_scope, "', Path='", status_app_mod.status_effect_resource_path, "', Chance=", status_app_mod.application_chance, ", DurationOvr=", status_app_mod.duration_override)
-				
-				else:
-					print("          Unknown/Base EffectData: DevNote='", effect_res.developer_note, "'")
-		print("---")
+#func _test_print_loaded_weapon_blueprints():
+	#print("--- Loaded Weapon Blueprints Test ---")
+	#if all_loaded_weapon_blueprints.is_empty():
+		#print("No weapon blueprints were loaded or found in 'weapon_blueprint_files' array.")
+		#return
+#
+	#for bp_data in all_loaded_weapon_blueprints:
+		#if not is_instance_valid(bp_data):
+			#print("  Found an invalid blueprint in the loaded list.")
+			#continue
+		#
+		#print("Weapon ID: '", bp_data.id, "', Title: '", bp_data.title, "'")
+		#var scene_path_str = "N/A"
+		#if is_instance_valid(bp_data.weapon_scene) and bp_data.weapon_scene.resource_path != "":
+			#scene_path_str = bp_data.weapon_scene.resource_path
+		#print("  Scene: ", scene_path_str)
+		#print("  Cooldown: ", bp_data.cooldown, ", Max Level: ", bp_data.max_level)
+		#print("  Initial Specific Stats: ", bp_data.initial_specific_stats)
+		#print("  Available Upgrades (%s):" % bp_data.available_upgrades.size())
+		#for upgrade_res_idx in range(bp_data.available_upgrades.size()):
+			#var upgrade_res = bp_data.available_upgrades[upgrade_res_idx]
+			#if not is_instance_valid(upgrade_res) or not upgrade_res is WeaponUpgradeData:
+				#print("    - Invalid upgrade resource found at index ", upgrade_res_idx, " in blueprint's available_upgrades array. Type: ", typeof(upgrade_res))
+				#continue
+			#
+			#var upg_data = upgrade_res as WeaponUpgradeData
+			#print("    - Upgrade [", upgrade_res_idx, "] ID: '", upg_data.upgrade_id, "', Title: '", upg_data.title, "'")
+			#print("      Effects (%s):" % upg_data.effects.size())
+			#for effect_res_idx in range(upg_data.effects.size()):
+				#var effect_res = upg_data.effects[effect_res_idx]
+				#if not is_instance_valid(effect_res):
+					#print("        Effect [", effect_res_idx, "]: Invalid resource.")
+					#continue
+				#print("        Effect [", effect_res_idx, "] TypeID: '", effect_res.effect_type_id, "' (Class: '", effect_res.get_class(),"')")
+				#
+				#if effect_res is StatModificationEffectData:
+					#var stat_mod = effect_res as StatModificationEffectData
+					## CORRECTED: Use get_value() from StatModificationEffectData
+					#var effect_val = stat_mod.get_value()
+					#print("          StatMod: Scope='", stat_mod.target_scope, "', Key='", stat_mod.stat_key, "', Type='", stat_mod.modification_type, "', Val=", effect_val)
+				#
+				#elif effect_res is CustomFlagEffectData:
+					#var flag_mod = effect_res as CustomFlagEffectData
+					#print("          FlagMod: Scope='", flag_mod.target_scope, "', Key='", flag_mod.flag_key, "', Val=", flag_mod.flag_value)
+				#
+				#elif effect_res is TriggerAbilityEffectData:
+					#var trigger_mod = effect_res as TriggerAbilityEffectData
+					#print("          TriggerAbility: Scope='", trigger_mod.target_scope, "', ID='", trigger_mod.ability_id, "', Params=", trigger_mod.ability_params)
+				#
+				#elif effect_res is StatusEffectApplicationData:
+					#var status_app_mod = effect_res as StatusEffectApplicationData
+					#print("          StatusApp: Scope='", status_app_mod.target_scope, "', Path='", status_app_mod.status_effect_resource_path, "', Chance=", status_app_mod.application_chance, ", DurationOvr=", status_app_mod.duration_override)
+				#
+				#else:
+					#print("          Unknown/Base EffectData: DevNote='", effect_res.developer_note, "'")
+		#print("---")
 
 
 func _physics_process(delta: float):
@@ -502,6 +534,9 @@ func _calculate_spawn_position_for_enemy(near_player: bool = false, offset_vecto
 	
 	return spawn_position + offset_vector
 
+func _on_enemy_killed(attacker_node: Node, killed_enemy_node: Node):
+	emit_signal("enemy_was_killed", attacker_node, killed_enemy_node)
+
 # Spawns an actual enemy instance into the scene.
 func _spawn_actual_enemy(enemy_data: EnemyData, position: Vector2, force_elite_type: StringName = &""):
 	if not is_instance_valid(enemy_data) or enemy_data.scene_path.is_empty():
@@ -517,6 +552,7 @@ func _spawn_actual_enemy(enemy_data: EnemyData, position: Vector2, force_elite_t
 
 	enemy_instance.global_position = position
 	enemies_container.add_child(enemy_instance) # Add to container for organization
+	enemy_instance.killed_by_attacker.connect(_on_enemy_killed)
 
 	# Initialize enemy with its data
 	if enemy_instance.has_method("initialize_from_data"):
@@ -739,90 +775,156 @@ func _on_player_level_up(_new_level: int):
 	
 	level_up_screen_instance.process_mode = Node.PROCESS_MODE_ALWAYS # Ensure UI processes while game is paused
 
-# Generates a list of upgrade options for the player to choose from.
-# This function aims to prevent duplicate upgrades in the same selection.
+# REFACTORED: This function now builds a single, unified pool of all possible
+# level-up options and uses a weighted selection algorithm to choose the final cards.
 func _get_upgrade_options_for_player() -> Array:
 	var options_pool: Array = []
-	var offered_ids_this_run: Array = []
 
-	# 1. Get General Upgrades
+	if not is_instance_valid(player_node):
+		return [{"title": "Error", "description": "Player node is invalid.", "type": "skip"}]
+
+	# --- 1. Populate Pool: General Upgrades (MODIFIED LOGIC) ---
+	var player_acquired_upgrades = player_node.acquired_general_upgrade_ids
 	for card_res in loaded_general_upgrades:
-		if is_instance_valid(card_res) and not offered_ids_this_run.has(card_res.id):
-			var card_presentation = {
-				"id_for_card_selection": card_res.id,
-				"title": card_res.title,
-				"description": card_res.description,
-				# FIXED: Check if the icon is valid before accessing its resource_path.
-				"icon_path": card_res.icon.resource_path if is_instance_valid(card_res.icon) else "",
-				"type": "general_upgrade",
-				"resource_data": card_res
+		if not is_instance_valid(card_res): continue
+
+		# --- Stacking Check ---
+		var times_acquired = player_acquired_upgrades.count(card_res.id)
+		if times_acquired >= card_res.max_stacks:
+			continue # Skip if player already has the max number of this upgrade.
+
+		# --- Prerequisite Check ---
+		var prerequisites_met = true
+		for prereq_id in card_res.prerequisites:
+			if not player_acquired_upgrades.has(prereq_id):
+				prerequisites_met = false
+				break # A prerequisite is missing, so this upgrade is not valid.
+		
+		if not prerequisites_met:
+			continue # Skip this upgrade if prerequisites are not met.
+
+		# If all checks pass, add the card to the pool.
+		var card_presentation = {
+			"id_for_card_selection": card_res.id,
+			"title": card_res.title,
+			"description": card_res.description,
+			"icon_path": card_res.icon.resource_path if is_instance_valid(card_res.icon) else "",
+			"type": "general_upgrade",
+			"resource_data": card_res,
+			"weight": card_res.weight
+		}
+		options_pool.append(card_presentation)
+
+
+	# --- 2. Populate Pool: Weapon Upgrades ---
+	var player_active_weapons = player_node.get_active_weapons_data_for_level_up()
+	for active_weapon_dict in player_active_weapons:
+		var weapon_id_sname = active_weapon_dict.get("id") as StringName
+		if weapon_id_sname == &"": continue
+		
+		var next_upgrades = get_weapon_next_level_upgrades(str(weapon_id_sname), active_weapon_dict)
+		for upgrade_res in next_upgrades:
+			var upgrade_card_presentation = {
+				"id_for_card_selection": str(weapon_id_sname) + "_" + str(upgrade_res.upgrade_id),
+				"type": "weapon_upgrade",
+				"title": upgrade_res.title,
+				"description": upgrade_res.description,
+				"icon_path": upgrade_res.icon.resource_path if is_instance_valid(upgrade_res.icon) else "",
+				"weapon_id_to_upgrade": weapon_id_sname,
+				"resource_data": upgrade_res,
+				# MODIFIED: Apply a multiplier to make equipped weapon upgrades more likely.
+				"weight": upgrade_res.weight * 1.5 
 			}
-			options_pool.append(card_presentation)
-			offered_ids_this_run.append(card_res.id)
+			options_pool.append(upgrade_card_presentation)
 
-	# 2. Get Weapon Upgrades
-	if is_instance_valid(player_node) and player_node.has_method("get_active_weapons_data_for_level_up"):
-		var player_active_weapons: Array[Dictionary] = player_node.get_active_weapons_data_for_level_up()
-		for active_weapon_dict in player_active_weapons:
-			var weapon_id_sname = active_weapon_dict.get("id") as StringName
-			if weapon_id_sname == &"": continue
+	# --- 3. Populate Pool: New Weapons ---
+	if player_active_weapons.size() < player_node.weapon_manager.max_weapons:
+		for bp_data in all_loaded_weapon_blueprints:
+			if not is_instance_valid(bp_data): continue
 			
-			var next_upgrades: Array[WeaponUpgradeData] = get_weapon_next_level_upgrades(str(weapon_id_sname), active_weapon_dict)
-			for upgrade_res in next_upgrades:
-				var unique_selection_id = str(weapon_id_sname) + "_" + str(upgrade_res.upgrade_id)
-				if not offered_ids_this_run.has(unique_selection_id):
-					var upgrade_card_presentation = {
-						"id_for_card_selection": unique_selection_id,
-						"title": upgrade_res.title,
-						"description": upgrade_res.description,
-						# FIXED: Check if the icon is valid before accessing its resource_path.
-						"icon_path": upgrade_res.icon.resource_path if is_instance_valid(upgrade_res.icon) else "",
-						"type": "weapon_upgrade",
-						"weapon_id_to_upgrade": weapon_id_sname,
-						"resource_data": upgrade_res
-					}
-					options_pool.append(upgrade_card_presentation)
-					offered_ids_this_run.append(unique_selection_id)
+			var already_have_it = false
+			for p_wep_dict in player_active_weapons:
+				if p_wep_dict.get("id") == bp_data.id:
+					already_have_it = true
+					break
+			if already_have_it: continue
 
-	# 3. Get New Weapons if slots are available
-	if is_instance_valid(player_node) and player_node.has_method("get_active_weapons_data_for_level_up"):
-		var current_player_weapons = player_node.get_active_weapons_data_for_level_up()
-		if current_player_weapons.size() < player_node.weapon_manager.max_weapons:
-			var potential_new_weapons_pool : Array = []
-			for bp_data in all_loaded_weapon_blueprints:
-				if not is_instance_valid(bp_data): continue
-				var bp_id_sname = bp_data.id
-				var already_have_it = false
-				for p_wep_dict in current_player_weapons:
-					if p_wep_dict.get("id") == bp_id_sname: already_have_it = true; break
-				
-				if not already_have_it and not offered_ids_this_run.has(bp_id_sname):
-					var new_weapon_offer_presentation = {
-						"id_for_card_selection": bp_id_sname,
-						"type": "new_weapon",
-						"title": bp_data.title,
-						"description": bp_data.description,
-						# FIXED: Check if the icon is valid before accessing its resource_path.
-						"icon_path": bp_data.icon.resource_path if is_instance_valid(bp_data.icon) else "",
-						"resource_data": bp_data
-					}
-					potential_new_weapons_pool.append(new_weapon_offer_presentation)
-					offered_ids_this_run.append(bp_id_sname)
+			var can_be_offered = true
+			if not bp_data.class_tag_restrictions.is_empty():
+				var first_tag = bp_data.class_tag_restrictions[0]
+				if first_tag is StringName or first_tag is String:
+					var required_class_tag = StringName(first_tag)
+					if not player_node.acquired_advanced_classes.has(required_class_tag):
+						can_be_offered = false
 			
-			if not potential_new_weapons_pool.is_empty():
-				options_pool.append(potential_new_weapons_pool.pick_random())
+			if can_be_offered:
+				var new_weapon_offer = {
+					"id_for_card_selection": bp_data.id,
+					"type": "new_weapon",
+					"title": bp_data.title,
+					"description": bp_data.description,
+					"icon_path": bp_data.icon.resource_path if is_instance_valid(bp_data.icon) else "",
+					"resource_data": bp_data,
+					"weight": bp_data.weight # Use the new weight from the blueprint
+				}
+				options_pool.append(new_weapon_offer)
 
-	# Final Selection Logic
-	options_pool.shuffle()
-	var final_chosen_options: Array = []
-	for option_data_dict in options_pool:
-		if final_chosen_options.size() >= 3: break
-		final_chosen_options.append(option_data_dict)
+	# --- 4. Perform Weighted Selection ---
+	var num_standard_options = 3 # This can be made dynamic later
+	var final_chosen_options = _perform_weighted_selection(options_pool, num_standard_options)
+
+	# --- 5. Check for and Append Advanced Class Unlocks (High Priority) ---
+	var class_unlock_card: Dictionary = {}
+	if is_instance_valid(player_node):
+		for progression_data in loaded_class_progressions:
+			var class_to_unlock = progression_data.class_tier_to_unlock
+			if is_instance_valid(class_to_unlock) and not player_node.acquired_advanced_classes.has(class_to_unlock.class_id):
+				if progression_data.are_requirements_met(player_node.basic_class_levels, player_node.acquired_advanced_classes, player_node.current_level):
+					class_unlock_card = {
+						"id_for_card_selection": progression_data.progression_id,
+						"type": "advanced_class_unlock",
+						"title": "Unlock: " + class_to_unlock.display_name,
+						"description": progression_data.unlock_description,
+						"icon_path": "",
+						"resource_data": class_to_unlock
+					}
+					break
+	
+	if not class_unlock_card.is_empty():
+		final_chosen_options.append(class_unlock_card)
 			
 	if final_chosen_options.is_empty():
 		final_chosen_options.append({"title": "Continue", "description": "No new upgrades this level.", "type": "skip"})
 	
 	return final_chosen_options
+
+# NEW HELPER FUNCTION: Performs a weighted random selection from a pool of options.
+func _perform_weighted_selection(pool: Array, count: int) -> Array:
+	var selected_items: Array = []
+	if pool.is_empty():
+		return selected_items
+
+	var temp_pool = pool.duplicate(true) # Work with a copy to avoid modifying the original
+	var total_weight = 0.0
+	for item in temp_pool:
+		total_weight += item.get("weight", 0.0)
+		
+	for _i in range(min(count, temp_pool.size())):
+		if total_weight <= 0: break # Stop if no weight is left
+		
+		var random_pick = randf() * total_weight
+		var current_weight_sum = 0.0
+		
+		for j in range(temp_pool.size()):
+			var item = temp_pool[j]
+			current_weight_sum += item.get("weight", 0.0)
+			if random_pick <= current_weight_sum:
+				selected_items.append(item)
+				total_weight -= item.get("weight", 0.0)
+				temp_pool.remove_at(j)
+				break # Found our item, break inner loop to pick the next one
+				
+	return selected_items
 
 # Called when the player chooses an upgrade from the level-up screen.
 func _on_upgrade_chosen(chosen_upgrade_data_wrapper: Dictionary):
@@ -996,7 +1098,7 @@ func debug_reset_game_parameters_to_defaults():
 
 # --- Debug spawn function for specific enemies ---
 func debug_spawn_specific_enemy(enemy_id: StringName, elite_type_override: StringName, count: int, near_player: bool):
-	print("game.gd: DEBUG SPAWN REQUEST - ID: ", enemy_id, ", Elite: ", elite_type_override, ", Count: ", count, ", Near Player: ", near_player)
+	#print("game.gd: DEBUG SPAWN REQUEST - ID: ", enemy_id, ", Elite: ", elite_type_override, ", Count: ", count, ", Near Player: ", near_player)
 
 	if not is_instance_valid(player_node):
 		push_error("game.gd ERROR: Player node is not valid. Cannot spawn enemies."); return
@@ -1020,4 +1122,4 @@ func debug_spawn_specific_enemy(enemy_id: StringName, elite_type_override: Strin
 
 		var spawn_position = _calculate_spawn_position_for_enemy(near_player)
 		_spawn_actual_enemy(enemy_data_to_spawn, spawn_position, elite_type_override)
-		print("game.gd: Spawned enemy: ", enemy_data_to_spawn.display_name, " (Elite: ", elite_type_override, ") at ", spawn_position)
+		#print("game.gd: Spawned enemy: ", enemy_data_to_spawn.display_name, " (Elite: ", elite_type_override, ") at ", spawn_position)

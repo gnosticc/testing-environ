@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=6 format=3 uid="uid://beilornuxuwpu"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_kxxj4"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_14jo1"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_iyyg1"]
+[ext_resource type="Resource" uid="uid://prm5rikppyij" path="res://Data/Classes/Effects/warrior_unlock_bonus_damage.tres" id="3_ybolv"]
+[ext_resource type="Resource" uid="uid://bd6w7o53m5e28" path="res://Data/Classes/Effects/knight_unlock_bonus_armor.tres" id="4_8grcm"]
+
+[resource]
+script = ExtResource("2_14jo1")
+class_id = &"champion_advanced"
+display_name = "Champion"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_kxxj4")]([ExtResource("2_iyyg1"), ExtResource("3_ybolv"), ExtResource("4_8grcm")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"champion_warhammer"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Warrior weapons and 10 total levels in Knight weapons to unlock the path of the Champion. A paragon of martial prowess, blending raw power with unyielding defense. Unlocks the Warhammer weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

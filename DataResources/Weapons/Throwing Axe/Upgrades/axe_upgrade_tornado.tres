@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cp6iu61s7yslh"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_0yml0"]
+[ext_resource type="Resource" uid="uid://dwspnjhd23hnl" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_tornado.tres" id="2_ibmp2"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_tsbl8"]
+
+[resource]
+script = ExtResource("2_tsbl8")
+upgrade_id = &"axe_tornado"
+title = "Tornado Axe"
+description = "You enter a true battle rage, hurling a fan of three axes with every throw."
+prerequisites_on_this_weapon = Array[StringName]([&"axe_rampage"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_0yml0")]([ExtResource("2_ibmp2")])
+set_acquired_flag_on_weapon = &"axe_tornado_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

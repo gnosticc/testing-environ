@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CustomFlagEffectData" load_steps=2 format=3 uid="uid://2p7p1gh2kgkk"]
+
+[ext_resource type="Script" uid="uid://dc316ihl7h1xg" path="res://Scripts/DataResources/Effects/CustomFlagEffectData.gd" id="1_gjntd"]
+
+[resource]
+script = ExtResource("1_gjntd")
+flag_key = &"has_shadows_embrace"
+flag_value = true
+effect_type_id = &"set_flag"
+target_scope = &"weapon_behavior"
+developer_note = ""
+metadata/_custom_type_script = "uid://dc316ihl7h1xg"

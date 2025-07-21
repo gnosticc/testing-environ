@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dqp25i10ker1s"]
+
+[ext_resource type="Script" uid="uid://mpl6cpolljm7" path="res://Scripts/DataResources/Weapons/Advanced/ChromaticAberrationController.gd" id="1_s4hwk"]
+[ext_resource type="PackedScene" uid="uid://dwjenponsb4ov" path="res://Scenes/Weapons/Advanced/UnstableOrb.tscn" id="2_mxvrv"]
+
+[node name="ChromaticAberrationController" type="Node2D"]
+script = ExtResource("1_s4hwk")
+projectile_scene = ExtResource("2_mxvrv")

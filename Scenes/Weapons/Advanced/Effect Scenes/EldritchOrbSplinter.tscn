@@ -1,0 +1,73 @@
+[gd_scene load_steps=11 format=3 uid="uid://bexaije5u5mbw"]
+
+[ext_resource type="Script" uid="uid://1d8s1yxaj5c6" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/EldritchOrbSplinter.gd" id="1_ydpji"]
+[ext_resource type="Texture2D" uid="uid://b0geupby5gg4s" path="res://Assets/Pets and Summons/Summoner/Eldritch Orb Splinter Animation.png" id="2_nlnxd"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ywun"]
+atlas = ExtResource("2_nlnxd")
+region = Rect2(0, 0, 150, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fyao"]
+atlas = ExtResource("2_nlnxd")
+region = Rect2(150, 0, 150, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_binxo"]
+atlas = ExtResource("2_nlnxd")
+region = Rect2(300, 0, 150, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qv378"]
+atlas = ExtResource("2_nlnxd")
+region = Rect2(450, 0, 150, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nkjmr"]
+atlas = ExtResource("2_nlnxd")
+region = Rect2(600, 0, 150, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_glnr7"]
+atlas = ExtResource("2_nlnxd")
+region = Rect2(750, 0, 150, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1ybnq"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ywun")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7fyao")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_binxo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qv378")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nkjmr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_glnr7")
+}],
+"loop": true,
+"name": &"default",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pb7ob"]
+radius = 69.0072
+
+[node name="EldritchOrbSplinter" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_ydpji")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_1ybnq")
+autoplay = "default"
+frame_progress = 0.885952
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_pb7ob")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

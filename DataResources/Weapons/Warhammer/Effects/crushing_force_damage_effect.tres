@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://blvp2fkf8j0vv"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_c8jrc"]
+
+[resource]
+script = ExtResource("1_c8jrc")
+id = &""
+modification_type = &"flat_add"
+stat_key = &""
+value_type = 1
+value_float = 0.0
+value_int = 0
+effect_type_id = &""
+target_scope = &""
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=6 format=3 uid="uid://b3f7p6kee4nky"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_hs6e5"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_ocwpw"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_voqam"]
+[ext_resource type="Resource" uid="uid://prm5rikppyij" path="res://Data/Classes/Effects/warrior_unlock_bonus_damage.tres" id="3_pelwa"]
+[ext_resource type="Resource" uid="uid://bt4k2ct5yhm6s" path="res://Data/Classes/Effects/wizard_unlock_crit_damage.tres" id="4_66ew1"]
+
+[resource]
+script = ExtResource("2_ocwpw")
+class_id = &"spellsword_advanced"
+display_name = "Spellsword"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_hs6e5")]([ExtResource("2_voqam"), ExtResource("3_pelwa"), ExtResource("4_66ew1")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"spellsword_sword_coil"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Warrior and Wizard weapons to unlock the path of the Spellsword. A battlemage who weaves arcane power into their martial attacks. Unlocks the Sword Coil weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

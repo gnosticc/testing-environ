@@ -20,13 +20,15 @@ title = "Crossbow"
 description = "Fires a heavy bolt that can pass through enemies."
 weapon_scene = ExtResource("3_2we4c")
 tags = Array[StringName]([&"projectile", &"physical", &"piercing", &"warrior weapon"])
-class_tag_restrictions = Array[int]([1])
+class_tag_restrictions = [1]
 cooldown = 2.5
 max_level = 10
 base_lifetime = 2.0
 spawn_as_child = false
 requires_direction = true
 targeting_type = "nearest_enemy"
+tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "attack_speed_multiplier": 1.0,
 "ballista_barrage_delay": 0.2,

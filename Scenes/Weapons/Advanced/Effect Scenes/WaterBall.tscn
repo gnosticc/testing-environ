@@ -1,0 +1,86 @@
+[gd_scene load_steps=13 format=3 uid="uid://cj7011p82apco"]
+
+[ext_resource type="Texture2D" uid="uid://dua0051v6ig7n" path="res://Assets/Pets and Summons/Spirit Master/Water Ball Animation.png" id="1_bkl3x"]
+[ext_resource type="Script" uid="uid://bm3y2bkrdwwmw" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/WaterBall.gd" id="1_y7j0f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y7j0f"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(0, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_000ck"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(550, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gb6m1"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(1100, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ldev3"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(1650, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kgyx2"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(2200, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rj53f"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(2750, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_26jrq"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(3300, 0, 550, 550)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sjf60"]
+atlas = ExtResource("1_bkl3x")
+region = Rect2(3850, 0, 550, 550)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_4fcru"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y7j0f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_000ck")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gb6m1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ldev3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kgyx2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rj53f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_26jrq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sjf60")
+}],
+"loop": true,
+"name": &"default",
+"speed": 20.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hwx5r"]
+radius = 275.915
+
+[node name="WaterBall" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_y7j0f")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_4fcru")
+frame_progress = 0.741344
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_hwx5r")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

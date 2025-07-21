@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://bmob7q3fccku2"]
+
+[ext_resource type="Texture2D" uid="uid://bkbycsatjbula" path="res://Assets/Pets and Summons/Mechamaster Pets/Rocket Turret Projectile Animation.png" id="1_6lhdt"]
+[ext_resource type="Script" uid="uid://85ucmw6hr48u" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ArtilleryProjectile.gd" id="1_p7ik8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p7ik8"]
+atlas = ExtResource("1_6lhdt")
+region = Rect2(0, 0, 90, 60)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_kbgap"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p7ik8")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_iytlv"]
+radius = 27.9873
+height = 95.9807
+
+[node name="ArtilleryProjectile" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_p7ik8")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_kbgap")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.57394
+shape = SubResource("CapsuleShape2D_iytlv")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

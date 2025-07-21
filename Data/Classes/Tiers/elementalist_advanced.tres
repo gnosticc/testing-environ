@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://bl37aprkhpp2r"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_58jue"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_d7tpt"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_twx25"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_0076r"]
+[ext_resource type="Resource" uid="uid://bt4k2ct5yhm6s" path="res://Data/Classes/Effects/wizard_unlock_crit_damage.tres" id="4_gkcik"]
+[ext_resource type="Resource" uid="uid://bu6ytjrwayyg8" path="res://Data/Classes/Effects/druid_unlock_speed.tres" id="5_yoytm"]
+
+[resource]
+script = ExtResource("2_d7tpt")
+class_id = &"elementalist_advanced"
+display_name = "Elementalist"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_58jue")]([ExtResource("2_twx25"), ExtResource("3_0076r"), ExtResource("4_gkcik"), ExtResource("5_yoytm")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"elementalist_chromatic_aberration"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Wizard and Druid weapons to unlock the path of the Elementalist. A conduit of raw elemental forces, unleashing chaotic displays of fire, ice, and nature. Unlocks the Chromatic Aberration weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

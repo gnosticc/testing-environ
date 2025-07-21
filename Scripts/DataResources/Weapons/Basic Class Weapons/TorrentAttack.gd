@@ -25,7 +25,7 @@ func _ready():
 	
 	animated_sprite.play("erupt")
 
-func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	_specific_stats = p_attack_stats
 	_owner_player_stats = p_player_stats
 
@@ -33,7 +33,12 @@ func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_pl
 
 	var weapon_damage_percent = float(_specific_stats.get(&"weapon_damage_percentage", 0.6))
 	var weapon_tags: Array[StringName] = _specific_stats.get(&"tags", [])
-	var calculated_damage_float = _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
+
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+	var calculated_damage_float = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	# --- END REFACTOR ---
+
 	_damage_per_tick = int(round(maxf(1.0, calculated_damage_float)))
 	
 	var base_area_scale = float(_specific_stats.get(&"area_scale", 1.0))
@@ -89,10 +94,14 @@ func _apply_damage_and_effects(enemy: BaseEnemy):
 	var attack_stats = {
 		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 	}
-	enemy.take_damage(_damage_per_tick, owner_player_char, attack_stats)
+	var weapon_tags: Array[StringName] = []
+	if _specific_stats.has("tags"):
+		weapon_tags = _specific_stats.get("tags")
+	enemy.take_damage(_damage_per_tick, owner_player_char, attack_stats, weapon_tags) # Pass tags
 	
 	if _specific_stats.get(&"has_drenching_force", false) and is_instance_valid(enemy.status_effect_component):
 		enemy.status_effect_component.apply_effect(SLOW_STATUS_DATA, owner_player_char, {}, 1.0)
+
 
 func _spawn_maelstrom_wave():
 	if not is_instance_valid(MAELSTROM_WAVE_SCENE): return
@@ -105,10 +114,13 @@ func _spawn_maelstrom_wave():
 	var random_direction = Vector2.RIGHT.rotated(randf_range(0, TAU))
 	
 	if wave_instance.has_method("initialize"):
-		wave_instance.initialize(wave_damage, random_direction, _owner_player_stats)
+		# Pass the main weapon's stats to the wave
+		wave_instance.initialize(wave_damage, random_direction, _owner_player_stats, _specific_stats)
+
 
 func _on_lifetime_expired():
 	if _specific_stats.get(&"has_devastation", false):
+		# Deal the final burst damage
 		var num_ticks = lifetime_timer.wait_time / damage_tick_timer.wait_time
 		var total_damage = int(round(_damage_per_tick * num_ticks))
 		
@@ -119,5 +131,20 @@ func _on_lifetime_expired():
 					PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 				}
 				enemy.take_damage(total_damage, owner_player_char, attack_stats)
-	
-	queue_free()
+		
+		# Create and configure the visual tween
+		var tween = create_tween()
+		tween.set_parallel() # Animate scale and color at the same time
+		
+		# Animate scale to 120%
+		tween.tween_property(animated_sprite, "scale", animated_sprite.scale * 2.0, 0.5).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+		# Animate color to a transparent blue
+# First, a quick, bright flash to yellow
+		tween.tween_property(animated_sprite, "modulate", Color(1.0, 1.0, 0.7), 0.07).set_trans(Tween.TRANS_QUINT).set_ease(Tween.EASE_OUT)
+# Then, chain a second tween to fade from yellow to a transparent dark orange
+		tween.tween_property(animated_sprite, "modulate", Color(0.9, 0.3, 0.0, 0.0), 0.08).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		# Connect the tween's finished signal to destroy the node
+		tween.finished.connect(queue_free)
+	else:
+		# If Devastation is not active, just free the node normally.
+		queue_free()

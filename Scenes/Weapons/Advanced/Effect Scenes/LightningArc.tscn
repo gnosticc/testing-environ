@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://bgd3qk2ucd24"]
+
+[ext_resource type="Texture2D" uid="uid://bg21gth6e3oko" path="res://Assets/Weapons/Advanced Weapons/Lightning Arc Animation.png" id="1_5whux"]
+[ext_resource type="Script" uid="uid://bodi5j1ufrmyi" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/LightningArc.gd" id="2_ochxk"]
+
+[node name="LightningArc" type="Sprite2D"]
+texture = ExtResource("1_5whux")
+script = ExtResource("2_ochxk")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.25
+one_shot = true

@@ -34,7 +34,7 @@ func _physics_process(delta: float):
 		velocity = direction * final_speed
 	move_and_slide()
 
-func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	direction = p_direction.normalized() if p_direction.length_squared() > 0 else Vector2.RIGHT
 	_received_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
@@ -46,7 +46,11 @@ func _apply_all_stats_effects():
 
 	var weapon_damage_percent = float(_received_stats.get(&"weapon_damage_percentage", 1.0))
 	var weapon_tags: Array[StringName] = _received_stats.get(&"tags", [])
-	var calculated_damage_float = _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
+
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+	var calculated_damage_float = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	# --- END REFACTOR ---
 	
 	var total_crit_chance = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_CHANCE)
 	if randf() < total_crit_chance:
@@ -91,8 +95,10 @@ func _on_body_entered(body: Node2D):
 
 		_enemies_hit_this_instance.append(enemy_target)
 		var owner_player_char = _owner_player_stats.get_parent()
-		
-		enemy_target.take_damage(final_damage_amount, owner_player_char)
+		var weapon_tags: Array[StringName] = []
+		if _received_stats.has("tags"):
+			weapon_tags = _received_stats.get("tags")
+		enemy_target.take_damage(final_damage_amount, owner_player_char, {}, weapon_tags)
 
 		if _received_stats.get(&"has_arcane_infusion", false):
 			var proc_chance = float(_received_stats.get(&"debuff_on_hit_chance", 0.0))

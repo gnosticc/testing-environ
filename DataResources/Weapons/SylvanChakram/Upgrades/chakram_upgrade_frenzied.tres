@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dhl62ibhb25oy"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_uvukr"]
+[ext_resource type="Resource" uid="uid://gh6fkbb1n553" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_frenzied_cooldown.tres" id="2_o21ku"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_x3ag3"]
+[ext_resource type="Resource" uid="uid://dx5w3jue565mv" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_frenzied_speed.tres" id="3_frblw"]
+
+[resource]
+script = ExtResource("2_x3ag3")
+upgrade_id = &"chakram_frenzied"
+title = "Frenzied Throw"
+description = "Increases attack speed and projectile speed by 25%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_uvukr")]([ExtResource("2_o21ku"), ExtResource("3_frblw")])
+set_acquired_flag_on_weapon = &"chakram_frenzied_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

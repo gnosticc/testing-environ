@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://cgdwbpi8034nj"]
+
+[ext_resource type="Resource" uid="uid://djpj54bhwlfrc" path="res://Data/Classes/Tiers/berserker_advanced.tres" id="1_d8sca"]
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_oepgo"]
+
+[resource]
+script = ExtResource("1_oepgo")
+progression_id = &"unlock_berserker"
+class_tier_to_unlock = ExtResource("1_d8sca")
+unlock_description = "A furious warrior who thrives in the heart of battle, fueled by primal rage. Unlocks the Throwing Axe weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 12
+Movement Speed: 15
+
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 1,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 5,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

@@ -90,6 +90,15 @@ var enemy_spawn_count_spinbox: SpinBox
 var spawn_enemy_button: Button
 var spawn_near_player_checkbox: CheckBox
 
+# NEW: UI Node References for the Class Progression Tab
+var class_progression_tab_content: VBoxContainer
+var class_levels_grid: GridContainer
+var class_level_edits: Dictionary = {} # To store LineEdits for each class
+var unlocked_classes_list: ItemList
+var apply_class_levels_button: Button
+var force_level_up_button: Button
+var reset_class_progression_button: Button
+
 # Game Tuning Tab UI Elements
 var game_tuning_tab_content: VBoxContainer
 var gt_base_dds_tick_edit: LineEdit
@@ -298,6 +307,7 @@ func _full_panel_content_update():
 		_update_player_active_weapons_display() # Update list of player's active weapons
 		_update_available_upgrades_display() # Update upgrades for selected active weapon
 		_populate_enemy_spawn_list() # Populate enemy type dropdown
+		_update_class_progression_display()
 		
 		# Ensure correct initial selection for enemy spawner
 		if is_instance_valid(enemy_type_option_button) and enemy_type_option_button.item_count > 0:
@@ -420,6 +430,7 @@ func _setup_all_tabs():
 	# Setup each tab
 	_setup_info_tab()
 	_setup_player_stats_tab()
+	_setup_class_progression_tab()
 	_setup_enemy_spawner_tab()
 	_setup_game_tuning_tab()
 	_setup_weapons_tab() # Ensure weapons tab is added last for consistency with other UIs
@@ -555,6 +566,113 @@ func _setup_player_stats_tab():
 	if is_instance_valid(tab_container):
 		tab_container.add_child(player_stats_tab_content)
 		tab_container.set_tab_title(tab_container.get_tab_count() - 1, "Player Stats")
+
+# NEW: Function to create and configure the Class Progression tab.
+func _setup_class_progression_tab():
+	class_progression_tab_content = VBoxContainer.new()
+	class_progression_tab_content.name = "ClassProgressionTabContent"
+	
+	var levels_label = Label.new(); levels_label.text = "Basic Class Levels:"
+	class_progression_tab_content.add_child(levels_label)
+	
+	class_levels_grid = GridContainer.new(); class_levels_grid.columns = 2
+	class_progression_tab_content.add_child(class_levels_grid)
+	
+	# Create an editor for each basic class
+	class_level_edits.clear()
+	for class_name_str in PlayerCharacter.BasicClass.keys():
+		if class_name_str == "NONE": continue # Skip the NONE class
+		var class_enum_val = PlayerCharacter.BasicClass[class_name_str]
+		
+		var lbl = Label.new(); lbl.text = class_name_str.capitalize() + ":"
+		class_levels_grid.add_child(lbl)
+		
+		var line_edit = LineEdit.new(); line_edit.name = class_name_str + "LevelEdit"
+		line_edit.placeholder_text = "0"
+		line_edit.custom_minimum_size.x = 60
+		class_levels_grid.add_child(line_edit)
+		class_level_edits[class_enum_val] = line_edit
+
+	apply_class_levels_button = Button.new(); apply_class_levels_button.text = "Apply Class Levels"
+	apply_class_levels_button.pressed.connect(_on_apply_class_levels_button_pressed)
+	class_progression_tab_content.add_child(apply_class_levels_button)
+	
+	class_progression_tab_content.add_child(HSeparator.new())
+	
+	var unlocked_label = Label.new(); unlocked_label.text = "Unlocked Advanced Classes:"
+	class_progression_tab_content.add_child(unlocked_label)
+	
+	unlocked_classes_list = ItemList.new(); unlocked_classes_list.custom_minimum_size.y = 80
+	class_progression_tab_content.add_child(unlocked_classes_list)
+	
+	class_progression_tab_content.add_child(HSeparator.new())
+	
+	var actions_hbox = HBoxContainer.new(); actions_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	class_progression_tab_content.add_child(actions_hbox)
+	
+	force_level_up_button = Button.new(); force_level_up_button.text = "Force Level-Up"
+	force_level_up_button.pressed.connect(_on_force_level_up_button_pressed)
+	actions_hbox.add_child(force_level_up_button)
+	
+	reset_class_progression_button = Button.new(); reset_class_progression_button.text = "Reset Class Progression"
+	reset_class_progression_button.pressed.connect(_on_reset_class_progression_button_pressed)
+	actions_hbox.add_child(reset_class_progression_button)
+
+	if is_instance_valid(tab_container):
+		tab_container.add_child(class_progression_tab_content)
+		tab_container.set_tab_title(tab_container.get_tab_count() - 1, "Class Progression")
+
+# NEW: Function to update the display of the Class Progression tab.
+func _update_class_progression_display():
+	if not is_instance_valid(player_node): return
+
+	# Update LineEdits with current class levels
+	for class_enum in class_level_edits:
+		var line_edit = class_level_edits[class_enum] as LineEdit
+		if is_instance_valid(line_edit):
+			var current_level = player_node.basic_class_levels.get(class_enum, 0)
+			line_edit.text = str(current_level)
+	
+	# Update the list of unlocked advanced classes
+	if is_instance_valid(unlocked_classes_list):
+		unlocked_classes_list.clear()
+		if player_node.acquired_advanced_classes.is_empty():
+			unlocked_classes_list.add_item("None")
+		else:
+			for class_id in player_node.acquired_advanced_classes:
+				unlocked_classes_list.add_item(str(class_id))
+
+# NEW: Handler for the "Apply Class Levels" button.
+func _on_apply_class_levels_button_pressed():
+	if not is_instance_valid(player_node) or not player_node.has_method("debug_set_basic_class_level"):
+		push_error("DebugPanel: Player node invalid or missing 'debug_set_basic_class_level' method.")
+		return
+		
+	for class_enum in class_level_edits:
+		var line_edit = class_level_edits[class_enum] as LineEdit
+		if is_instance_valid(line_edit) and line_edit.text.is_valid_int():
+			player_node.debug_set_basic_class_level(class_enum, int(line_edit.text))
+	
+	print("DebugPanel: Applied manual class level changes.")
+	call_deferred("_update_class_progression_display")
+
+# NEW: Handler for the "Force Level-Up" button.
+func _on_force_level_up_button_pressed():
+	if is_instance_valid(player_node) and player_node.has_method("check_level_up"):
+		player_node.current_experience = player_node.experience_to_next_level
+		player_node.check_level_up()
+		print("DebugPanel: Forced player level-up.")
+	else:
+		push_error("DebugPanel: Player node invalid or missing 'check_level_up' method.")
+
+# NEW: Handler for the "Reset Class Progression" button.
+func _on_reset_class_progression_button_pressed():
+	if is_instance_valid(player_node) and player_node.has_method("debug_reset_class_progression"):
+		player_node.debug_reset_class_progression()
+		print("DebugPanel: Reset player class progression.")
+		call_deferred("_update_class_progression_display")
+	else:
+		push_error("DebugPanel: Player node invalid or missing 'debug_reset_class_progression' method.")
 
 # Updates the LineEdit fields in the Player Stats tab with current stat values.
 func _update_player_stats_display_fields():

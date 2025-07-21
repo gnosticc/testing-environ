@@ -26,6 +26,9 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ulf4l")
+}, {
+"duration": 0.3,
+"texture": SubResource("AtlasTexture_ulf4l")
 }],
 "loop": false,
 "name": &"default",

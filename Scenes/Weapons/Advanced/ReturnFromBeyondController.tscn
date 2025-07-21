@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://dby44xxultctg"]
+
+[ext_resource type="Script" uid="uid://ciwd11y55r34c" path="res://Scripts/DataResources/Weapons/Advanced/ReturnFromBeyondController.gd" id="1_o4qpy"]
+[ext_resource type="PackedScene" uid="uid://b7seycefrri28" path="res://Scenes/Weapons/Advanced/EtherealEcho.tscn" id="2_117f5"]
+[ext_resource type="PackedScene" uid="uid://htl1elymvxfu" path="res://Scenes/Weapons/Advanced/Effect Scenes/SummoningPortal.tscn" id="3_7nksu"]
+
+[node name="ReturnFromBeyondController" type="Node2D"]
+script = ExtResource("1_o4qpy")
+echo_scene = ExtResource("2_117f5")
+portal_scene = ExtResource("3_7nksu")

@@ -40,7 +40,7 @@ func _ready():
 	if _stats_have_been_set:
 		_apply_all_stats_effects()
 
-func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	direction = p_direction.normalized() if p_direction.length_squared() > 0 else Vector2.RIGHT
 	_received_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
@@ -59,7 +59,13 @@ func _apply_all_stats_effects():
 
 	var weapon_damage_percent = float(_received_stats.get(&"weapon_damage_percentage", 1.0))
 	var weapon_tags: Array[StringName] = _received_stats.get(&"tags", [])
-	final_damage_amount = int(round(maxf(1.0, _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags))))
+	
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+	var calculated_damage_float = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	# --- END REFACTOR ---
+
+	final_damage_amount = int(round(maxf(1.0, calculated_damage_float)))
 	
 	final_speed = float(_received_stats.get(&"final_projectile_speed", 220.0))
 	weapon_specific_crit_chance = float(_received_stats.get(&"crit_chance", 0.0))
@@ -111,14 +117,13 @@ func _on_body_entered(body: Node2D):
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 		}
 		
-		enemy_target.take_damage(int(round(damage_to_deal)), owner_player, attack_stats_for_enemy)
+		var weapon_tags: Array[StringName] = []
+		if _received_stats.has("tags"):
+			weapon_tags = _received_stats.get("tags")
+		enemy_target.take_damage(int(round(damage_to_deal)), owner_player, attack_stats_for_enemy, weapon_tags)
 		
-		# --- Explosion logic now triggers on every hit ---
-		# FIX: Defer the call to _try_spawn_explosion to avoid flushing queries error
-		# when adding children with physics bodies inside _spawn_explosion.
 		call_deferred("_try_spawn_explosion", int(round(damage_to_deal)))
 		
-		# --- Status effect logic ---
 		if _received_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
 			var status_apps: Array = _received_stats.get(&"on_hit_status_applications", [])
 			var global_status_effect_chance_add = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_STATUS_EFFECT_CHANCE_ADD)
@@ -150,13 +155,13 @@ func _start_destruction():
 	get_tree().create_timer(0.1, false, false, true).timeout.connect(queue_free)
 
 # Renamed from _handle_bolt_destruction to be more specific
-func _try_spawn_explosion(hit_damage: int):
+func _try_spawn_explosion(p_proccing_hit_damage: int):
 	if _received_stats.get(&"has_explosive_tip", false):
 		var explosion_chance = float(_received_stats.get(&"explosive_tip_chance", 0.0))
 		if randf() < explosion_chance:
 			var explosion_damage_percent = float(_received_stats.get(&"explosive_tip_damage_percent", 0.35))
 			var explosion_radius = float(_received_stats.get(&"explosive_tip_radius", 10.0))
-			var explosion_damage = int(round(hit_damage * explosion_damage_percent))
+			var explosion_damage = int(round(p_proccing_hit_damage * explosion_damage_percent))
 			_spawn_explosion(explosion_damage, explosion_radius)
 
 func _spawn_explosion(damage: int, radius: float):
@@ -166,12 +171,6 @@ func _spawn_explosion(damage: int, radius: float):
 	var explosion_instance = EXPLOSION_SCENE.instantiate()
 	var attacks_container = get_tree().current_scene.get_node_or_null("AttacksContainer")
 	
-	# The `_try_spawn_explosion` function is now called deferred,
-	# so adding the child here should be safe. However, if this error persists,
-	# it might mean the deferral from `_on_body_entered` to `_try_spawn_explosion`
-	# isn't enough, and `add_child` itself might need to be deferred, or
-	# `_spawn_explosion` as a whole needs to be called even later.
-	# For now, the deferral of the *caller* (`_try_spawn_explosion`) is the primary fix.
 	if is_instance_valid(attacks_container):
 		attacks_container.add_child(explosion_instance)
 	else:
@@ -184,4 +183,5 @@ func _spawn_explosion(damage: int, radius: float):
 		var attack_stats = {
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 		}
-		explosion_instance.call_deferred("detonate", damage, radius, owner_player, attack_stats)
+		# Pass the main weapon's stats dictionary to the explosion
+		explosion_instance.call_deferred("detonate", damage, radius, owner_player, attack_stats, false, _received_stats)

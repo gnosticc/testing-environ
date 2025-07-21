@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://eq3pb2irl67j"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_uaulr"]
+[ext_resource type="Resource" uid="uid://45k1mypkwyjv" path="res://DataResources/StatusEffects/Alchemist/transmutation_mark_effect.tres" id="2_bhq8p"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_gxcqp"]
+
+[resource]
+script = ExtResource("2_gxcqp")
+id = &"transmutation_mark_status"
+display_name = "Transmutation Mark"
+duration = 2.2
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_uaulr")]([ExtResource("2_bhq8p")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

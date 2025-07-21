@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://coe5axsprolaq"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ywv6a"]
+[ext_resource type="Resource" uid="uid://o31rnidveuma" path="res://DataResources/Weapons/Reinforcements/Effects/effect_deploy_hk.tres" id="2_1t2qt"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_hgfr5"]
+
+[resource]
+script = ExtResource("2_hgfr5")
+upgrade_id = &"reinforcements_deploy_hk"
+title = "\"New Unit: Hunter-Killer Bot"
+description = "Deploys the schematics for the Hunter-Killer Bot, a turret that seeks high-threat targets."
+prerequisites_on_this_weapon = Array[StringName]([&"reinforcements_deploy_artillery"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ywv6a")]([ExtResource("2_1t2qt")])
+set_acquired_flag_on_weapon = &"reinforcements_deploy_hk_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

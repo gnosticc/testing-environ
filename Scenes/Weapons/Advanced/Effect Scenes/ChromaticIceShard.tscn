@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://b2bd83yeqqx8y"]
+
+[ext_resource type="Script" uid="uid://lw2wuv3jd6ak" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ChromaticIceShard.gd" id="1_dpaol"]
+[ext_resource type="Texture2D" uid="uid://cxo1q5jwoluio" path="res://Assets/Weapons/Advanced Weapons/Chromatic Aberration/Chromatic Ice Shard Animation.png" id="2_vvhxb"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yvjnd"]
+atlas = ExtResource("2_vvhxb")
+region = Rect2(0, 0, 275, 75)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vxew1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yvjnd")
+}],
+"loop": false,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2rt6t"]
+radius = 28.0
+height = 274.0
+
+[node name="ChromaticIceShard" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_dpaol")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_vxew1")
+animation = &"fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_2rt6t")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

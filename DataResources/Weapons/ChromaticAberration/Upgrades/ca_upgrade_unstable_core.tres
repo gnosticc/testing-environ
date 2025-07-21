@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://c32vrh8y2bura"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_n16sj"]
+[ext_resource type="Resource" uid="uid://oh2spwfyirwj" path="res://DataResources/Weapons/ChromaticAberration/Effects/ca_unstable_core_damage.tres" id="2_i4kw3"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_y5dri"]
+[ext_resource type="Resource" uid="uid://5rvc0av8frro" path="res://DataResources/Weapons/ChromaticAberration/Effects/ca_unstable_core_cooldown.tres" id="3_6qipk"]
+
+[resource]
+script = ExtResource("2_y5dri")
+upgrade_id = &"ca_unstable_core"
+title = "Unstable Core"
+description = "Increases the base damage of the initial Unstable Orb by 50% and reduces the weapon's cooldown by 15%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_n16sj")]([ExtResource("2_i4kw3"), ExtResource("3_6qipk")])
+set_acquired_flag_on_weapon = &"ca_unstable_core_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

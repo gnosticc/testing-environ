@@ -13,8 +13,8 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_3yjcu")
 }],
-"loop": true,
-"name": &"default",
+"loop": false,
+"name": &"smash",
 "speed": 5.0
 }]
 
@@ -24,4 +24,6 @@ script = ExtResource("1_b888l")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 modulate = Color(1, 1, 1, 0.503)
 z_index = -2
+scale = Vector2(0.5, 0.5)
 sprite_frames = SubResource("SpriteFrames_1mglv")
+animation = &"smash"

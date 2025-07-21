@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://bdu2hd7bg5s3h"]
+
+[ext_resource type="Script" uid="uid://biavmuuavhcgh" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/SplinterProjectile.gd" id="1_ij72g"]
+[ext_resource type="Texture2D" uid="uid://bn5oj16s320pr" path="res://Assets/SFX/Throwing Axe Splinter Animation.png" id="2_2mxy3"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rq4gu"]
+size = Vector2(120, 112)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vpfvr"]
+atlas = ExtResource("2_2mxy3")
+region = Rect2(0, 0, 140, 190)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wotpi"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vpfvr")
+}],
+"loop": false,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[node name="SplinterProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_ij72g")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-1, -4.76837e-07)
+scale = Vector2(0.1, 0.1)
+shape = SubResource("RectangleShape2D_rq4gu")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_wotpi")
+animation = &"fly"
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.5
+one_shot = true

@@ -1,0 +1,62 @@
+[gd_scene load_steps=10 format=3 uid="uid://4m11hbf4mkd6"]
+
+[ext_resource type="Script" uid="uid://cinst5wsb2pio" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/GeyserExplosion.gd" id="1_6ooup"]
+[ext_resource type="Texture2D" uid="uid://cs56jnht2mvra" path="res://Assets/Pets and Summons/Spirit Master/Water Ball Geyser Animation.png" id="1_xbur2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6ooup"]
+atlas = ExtResource("1_xbur2")
+region = Rect2(0, 0, 210, 220)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yfpw5"]
+atlas = ExtResource("1_xbur2")
+region = Rect2(210, 0, 210, 220)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ajynb"]
+atlas = ExtResource("1_xbur2")
+region = Rect2(420, 0, 210, 220)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sk883"]
+atlas = ExtResource("1_xbur2")
+region = Rect2(630, 0, 210, 220)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mm0ws"]
+atlas = ExtResource("1_xbur2")
+region = Rect2(840, 0, 210, 220)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_j1aue"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6ooup")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yfpw5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ajynb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sk883")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mm0ws")
+}],
+"loop": false,
+"name": &"erupt",
+"speed": 15.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_j8ilr"]
+radius = 92.3472
+
+[node name="GeyserExplosion" type="Area2D"]
+collision_layer = 0
+collision_mask = 136
+script = ExtResource("1_6ooup")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_j1aue")
+animation = &"erupt"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_j8ilr")

@@ -40,7 +40,7 @@ func _ready():
 func _physics_process(delta: float):
 	global_position += direction * final_speed * delta
 
-func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(p_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	direction = p_direction.normalized() if p_direction.length_squared() > 0 else Vector2.RIGHT
 	_received_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
@@ -58,7 +58,12 @@ func _apply_all_stats_effects():
 
 	var weapon_damage_percent = float(_received_stats.get(&"weapon_damage_percentage", 1.0))
 	var weapon_tags: Array[StringName] = _received_stats.get(&"tags", [])
-	var calculated_damage_float = _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags)
+
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+	var calculated_damage_float = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	# --- END REFACTOR ---
+
 	final_damage_amount = int(round(maxf(1.0, calculated_damage_float)))
 	
 	var base_projectile_speed = float(_received_stats.get(&"projectile_speed", 160.0))
@@ -114,8 +119,12 @@ func _on_body_entered(body: Node2D):
 		var attack_stats_for_enemy: Dictionary = {
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]: _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 		}
-		enemy_target.take_damage(final_damage_amount, owner_player, attack_stats_for_enemy)
+		var weapon_tags: Array[StringName] = []
+		if _received_stats.has("tags"):
+			weapon_tags = _received_stats.get("tags")
+		enemy_target.take_damage(final_damage_amount, owner_player, attack_stats_for_enemy, weapon_tags) # Pass tags
 		_enemies_hit_this_instance.append(enemy_target)
+
 		
 		var global_lifesteal_percent = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
 		if global_lifesteal_percent > 0:

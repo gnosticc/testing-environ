@@ -10,7 +10,7 @@ extends Node2D
 # NEW: Signal to report spawned instances back to the WeaponManager.
 signal instances_spawned(summon_id: StringName, spawned_instances: Array[Node2D])
 
-func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	var received_stats_copy = p_attack_stats.duplicate(true)
 	var owner_player = p_player_stats.get_parent() as PlayerCharacter
 	var owner_player_stats = p_player_stats

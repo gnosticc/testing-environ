@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://naj2sekjfbjt"]
+
+[ext_resource type="Resource" uid="uid://bl37aprkhpp2r" path="res://Data/Classes/Tiers/elementalist_advanced.tres" id="1_mbwpt"]
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_my6wg"]
+
+[resource]
+script = ExtResource("1_my6wg")
+progression_id = &"unlock_elementalist"
+class_tier_to_unlock = ExtResource("1_mbwpt")
+unlock_description = "A conduit of raw elemental forces, unleashing chaotic displays of fire, ice, and nature. Unlocks the Chromatic Aberration weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Crit Damage:	 35%
+Movement Speed: 15
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 4,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 5,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

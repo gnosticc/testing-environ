@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dtp5um78xpbd4"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_868yv"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_2kbrn"]
+[ext_resource type="Resource" uid="uid://bu3drrsa5lv8d" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/chain_reaction_flag.tres" id="2_m8xgb"]
+
+[resource]
+script = ExtResource("2_2kbrn")
+upgrade_id = &"exp_mat_chain_reaction"
+title = "Chain Reaction"
+description = "The Volatile Eruption now has a 100% chance to spread the 'Soaked' status to all other enemies damaged by its AoE."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_868yv")]([ExtResource("2_m8xgb")])
+set_acquired_flag_on_weapon = &"exp_mat_chain_reaction_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

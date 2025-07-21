@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cbfi0b4rvgimu"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_diq31"]
+[ext_resource type="Resource" uid="uid://buo5xfep3oeqs" path="res://DataResources/Weapons/LuringPrism/Effects/hidden_knife_effect.tres" id="2_hicyj"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_hrkqh"]
+
+[resource]
+script = ExtResource("2_hrkqh")
+upgrade_id = &"lp_hidden_knife"
+title = "Hidden Knife"
+description = "Throw a second, smaller dagger at the nearest enemy outside of the primary target's cluster."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_diq31")]([ExtResource("2_hicyj")])
+set_acquired_flag_on_weapon = &"lp_hidden_knife_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

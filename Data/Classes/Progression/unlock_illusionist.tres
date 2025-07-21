@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://b38jkc0y0b3ep"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_nkaye"]
+[ext_resource type="Resource" uid="uid://p4f5cr0mqpbn" path="res://Data/Classes/Tiers/illusionist_advanced.tres" id="1_qf0qu"]
+
+[resource]
+script = ExtResource("1_nkaye")
+progression_id = &"unlock_illusionist"
+class_tier_to_unlock = ExtResource("1_qf0qu")
+unlock_description = "A trickster who manipulates the battlefield with illusions that taunt and shred enemies. Unlocks the Luring Prism weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Crit Chance: 5.0%
+Luck: 3
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 3,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 6,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

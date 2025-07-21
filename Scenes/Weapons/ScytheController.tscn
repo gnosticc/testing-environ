@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dbfif7bkt7ndk"]
+
+[ext_resource type="Script" uid="uid://uq27hf07p27r" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/ScytheController.gd" id="1_bardu"]
+[ext_resource type="PackedScene" uid="uid://byd28ph0dd8dr" path="res://Scenes/Weapons/scythe_attack.tscn" id="2_v2d1d"]
+
+[node name="ScytheController" type="Node2D"]
+script = ExtResource("1_bardu")
+scythe_attack_scene = ExtResource("2_v2d1d")

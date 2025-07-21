@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://240v2bjhumpt"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_lvywo"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_f1boj"]
+[ext_resource type="Resource" uid="uid://db5j2ivj6hdi6" path="res://DataResources/Weapons/LuringPrism/Effects/honing_shards_effect.tres" id="2_v5hg4"]
+
+[resource]
+script = ExtResource("2_f1boj")
+upgrade_id = &"lp_honing_shards"
+title = "Eviscerating Shards"
+description = "The Ring of Shards deals 50% more damage per tick."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_lvywo")]([ExtResource("2_v5hg4")])
+set_acquired_flag_on_weapon = &"lp_honing_shards_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

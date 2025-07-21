@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b86551o1dcr85"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_mrtyi"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_7h602"]
+[ext_resource type="Resource" uid="uid://ciyx6j2u3dg2l" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_chain_reaction_effect.tres" id="2_ic0t4"]
+
+[resource]
+script = ExtResource("2_7h602")
+upgrade_id = &"living_conduit_chain_reaction"
+title = "Chain Reaction"
+description = "The arcing lightning is now powerful enough to jump to an additional target."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_mrtyi")]([ExtResource("2_ic0t4")])
+set_acquired_flag_on_weapon = &"living_conduit_chain_reaction_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

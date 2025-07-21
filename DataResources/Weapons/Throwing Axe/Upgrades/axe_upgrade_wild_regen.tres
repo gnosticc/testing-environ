@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b257ufp0e1pq"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_fowu0"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_7xhq5"]
+[ext_resource type="Resource" uid="uid://cgn1ueir8ct0d" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_wild_regen.tres" id="2_qi1pq"]
+
+[resource]
+script = ExtResource("2_7xhq5")
+upgrade_id = &"axe_wild_regen"
+title = "Wild Regeneration"
+description = "The thrill of a critical strike invigorates you, mending your wounds. On crit, gain health regeneration for 3 seconds based on your Luck."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_fowu0")]([ExtResource("2_qi1pq")])
+set_acquired_flag_on_weapon = &"axe_wild_regen_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

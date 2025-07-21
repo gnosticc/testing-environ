@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dhv4agrhqnbfe"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_icksg"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_8ql6m"]
+[ext_resource type="Resource" uid="uid://ydhus4hv0jt5" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_lingering_effect.tres" id="2_qy4au"]
+
+[resource]
+script = ExtResource("2_8ql6m")
+upgrade_id = &"living_conduit_lingering_charge"
+title = "Lingering Charge"
+description = "The arcane energy is tenacious. When a Conduit dies, the effect jumps to a new host for a fresh duration."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_icksg")]([ExtResource("2_qy4au")])
+set_acquired_flag_on_weapon = &"living_conduit_lingering_charge_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

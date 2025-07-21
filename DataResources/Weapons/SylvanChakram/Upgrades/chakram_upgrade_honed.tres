@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://1qdt3ah8hta3"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ee2c3"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_2yqvm"]
+[ext_resource type="Resource" uid="uid://c25fkiqysrk7w" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_honed.tres" id="2_jjkms"]
+[ext_resource type="Resource" uid="uid://3hut45mvat21" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_honed_companion.tres" id="3_dv1dt"]
+
+[resource]
+script = ExtResource("2_2yqvm")
+upgrade_id = &"chakram_honed"
+title = "Honed Edge"
+description = "The chakram's edges are sharpened, increasing its base damage by 100%. Companion damage is increased by 70% if acquired."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ee2c3")]([ExtResource("2_jjkms"), ExtResource("3_dv1dt")])
+set_acquired_flag_on_weapon = &"chakram_honed_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

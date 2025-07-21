@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://6end64pxc6s0"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_08lho"]
+[ext_resource type="Resource" uid="uid://c53r8isdq8a07" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/self_experimentation_flag.tres" id="2_v5nii"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_y2og4"]
+
+[resource]
+script = ExtResource("2_y2og4")
+upgrade_id = &"exp_mat_self_experimentation"
+title = "Self-Experimentation"
+description = "Every 12 seconds, gain a random potent buff for 6 seconds: +25% Global Dmg, +20% Attack Speed, or +30% Move Speed"
+prerequisites_on_this_weapon = Array[StringName]([&"exp_mat_transmutation"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_08lho")]([ExtResource("2_v5nii")])
+set_acquired_flag_on_weapon = &"exp_mat_self_experimentation_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

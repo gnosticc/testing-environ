@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://dhyplfp76c8b"]
+
+[ext_resource type="Script" uid="uid://gjt88frrlu0e" path="res://Scripts/DataResources/Weapons/Basic Class Weapons/LongswordController.gd" id="1_c2arm"]
+[ext_resource type="PackedScene" uid="uid://snbqkv5o3phl" path="res://Scenes/Weapons/LongswordAttack.tscn" id="2_i1v2x"]
+
+[node name="LongswordController" type="Node2D"]
+script = ExtResource("1_c2arm")
+longsword_attack_scene = ExtResource("2_i1v2x")

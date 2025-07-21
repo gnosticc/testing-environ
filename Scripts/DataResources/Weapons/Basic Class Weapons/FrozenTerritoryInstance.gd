@@ -1,6 +1,8 @@
-# File: res://Scripts/DataResources/Weapons/Basic Class Weapons/FrozenTerritoryInstance.gd
+# File: res/Scripts/DataResources/Weapons/Basic Class Weapons/FrozenTerritoryInstance.gd
 # MODIFIED: All Rimeheart and Lingering Cold connection logic has been removed.
 # This script is now much simpler.
+# FIX: Now correctly passes the owner_player as the source when applying status effects,
+#      resolving a crash when the StatusEffectComponent tried to access player stats.
 
 class_name FrozenTerritoryInstance
 extends Area2D
@@ -45,8 +47,13 @@ func initialize(p_owner: PlayerCharacter, p_stats: Dictionary, start_angle: floa
 	
 	var weapon_damage_percent = float(specific_weapon_stats.get(&"weapon_damage_percentage", 1.0))
 	var weapon_tags: Array[StringName] = specific_weapon_stats.get(&"tags", [])
-	damage_on_contact = int(round(maxf(1.0, _owner_player_stats.get_calculated_player_damage(weapon_damage_percent, weapon_tags))))
 
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(weapon_damage_percent)
+	var final_damage = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	damage_on_contact = int(round(maxf(1.0, final_damage)))
+	# --- END REFACTOR ---
+	
 	var area_scale = float(specific_weapon_stats.get(&"area_scale", 1.0))
 	self.scale = Vector2.ONE * area_scale
 
@@ -95,7 +102,10 @@ func _deal_damage(enemy_target: BaseEnemy):
 	else:
 		attack_stats[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]] = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR_PENETRATION)
 	
-	enemy_target.take_damage(damage_on_contact, owner_player, attack_stats)
+	var weapon_tags: Array[StringName] = []
+	if specific_weapon_stats.has("tags"):
+		weapon_tags = specific_weapon_stats.get("tags")
+	enemy_target.take_damage(damage_on_contact, owner_player, attack_stats, weapon_tags)
 	
 	if specific_weapon_stats.has(&"on_hit_status_applications") and is_instance_valid(enemy_target.status_effect_component):
 		var status_apps: Array = specific_weapon_stats.get(&"on_hit_status_applications", [])
@@ -111,9 +121,10 @@ func _deal_damage(enemy_target: BaseEnemy):
 					if specific_weapon_stats.get(&"has_lingering_cold", false):
 						id_override = "ft_lingering_cold_slow"
 					
+					# FIX: Pass the 'owner_player' as the source node, not 'self'.
 					enemy_target.status_effect_component.apply_effect(
 						load(app_data.status_effect_resource_path) as StatusEffectData,
-						self, 
+						owner_player, 
 						specific_weapon_stats,
 						app_data.duration_override,
 						app_data.potency_override,

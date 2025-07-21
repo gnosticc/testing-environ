@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bked6ln1vfncr"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_uv7cc"]
+[ext_resource type="Resource" uid="uid://doutm17jdv8qa" path="res://DataResources/Weapons/SwordCoil/Effects/sc_runic_imbuement_effect.tres" id="2_7arqp"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_fpqh1"]
+
+[resource]
+script = ExtResource("2_fpqh1")
+upgrade_id = &"sc_runic_imbuement"
+title = "Runic Imbuement"
+description = "The blade is etched with runes of power. Gains an additional 80% damage bonus."
+prerequisites_on_this_weapon = Array[StringName]([&"sc_empowered_conduit"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_uv7cc")]([ExtResource("2_7arqp")])
+set_acquired_flag_on_weapon = &"sc_runic_imbuement_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

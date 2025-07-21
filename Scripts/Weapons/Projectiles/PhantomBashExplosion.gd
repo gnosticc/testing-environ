@@ -17,6 +17,7 @@ var _damage: int
 var _radius: float
 var _source_node: Node
 var _attack_stats: Dictionary
+var _specific_stats: Dictionary
 
 func _ready():
 	# The node starts completely inert.
@@ -29,7 +30,7 @@ func _ready():
 	animated_sprite.animation_finished.connect(_on_animation_finished)
 
 # This is called by ShieldBashAttack after a 1-second delay.
-func detonate(damage: int, radius: float, source_node: Node, attack_stats: Dictionary):
+func detonate(damage: int, radius: float, source_node: Node, attack_stats: Dictionary, p_weapon_stats: Dictionary):
 	if not is_instance_valid(self): return
 
 	# Store the data for when the animation finishes.
@@ -37,6 +38,7 @@ func detonate(damage: int, radius: float, source_node: Node, attack_stats: Dicti
 	_radius = radius
 	_source_node = source_node
 	_attack_stats = attack_stats
+	_specific_stats = p_weapon_stats # Store the weapon stats
 	
 	# --- VISUAL SCALING LOGIC ---
 	if is_instance_valid(animated_sprite) and animated_sprite.sprite_frames:
@@ -115,7 +117,10 @@ func _deal_damage_and_cleanup():
 	#print("PhantomBashExplosion at ", global_position, ": Detected ", bodies.size(), " overlapping bodies.") # Debug print
 	for body in bodies:
 		if body is BaseEnemy and is_instance_valid(body) and not body.is_dead():
-			body.take_damage(_damage, _source_node, _attack_stats)
+			var weapon_tags: Array[StringName] = []
+			if _specific_stats.has("tags"):
+				weapon_tags = _specific_stats.get("tags")
+			body.take_damage(_damage, _source_node, _attack_stats, weapon_tags) # Pass tags
 			#print("  -> Hit enemy: ", body.name, " (ID: ", body.get_instance_id(), ") for ", _damage, " damage.") # Debug print
 		#else:
 			#print("  -> Detected body ", body.name, " but it's not a valid enemy or is dead.") # Debug print

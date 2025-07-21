@@ -107,7 +107,7 @@ func _ready():
 	if is_instance_valid(animated_sprite):
 		_initial_sprite_modulate_from_scene = animated_sprite.modulate # Store the absolute original scene modulate
 		_final_base_modulate_color = _initial_sprite_modulate_from_scene # Start final base with scene color
-		print("BaseEnemy '", name, "': _initial_sprite_modulate_from_scene set in _ready(): ", _initial_sprite_modulate_from_scene) # DEBUG
+		#print("BaseEnemy '", name, "': _initial_sprite_modulate_from_scene set in _ready(): ", _initial_sprite_modulate_from_scene) # DEBUG
 		
 		if animated_sprite.sprite_frames and animated_sprite.sprite_frames.has_animation(&"attack"):
 			if not animated_sprite.is_connected("animation_finished", Callable(self, "_on_animated_sprite_animation_finished")):
@@ -193,7 +193,7 @@ func initialize_from_data(data: EnemyData):
 	if is_instance_valid(animated_sprite):
 		# Combine initial scene modulate with EnemyData's sprite_modulate_color
 		_final_base_modulate_color = _initial_sprite_modulate_from_scene * data.sprite_modulate_color
-		print("BaseEnemy '", name, "': _final_base_modulate_color after EnemyData applied: ", _final_base_modulate_color) # DEBUG
+		#print("BaseEnemy '", name, "': _final_base_modulate_color after EnemyData applied: ", _final_base_modulate_color) # DEBUG
 		
 		# Now, trigger the status effect tint update
 		if is_instance_valid(status_effect_component):
@@ -228,26 +228,25 @@ func _physics_process(delta: float):
 
 	# Handle status effects that stop movement
 	if is_instance_valid(status_effect_component):
-		# FIX: Use has_flag() for flags now
 		if status_effect_component.has_flag(&"is_stunned") or status_effect_component.has_flag(&"is_frozen") or status_effect_component.has_flag(&"is_rooted"):
 			velocity = Vector2.ZERO; move_and_slide(); return # Cannot move
+			
 		# If feared, change movement direction
-		# FIX: Use has_flag() for flags now
 		if status_effect_component.has_flag(&"is_feared"):
 			if is_instance_valid(player_node):
 				var move_direction = (global_position - player_node.global_position).normalized()
-				var current_move_speed_from_base = speed # Start with base speed from EnemyData for feared logic
+				var current_move_speed_from_base = speed # Start with base speed from EnemyData
 				
-				# Apply speed modifiers from status effects for feared movement as well
-				var speed_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
-				var speed_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
-				current_move_speed_from_base *= (1.0 + speed_mod_add)
-				current_move_speed_from_base *= speed_mod_mult
+				# CORRECTED SPEED CALCULATION
+				var temp_flat_mod = status_effect_component.get_sum_of_flat_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+				var temp_percent_add_mod = status_effect_component.get_sum_of_percent_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+				var temp_multiplicative_mod = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+
+				current_move_speed_from_base = (current_move_speed_from_base + temp_flat_mod) * (1.0 + temp_percent_add_mod) * temp_multiplicative_mod
 				current_move_speed_from_base = maxf(0.0, current_move_speed_from_base)
 				
-				velocity = move_direction * current_move_speed_from_base # Feared enemies move away from player
-				
-				move_and_slide(); _update_animation_state(); return # Exit after handling feared movement
+				velocity = move_direction * current_move_speed_from_base
+				move_and_slide(); _update_animation_state(); return
 
 	var move_direction = Vector2.ZERO
 	if is_instance_valid(player_node):
@@ -260,26 +259,22 @@ func _physics_process(delta: float):
 	
 	# Apply speed modifiers from status effects
 	if is_instance_valid(status_effect_component):
-		# Assumes status effects modify the base speed directly
-		# These will now correctly get values from _additive_modifiers and _multiplicative_modifiers
-		var speed_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
-		var speed_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+		# CORRECTED SPEED CALCULATION
+		var temp_flat_mod = status_effect_component.get_sum_of_flat_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+		var temp_percent_add_mod = status_effect_component.get_sum_of_percent_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
+		var temp_multiplicative_mod = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.MOVEMENT_SPEED])
 		
-		current_move_speed *= (1.0 + speed_mod_add) # Apply additive percentage modifiers
-		current_move_speed *= speed_mod_mult # Apply final multiplicative modifiers
+		# Apply modifiers in the correct order: (Base + Flat) * (1 + Percent Add) * Multiplier
+		current_move_speed = (current_move_speed + temp_flat_mod) * (1.0 + temp_percent_add_mod) * temp_multiplicative_mod
 		current_move_speed = maxf(0.0, current_move_speed) # Ensure speed doesn't go negative
 
 	# Combine movement velocity with knockback velocity
-	# --- MODIFIED: Velocity calculation pipeline ---
-	# 1. Start with the enemy's own intended movement.
 	velocity = final_direction * current_move_speed
 
-	# 2. Add any active knockback velocity.
 	if knockback_velocity.length_squared() > 0:
 		velocity += knockback_velocity
 		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 300.0 * delta)
 
-	# 3. Add any accumulated external forces (like the vortex pull).
 	if external_forces.length_squared() > 0:
 		velocity += external_forces
 
@@ -288,7 +283,6 @@ func _physics_process(delta: float):
 		animated_sprite.flip_h = (velocity.x < 0) if not _sprite_initially_faces_left else (velocity.x > 0)
 			
 	move_and_slide()
-	# 5. Reset external forces for the next frame.
 	external_forces = Vector2.ZERO
 	_update_animation_state()
 
@@ -315,10 +309,10 @@ func _calculate_separation_force() -> Vector2:
 # attacker_node: The node that dealt the damage (e.g., PlayerCharacter, a Projectile).
 # p_attack_stats: Dictionary containing attack-specific stats (e.g., player's armor_penetration).
 # --- MERGED take_damage function ---
-func take_damage(amount: float, attacker_node: Node = null, p_attack_stats: Dictionary = {}):
+func take_damage(damage_amount: float, attacker_node: Node = null, p_attack_stats: Dictionary = {}, p_weapon_tags: Array[StringName] = []):
 	if current_health <= 0 or is_dead_flag: return
 	
-	var final_damage_taken = amount
+	var final_damage_taken = damage_amount
 	var current_armor_stat = armor
 	
 	var armor_penetration_value = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0))
@@ -326,39 +320,49 @@ func take_damage(amount: float, attacker_node: Node = null, p_attack_stats: Dict
 	final_damage_taken = maxf(1.0, final_damage_taken - effective_armor)
 	
 	if is_instance_valid(status_effect_component):
-		var damage_taken_mod_add = status_effect_component.get_sum_of_additive_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER])
+		var damage_taken_mod_add = status_effect_component.get_sum_of_percent_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER])
 		var damage_taken_mod_mult = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_TAKEN_MULTIPLIER])
 		final_damage_taken *= (1.0 + damage_taken_mod_add)
 		final_damage_taken *= damage_taken_mod_mult
 		
-	# NEW: Store this damage amount before applying it.
 	_last_damage_instance_received = int(round(final_damage_taken))
 
 	current_health -= final_damage_taken
 	update_health_bar()
 	_flash_on_hit()
-	
+
+	# --- Catalytic Reaction Check ---
+	if is_instance_valid(status_effect_component) and status_effect_component.has_status_effect(&"soaked"):
+		status_effect_component.consume_effect_and_apply_next(&"soaked")
+		# This signal now correctly passes the weapon tags from the damaging attack
+		CombatEvents.emit_signal("catalytic_reaction_requested", self, p_weapon_tags)
+
 	if current_health <= 0:
 		_die(attacker_node)
 
-
 # Handles the enemy's death sequence.
+# MERGED _die function with Lingering Cold and Shadow's Embrace logic
 func _die(killer_node: Node = null):
-	if is_dead_flag: return # Prevent double death
+	if is_dead_flag: return
 	is_dead_flag = true
-	_is_contact_attacking = false # Stop attack animation/logic
+	
+	# --- Shadow's Embrace Logic ---
+	if is_instance_valid(status_effect_component) and status_effect_component.has_status_effect(&"death_mark"):
+		var effect_entry = status_effect_component.active_effects.get("death_mark")
+		if effect_entry and effect_entry.has("weapon_stats"):
+			CombatEvents.emit_signal("death_mark_triggered", global_position, effect_entry.weapon_stats)
+
+	_is_contact_attacking = false
 	_set_animation_state(EnemyAnimState.DEATH)
 
 	# Stop and free elite-specific timers and nodes.
-	# This should be called *before* decrementing active enemy count or queue_freeing.
 	if is_instance_valid(phaser_teleport_timer): phaser_teleport_timer.queue_free()
 	if is_instance_valid(summoner_spawn_timer): summoner_spawn_timer.queue_free()
 	if is_instance_valid(shaman_aura): shaman_aura.queue_free()
 	if is_instance_valid(shaman_heal_pulse_timer): shaman_heal_pulse_timer.queue_free()
-	if is_instance_valid(time_warper_aura): time_warper_aura.queue_free() # For time_warper
+	if is_instance_valid(time_warper_aura): time_warper_aura.queue_free()
 
-	# --- NEW: Lingering Cold Logic ---
-	# MODIFIED: Correctly check for the special effect ID.
+	# --- Lingering Cold Logic ---
 	if is_instance_valid(status_effect_component) and status_effect_component.has_status_effect_by_unique_id("ft_lingering_cold_slow"):
 		var weapon_stats = status_effect_component.get_stats_from_effect_source_by_unique_id("ft_lingering_cold_slow")
 		var spread_radius = float(weapon_stats.get(&"lingering_cold_radius", 75.0))
@@ -375,40 +379,63 @@ func _die(killer_node: Node = null):
 			var collider = result.collider
 			if collider != self and collider is BaseEnemy and is_instance_valid(collider) and not collider.is_dead():
 				if is_instance_valid(collider.status_effect_component):
-					# Apply the regular slow effect to nearby enemies, without the special ID.
 					collider.status_effect_component.apply_effect(slow_effect_data, killer_node)
-
 
 	# Decrement active enemy count in game.gd.
 	if is_instance_valid(game_node_ref) and game_node_ref.has_method("decrement_active_enemy_count"):
 		game_node_ref.decrement_active_enemy_count()
 	else:
 		push_warning("BaseEnemy '", name, "': Game node reference invalid or missing 'decrement_active_enemy_count' on death.")
-		
-	emit_signal("killed_by_attacker", killer_node, self) # Notify systems of enemy death
-	set_physics_process(false) # Stop physics updates
+
+	# --- Transmutation Check (MUST happen before _on_owner_death) ---
+	if is_instance_valid(status_effect_component) and (status_effect_component.has_flag(&"is_marked_for_transmutation") or status_effect_component.has_flag(&"is_soaked")):
+		if is_instance_valid(player_node): # Ensure player reference is valid
+			var player_stats = player_node.get_node_or_null("PlayerStats")
+			if is_instance_valid(player_stats):
+				var base_chance = 0.25
+				var luck = player_stats.get_final_stat(PlayerStatKeys.Keys.LUCK)
+				var final_chance = base_chance + (luck * 0.05)
+				if randf() < final_chance:
+					call_deferred("_spawn_transmuted_orb")
+		else:
+			push_warning("BaseEnemy '", name, "': Transmutation check failed, player_node is not valid.")
+
+	# Now that we've checked for statuses, we can clear them.
+	if is_instance_valid(status_effect_component):
+		status_effect_component._on_owner_death()
+	
+	# Drop the primary orb immediately, but deferred to avoid physics errors.
+	call_deferred("_finish_dying_and_drop_exp")
+
+	emit_signal("killed_by_attacker", killer_node, self)
+	set_physics_process(false)
 
 	# Disable/free collision shapes and areas to prevent further interaction.
 	var col_shape = get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if is_instance_valid(col_shape): col_shape.call_deferred("set_disabled", true) # Use call_deferred for safety
+	if is_instance_valid(col_shape): col_shape.call_deferred("set_disabled", true)
 	
 	if is_instance_valid(damage_area):
 		var da_col_shape = damage_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		if is_instance_valid(da_col_shape): da_col_shape.call_deferred("set_disabled", true)
-		damage_area.call_deferred("set_monitoring", false) # Stop detecting bodies
+		damage_area.call_deferred("set_monitoring", false)
 		
 	if is_instance_valid(separation_detector):
 		var sd_col_shape = separation_detector.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		if is_instance_valid(sd_col_shape): sd_col_shape.call_deferred("set_disabled", true)
 		separation_detector.call_deferred("set_monitoring", false)
 
-	# Start a timer to queue_free the enemy after death animation/effects.
-	var death_timer = get_tree().create_timer(1.0) # Adjust time if death anim is longer/shorter
-	death_timer.timeout.connect(Callable(self, "_finish_dying_and_drop_exp"))
+	# Set a single, reliable timer to delete the enemy node after the death animation.
+	get_tree().create_timer(1.0).timeout.connect(queue_free)
 
+
+
+func _spawn_transmuted_orb():
+	print_debug("Transmutation successful! Spawning extra experience orb.")
+	var offset = Vector2(randf_range(-15.0, 15.0), randf_range(-15.0, 15.0))
+	_finish_dying_and_drop_exp(offset)
 
 # Handles dropping experience and queuing for free.
-func _finish_dying_and_drop_exp():
+func _finish_dying_and_drop_exp(p_offset: Vector2 = Vector2.ZERO):
 	var final_exp_to_give = self.experience_to_drop
 	var actual_exp_scene_path: String = ""
 	
@@ -416,32 +443,31 @@ func _finish_dying_and_drop_exp():
 		actual_exp_scene_path = enemy_data_resource.exp_drop_scene_path
 	else:
 		push_warning("BaseEnemy '", name, "': Missing exp_drop_scene_path in EnemyData. Skipping EXP drop.")
+		return
 
 	if not actual_exp_scene_path.is_empty():
 		var exp_scene_to_load = load(actual_exp_scene_path) as PackedScene
 		if is_instance_valid(exp_scene_to_load):
 			var exp_drop_instance = exp_scene_to_load.instantiate()
 			
-			# Find a suitable parent for the EXP drop (DropsContainer or current scene)
 			var drops_container_node = get_tree().current_scene.get_node_or_null("DropsContainer")
 			if is_instance_valid(drops_container_node):
 				drops_container_node.add_child(exp_drop_instance)
-			elif get_parent(): # Fallback to current parent
+			elif get_parent():
 				get_parent().add_child(exp_drop_instance)
-			else: # Fallback to current scene root
+			else:
 				get_tree().current_scene.add_child(exp_drop_instance)
 			
-			exp_drop_instance.global_position = global_position # Spawn at enemy's death location
+			exp_drop_instance.global_position = self.global_position + p_offset
 			
-			# Pass experience value and elite status to the EXP drop script
 			if exp_drop_instance.has_method("set_experience_value"):
 				exp_drop_instance.set_experience_value(final_exp_to_give, self.is_elite)
 			else:
 				push_warning("BaseEnemy: EXP drop instance '", exp_drop_instance.name, "' is missing 'set_experience_value' method.")
 		else:
 			push_error("BaseEnemy: Could not load EXP drop scene from path: ", actual_exp_scene_path)
-			
-	call_deferred("queue_free") # Queue the enemy for removal after dropping EXP
+
+
 
 # Culls the enemy (removes it without death animation/EXP drop) and reports threat.
 func cull_self_and_report_threat():
@@ -526,8 +552,8 @@ func _play_animation(anim_name: StringName):
 		if animated_sprite.sprite_frames.has_animation(anim_name):
 			if animated_sprite.animation != anim_name or not animated_sprite.is_playing():
 				animated_sprite.play(anim_name)
-		else:
-			push_warning("BaseEnemy: AnimatedSprite2D does not have animation: '", anim_name, "'.")
+		#else:
+			#push_warning("BaseEnemy: AnimatedSprite2D does not have animation: '", anim_name, "'.")
 	else:
 		push_warning("BaseEnemy: AnimatedSprite2D or its SpriteFrames are invalid, cannot play animation '", anim_name, "'.")
 
@@ -811,21 +837,32 @@ func on_status_effects_changed(_owner_node: Node):
 		applied_tint *= SLOW_TINT_COLOR # Light blue tint for slow
 	# Add more tints for other effects as needed (e.g., Burn, Poison)
 	
-	animated_sprite.modulate = applied_tint
+	# --- STAT UPDATE LOGIC ---
+	# Armor
+	var old_armor = armor
+	var base_armor_val = 0.0
+	if is_instance_valid(enemy_data_resource):
+		base_armor_val = float(enemy_data_resource.base_armor)
+	
+	var flat_mod = status_effect_component.get_sum_of_flat_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR])
+	var percent_add_mod = status_effect_component.get_sum_of_percent_add_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR])
+	var mult_mod = status_effect_component.get_product_of_multiplicative_modifiers(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR])
+	
+	var new_armor = (base_armor_val + flat_mod) * (1.0 + percent_add_mod) * mult_mod
+	
+	if not is_equal_approx(old_armor, new_armor):
+		print_debug("Armor changed for '", name, "'. Before: ", old_armor, " -> After: ", new_armor)
+	
+	armor = new_armor
 
-	# --- NEW: STAT UPDATE LOGIC ---
-	# Read the final calculated modifiers from the StatusEffectComponent and apply them.
-	# We start with a base multiplier of 1.0 (100% damage).
+	# Damage Output Multiplier
 	var final_damage_mult = 1.0 
 	var mult_from_status = status_effect_component.get_product_of_multiplicative_modifiers(
 		PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.DAMAGE_OUTPUT_MULTIPLIER]
 	)
 	final_damage_mult *= mult_from_status
-	
-	# Update the local variable that is used in the damage calculation.
 	self.damage_output_multiplier = final_damage_mult
 
-	# Update movement behavior based on status effects that impair movement.
 	set_physics_process(true)
 
 

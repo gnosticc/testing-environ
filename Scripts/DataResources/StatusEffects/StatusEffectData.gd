@@ -32,6 +32,9 @@ enum VisualAnchor {
 ## If true, re-applying the effect will refresh its duration.
 @export var refresh_duration_on_reapply: bool = true
 
+# NEW: This flag allows an effect to trigger a one-shot event upon expiration.
+@export var has_effect_on_expire: bool = false
+
 @export_group("Tick-Based Effects (for DoTs, HoTs, etc.)")
 ## Interval in seconds for tick-based effects.
 @export var tick_interval: float = 0.0

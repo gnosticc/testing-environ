@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=6 format=3 uid="uid://ds6s2vyeij018"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_x6suq"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_534ro"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_b5qn5"]
+[ext_resource type="Resource" uid="uid://prm5rikppyij" path="res://Data/Classes/Effects/warrior_unlock_bonus_damage.tres" id="3_fa55l"]
+[ext_resource type="Resource" uid="uid://b80qa4hsk1ki5" path="res://Data/Classes/Effects/conjurer_unlock_luck.tres" id="4_kucto"]
+
+[resource]
+script = ExtResource("2_534ro")
+class_id = &"shinobi_advanced"
+display_name = "Shinobi"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_x6suq")]([ExtResource("2_b5qn5"), ExtResource("3_fa55l"), ExtResource("4_kucto")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"shinobi_shuriken"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Warrior and Conjurer weapons to unlock the path of the Shinobi. A master of stealth and deception who uses shadow clones to strike from unexpected angles. Unlocks the Shuriken weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

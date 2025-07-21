@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bjx5jjgu3vmjk"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_7tma7"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_crtem"]
+[ext_resource type="Resource" uid="uid://qeatdldyetx4" path="res://DataResources/Weapons/ConjoinedSpirits/Effects/elemental_fusion_effect.tres" id="2_nvy2k"]
+
+[resource]
+script = ExtResource("2_crtem")
+upgrade_id = &"cs_elemental_fusion"
+title = "Elemental Fusion"
+description = "When the Attunement Phase begins and ends, the spirit releases a nova of water and ice."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_7tma7")]([ExtResource("2_nvy2k")])
+set_acquired_flag_on_weapon = &"cs_elemental_fusion_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

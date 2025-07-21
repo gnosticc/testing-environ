@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bhs041yq058rx"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_6bv8y"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_mduy8"]
+[ext_resource type="Resource" uid="uid://ccvo7du81ud6p" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/lingering_fumes_area_effect.tres" id="2_wswxw"]
+[ext_resource type="Resource" uid="uid://nbfuf5rpauaj" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/lingering_fumes_duration_effect.tres" id="3_0m8dh"]
+
+[resource]
+script = ExtResource("2_mduy8")
+upgrade_id = &"exp_mat_lingering_fumes"
+title = "Lingering Fumes"
+description = "The 'Primary Reagent' puddles last 3 seconds longer and are 30% larger."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_6bv8y")]([ExtResource("2_wswxw"), ExtResource("3_0m8dh")])
+set_acquired_flag_on_weapon = &"exp_mat_lingering_fumes_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

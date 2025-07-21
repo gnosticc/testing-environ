@@ -1,0 +1,49 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://cro6wd51qxv33"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_iqg0i"]
+[ext_resource type="Resource" uid="uid://cu3avf4n5wis1" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_weighted_core.tres" id="2_i60gm"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_tugmu"]
+[ext_resource type="Resource" uid="uid://c78xj5lglikdd" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_iron_thorns.tres" id="3_c3y04"]
+[ext_resource type="PackedScene" uid="uid://08vpkg7rnxg1" path="res://Scenes/Weapons/Advanced/BrambleCenserController.tscn" id="3_tugmu"]
+[ext_resource type="Resource" uid="uid://nukd8a0ern7p" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_wider_swing.tres" id="4_j8dkt"]
+[ext_resource type="Resource" uid="uid://bv4msvsl1ghia" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_deep_roots.tres" id="5_kitsr"]
+[ext_resource type="Resource" uid="uid://dwxmmqtqydcjw" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_nourishment.tres" id="6_qo6sg"]
+[ext_resource type="Resource" uid="uid://cneish7e8uu4t" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_sprawling_growth.tres" id="7_tm3h7"]
+[ext_resource type="Resource" uid="uid://bkcqildp17i83" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_toxic_soil.tres" id="8_7nsjs"]
+[ext_resource type="Resource" uid="uid://b8hoddp0pq076" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_violent_germination.tres" id="9_gtkm1"]
+[ext_resource type="Resource" uid="uid://cf5b1qrtg3ya7" path="res://DataResources/Weapons/Bramble Censer/Upgrades/bramble_censer_upgrade_garden_of_thorns.tres" id="10_wvd1m"]
+
+[resource]
+script = ExtResource("2_tugmu")
+id = &"warden_bramble_censer"
+title = "Bramble Censer"
+description = "A heavy censer that creates pools of entangling roots. Striking rooted enemies with the Censer causes them to explode in a burst of thorns."
+weapon_scene = ExtResource("3_tugmu")
+tags = Array[StringName]([&"melee", &"nature", &"physical", &"aoe", &"warden weapon", &"controller"])
+class_tag_restrictions = [&"warden_advanced"]
+cooldown = 3.2
+max_level = 10
+base_lifetime = 3.0
+spawn_as_child = true
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+weight = 50.0
+initial_specific_stats = {
+"root_pool_duration": 5.0,
+"root_pool_radius": 15.0,
+"root_status_duration_add": 0.0,
+"rooted_bonus_damage_multiplier": 2.0,
+"seed_explosion_damage_percentage": 1.2,
+"seed_explosion_radius": 30.0,
+"seed_projectile_scale": 0.2,
+"seed_spawn_radius": 200.0,
+"swing_damage_percentage": 2.0,
+"swing_length_scale": 1.0,
+"swing_width_scale": 1.0,
+"thorn_burst_damage_percentage": 1.0,
+"thorn_projectile_scale": 0.1,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_iqg0i")]([ExtResource("2_i60gm"), ExtResource("3_c3y04"), ExtResource("4_j8dkt"), ExtResource("5_kitsr"), ExtResource("6_qo6sg"), ExtResource("7_tm3h7"), ExtResource("8_7nsjs"), ExtResource("9_gtkm1"), ExtResource("10_wvd1m")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

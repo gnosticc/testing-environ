@@ -14,6 +14,7 @@ var rotation_speed: float = 1.5
 var current_angle: float = 0.0
 var attack_cooldown: float = 2.0
 var attack_range: float = 180.0
+var _weapon_manager: WeaponManager # Reference to call back for cooldown reduction
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
 var _attack_cooldown_timer: Timer
@@ -109,4 +110,4 @@ func _fire_at_target(target: Node2D):
 	bolt.global_position = self.global_position
 	
 	if bolt.has_method("set_attack_properties"):
-		(bolt as Node2D).set_attack_properties(direction_to_target, specific_weapon_stats, _owner_player_stats)
+		(bolt as Node2D).set_attack_properties(direction_to_target, specific_weapon_stats, _owner_player_stats, _weapon_manager)

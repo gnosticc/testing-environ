@@ -21,13 +21,14 @@ title = "Frozen Territory"
 description = "Chunks of ice orbit you, damaging and slowing enemies they touch."
 weapon_scene = ExtResource("3_ox1t0")
 tags = Array[StringName]([&"orbital", &"magical", &"ice", &"area", &"wizard weapon"])
-class_tag_restrictions = Array[int]([4])
+class_tag_restrictions = [4]
 cooldown = 6.0
 max_level = 10
 base_lifetime = 3.0
 spawn_as_child = true
 requires_direction = false
 targeting_type = "none"
+tracks_shot_count = false
 initial_specific_stats = {
 "area_scale": 1.0,
 "has_absolute_zero": false,
@@ -41,7 +42,7 @@ initial_specific_stats = {
 "orbit_radius": 60.0,
 "pierce_count": 0,
 "projectile_speed": 200.0,
-"rimeheart_chance": 1.0,
+"rimeheart_chance": 0.5,
 "rimeheart_damage_percent": 1.0,
 "rimeheart_radius": 35.0,
 "rotation_duration": 3.0,

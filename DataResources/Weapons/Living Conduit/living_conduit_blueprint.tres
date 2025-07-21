@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://c5os4lxo81tje"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_dtv0u"]
+[ext_resource type="Resource" uid="uid://bgh3oce0538qy" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_high_voltage.tres" id="2_60nl8"]
+[ext_resource type="Resource" uid="uid://cugd861ah5qjk" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_thunderclap.tres" id="3_bhm8w"]
+[ext_resource type="Resource" uid="uid://b30xigg02j5ro" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_forked.tres" id="4_lnsnh"]
+[ext_resource type="Resource" uid="uid://b86551o1dcr85" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_chain_reaction.tres" id="5_xx8iw"]
+[ext_resource type="Resource" uid="uid://dhv4agrhqnbfe" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_lingering.tres" id="6_ry8jt"]
+[ext_resource type="Resource" uid="uid://k6eirka5lj5p" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_overload.tres" id="7_4is6h"]
+[ext_resource type="Resource" uid="uid://cyxfwlj8xdket" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_resonance.tres" id="8_lv6ea"]
+[ext_resource type="Resource" uid="uid://b8m6u13dy8hvy" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_static_field.tres" id="9_e3h1v"]
+[ext_resource type="Resource" uid="uid://b8dkrs8pxcxyw" path="res://DataResources/Weapons/Living Conduit/Upgrade/living_conduit_upgrade_stormcaller.tres" id="10_urhh7"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="11_3ujq7"]
+[ext_resource type="PackedScene" uid="uid://jbk4c4jj7pxw" path="res://Scenes/Weapons/Advanced/LivingConduitController.tscn" id="12_cc5jc"]
+
+[resource]
+script = ExtResource("11_3ujq7")
+id = &"magus_living_conduit"
+title = "Living Conduit"
+description = "Calls a bolt of lightning down on an enemy, damaging them and turning them into a living conduit that arcs electricity to other nearby foes."
+weapon_scene = ExtResource("12_cc5jc")
+tags = Array[StringName]([&"magical", &"lightning", &"aoe", &"magus weapon"])
+class_tag_restrictions = [&"magus_advanced"]
+cooldown = 2.0
+max_level = 10
+base_lifetime = 3.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+initial_specific_stats = {
+"conduit_arc_chain_count": 1,
+"conduit_arc_damage_percentage": 0.75,
+"conduit_arc_interval": 0.5,
+"conduit_arc_max_targets": 1,
+"conduit_arc_radius": 125.0,
+"conduit_duration": 3.0,
+"initial_bolt_count": 1,
+"initial_bolt_damage_percentage": 3.0,
+"overload_radius": 35.0,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_dtv0u")]([ExtResource("2_60nl8"), ExtResource("3_bhm8w"), ExtResource("4_lnsnh"), ExtResource("5_xx8iw"), ExtResource("6_ry8jt"), ExtResource("7_4is6h"), ExtResource("8_lv6ea"), ExtResource("9_e3h1v"), ExtResource("10_urhh7")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

@@ -46,9 +46,9 @@ func initialize(golem: Node2D, stats: Dictionary, golem_hit_damage: int):
 
 # This function is called every second by the timer to deal damage.
 func _on_damage_tick():
-	# Get all bodies currently inside the aura.
 	for body in get_overlapping_bodies():
-		# Check if the body is a valid, living enemy.
 		if body is BaseEnemy and is_instance_valid(body) and not body.is_dead():
-			# Deal damage to the enemy.
-			body.take_damage(_damage_per_tick, _golem_node)
+			var weapon_tags: Array[StringName] = []
+			if _golem_node.specific_weapon_stats.has("tags"):
+				weapon_tags = _golem_node.specific_weapon_stats.get("tags")
+			body.take_damage(_damage_per_tick, _golem_node, {}, weapon_tags) # Pass tags

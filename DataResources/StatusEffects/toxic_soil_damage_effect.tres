@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://b0xmh5v3lf0qj"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_6fcm7"]
+
+[resource]
+script = ExtResource("1_6fcm7")
+id = &"toxic_soil_damage_tick"
+modification_type = &"flat_add"
+stat_key = &"health"
+value_type = 1
+value_float = 0.0
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"enemy_stats"
+developer_note = "Damage per tick is dynamically calculated by StatusEffectComponent based on the Bramble Censer's swing damage, passed via potency_override.
+"
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

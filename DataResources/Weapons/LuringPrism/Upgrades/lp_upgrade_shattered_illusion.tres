@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://7cjkkhbgbyir"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_nrwob"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_tplxn"]
+[ext_resource type="Resource" uid="uid://ewbfhjf17gmq" path="res://DataResources/Weapons/LuringPrism/Effects/shattered_illusion_effect.tres" id="2_ul0hb"]
+
+[resource]
+script = ExtResource("2_tplxn")
+upgrade_id = &"lp_shattered_illusion"
+title = "Shattered Illusion"
+description = "Enemies defeated inside the Ring of Shards have a 25% chance to spawn a smaller, short-lived Luring Prism at their location."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_nrwob")]([ExtResource("2_ul0hb")])
+set_acquired_flag_on_weapon = &"lp_shattered_illusion_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

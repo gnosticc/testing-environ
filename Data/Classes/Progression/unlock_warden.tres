@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://bydsykkawwvcq"]
+
+[ext_resource type="Resource" uid="uid://dhlvaqpfcas8m" path="res://Data/Classes/Tiers/warden_advanced.tres" id="1_agmbc"]
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_lu8is"]
+
+[resource]
+script = ExtResource("1_lu8is")
+progression_id = &"unlock_warden"
+class_tier_to_unlock = ExtResource("1_agmbc")
+unlock_description = "A guardian of the wilds who uses the power of nature to ensnare and crush their foes. Unlocks the Bramble Censer weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Armor: 5
+Movement Speed: 15
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 2,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 5,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

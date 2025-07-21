@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bgh3oce0538qy"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_olnr2"]
+[ext_resource type="Resource" uid="uid://y7mn24id0myx" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_high_voltage_effect.tres" id="2_74whe"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_vcj4y"]
+
+[resource]
+script = ExtResource("2_vcj4y")
+upgrade_id = &"living_conduit_high_voltage"
+title = "High Voltage"
+description = "You channel more power into the initial strike. +100% Initial Bolt Damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_olnr2")]([ExtResource("2_74whe")])
+set_acquired_flag_on_weapon = &"living_conduit_high_voltage_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

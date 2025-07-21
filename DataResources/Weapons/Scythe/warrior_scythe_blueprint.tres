@@ -12,23 +12,24 @@
 [ext_resource type="Resource" uid="uid://dh6ylhvy6lkdq" path="res://DataResources/Weapons/Scythe/Upgrades/scythe_upgrade_wider_arc.tres" id="10_uktk8"]
 [ext_resource type="Texture2D" uid="uid://ewov0jt0h7f6" path="res://Assets/UI/Icons/Weapons/Scythe.png" id="11_e8rf4"]
 [ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="12_dcvdt"]
-[ext_resource type="PackedScene" uid="uid://byd28ph0dd8dr" path="res://Scenes/Weapons/scythe_attack.tscn" id="13_abgv2"]
+[ext_resource type="PackedScene" uid="uid://dbfif7bkt7ndk" path="res://Scenes/Weapons/ScytheController.tscn" id="13_krmoi"]
 
 [resource]
 script = ExtResource("12_dcvdt")
 id = &"warrior_scythe"
 title = "Scythe"
 description = "A terrifying modified agricultural tool."
-weapon_scene = ExtResource("13_abgv2")
+weapon_scene = ExtResource("13_krmoi")
 icon = ExtResource("11_e8rf4")
-tags = Array[StringName]([&"centered_melee", &"aoe", &"warrior weapon", &"Melee", &"physical"])
-class_tag_restrictions = Array[int]([1])
+tags = Array[StringName]([&"centered_melee", &"aoe", &"warrior weapon", &"melee", &"physical"])
+class_tag_restrictions = [1]
 cooldown = 2.0
 max_level = 10
 base_lifetime = 0.5
 spawn_as_child = true
 requires_direction = true
 targeting_type = &"mouse_direction"
+tracks_shot_count = false
 initial_specific_stats = {
 &"area_scale": 1.0,
 &"base_attack_duration": 0.5,
@@ -38,6 +39,7 @@ initial_specific_stats = {
 &"inherent_visual_scale_x": 0.7,
 &"inherent_visual_scale_y": 0.7,
 &"on_hit_status_applications": [],
+"player_has_soul_siphon": false,
 &"reaping_momentum_accumulated_bonus": 0,
 &"reaping_momentum_damage_per_hit": 1,
 &"soul_siphon_details": {

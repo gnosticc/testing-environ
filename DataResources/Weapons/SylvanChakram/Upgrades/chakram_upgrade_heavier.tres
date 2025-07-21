@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=7 format=3 uid="uid://bfwso8cjcy35d"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_prd8p"]
+[ext_resource type="Resource" uid="uid://dfwicq1m0mlla" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_heavier_damage.tres" id="2_64bhl"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_ra1jg"]
+[ext_resource type="Resource" uid="uid://ciw6o31pkoc5k" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_heavier_size.tres" id="3_ju200"]
+[ext_resource type="Resource" uid="uid://dhg3dgahyruj3" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_heavier_companion.tres" id="4_8mndy"]
+[ext_resource type="Resource" uid="uid://bk72tsh4tl4pn" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_heavier_splinter_damage.tres" id="5_ju200"]
+
+[resource]
+script = ExtResource("2_ra1jg")
+upgrade_id = &"chakram_heavier"
+title = "Heavier Timber"
+description = "Increases base damage of Chakram, Thorns, and Companions by 40% and size by 25%."
+prerequisites_on_this_weapon = Array[StringName]([&"chakram_honed"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_prd8p")]([ExtResource("2_64bhl"), ExtResource("3_ju200"), ExtResource("4_8mndy"), ExtResource("5_ju200")])
+set_acquired_flag_on_weapon = &"chakram_heavier_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cvoxxx6jwjn3q"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_w57v7"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_bvbe4"]
+[ext_resource type="Resource" uid="uid://yfjv0xyd1wda" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_rampage.tres" id="2_h3t14"]
+
+[resource]
+script = ExtResource("2_bvbe4")
+upgrade_id = &"axe_rampage"
+title = "Rampage"
+description = "The chaos of battle fuels your rage. Every kill grants a stacking global damage bonus of 1% per enemy killed, regardless of method. Max stacks: 25. Resets if you haven't killed anything in 8 seconds."
+prerequisites_on_this_weapon = Array[StringName]([&"axe_frenzied"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_w57v7")]([ExtResource("2_h3t14")])
+set_acquired_flag_on_weapon = &"axe_rampage_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

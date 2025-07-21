@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://qsi5eyjw0ns3"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_lyr22"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_bnbei"]
+[ext_resource type="Resource" uid="uid://beyc64hlmg0gb" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_heavier_head.tres" id="2_s3lni"]
+
+[resource]
+script = ExtResource("2_bnbei")
+upgrade_id = &"axe_heavier_head"
+title = "Heavier Head"
+description = "A denser axehead crushes armor and flesh alike. Increases base damage by 125%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_lyr22")]([ExtResource("2_s3lni")])
+set_acquired_flag_on_weapon = &"axe_heavier_head_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

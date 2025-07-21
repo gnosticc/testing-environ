@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cdvqj70md1d64"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_yy6qa"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_anbr0"]
+[ext_resource type="Resource" uid="uid://v63iwxixkshg" path="res://DataResources/Weapons/ConjoinedSpirits/Effects/splintering_chill_effect.tres" id="2_joa0x"]
+
+[resource]
+script = ExtResource("2_anbr0")
+upgrade_id = &"cs_splintering_chill"
+title = "Splintering Chill"
+description = "The Ice Spirit now fires a tight, three-shot burst of Ice Shards instead of one."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_yy6qa")]([ExtResource("2_joa0x")])
+set_acquired_flag_on_weapon = &"cs_splintering_chill_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

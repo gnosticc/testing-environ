@@ -1,0 +1,133 @@
+[gd_scene load_steps=14 format=3 uid="uid://cche0gfq825b1"]
+
+[ext_resource type="Texture2D" uid="uid://obxkwrp7lmbx" path="res://Assets/Pets and Summons/Mechamaster Pets/Rocket Turret Fire Animation.png" id="1_8tffc"]
+[ext_resource type="Script" uid="uid://cndmhodvfo6tx" path="res://Scripts/DataResources/Weapons/Advanced/ArtilleryBot.gd" id="1_m03b3"]
+[ext_resource type="Texture2D" uid="uid://dhmebw6er8rfx" path="res://Assets/Pets and Summons/Mechamaster Pets/Rocket Turret Animation.png" id="2_m03b3"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eu1io"]
+atlas = ExtResource("1_8tffc")
+region = Rect2(0, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s6ljr"]
+atlas = ExtResource("1_8tffc")
+region = Rect2(600, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_75q82"]
+atlas = ExtResource("1_8tffc")
+region = Rect2(300, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20slo"]
+atlas = ExtResource("1_8tffc")
+region = Rect2(900, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f3sls"]
+atlas = ExtResource("2_m03b3")
+region = Rect2(0, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xlrgt"]
+atlas = ExtResource("2_m03b3")
+region = Rect2(600, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y6wfr"]
+atlas = ExtResource("2_m03b3")
+region = Rect2(300, 0, 300, 180)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8foyl"]
+atlas = ExtResource("2_m03b3")
+region = Rect2(900, 0, 300, 180)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ff5jb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eu1io")
+}],
+"loop": false,
+"name": &"fire_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6ljr")
+}],
+"loop": false,
+"name": &"fire_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_75q82")
+}],
+"loop": false,
+"name": &"fire_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20slo")
+}],
+"loop": false,
+"name": &"fire_west",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f3sls")
+}],
+"loop": false,
+"name": &"idle_east",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xlrgt")
+}],
+"loop": false,
+"name": &"idle_north",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6wfr")
+}],
+"loop": false,
+"name": &"idle_south",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8foyl")
+}],
+"loop": false,
+"name": &"idle_west",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_8tffc"]
+radius = 209.38
+
+[node name="ArtilleryBot" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 136
+script = ExtResource("1_m03b3")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ff5jb")
+animation = &"fire_north"
+
+[node name="TargetingRange" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TargetingRange"]
+shape = SubResource("CircleShape2D_8tffc")
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="ProjectileSpawnPoint" type="Marker2D" parent="."]
+
+[node name="FireAnimTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true

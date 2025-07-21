@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://p4f5cr0mqpbn"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_s5tsi"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_0yauq"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_43put"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_kh4kc"]
+[ext_resource type="Resource" uid="uid://dnh2nswm5k4mx" path="res://Data/Classes/Effects/rogue_unlock_crit_chance.tres" id="4_vstga"]
+[ext_resource type="Resource" uid="uid://b80qa4hsk1ki5" path="res://Data/Classes/Effects/conjurer_unlock_luck.tres" id="5_3lrm4"]
+
+[resource]
+script = ExtResource("2_43put")
+class_id = &"illusionist_advanced"
+display_name = "Illusionist"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_s5tsi")]([ExtResource("2_0yauq"), ExtResource("3_kh4kc"), ExtResource("4_vstga"), ExtResource("5_3lrm4")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"illusionist_luring_prism"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Rogue and Conjurer weapons to unlock the path of the Illusionist. A trickster who manipulates the battlefield with illusions that taunt and shred enemies. Unlocks the Luring Prism weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

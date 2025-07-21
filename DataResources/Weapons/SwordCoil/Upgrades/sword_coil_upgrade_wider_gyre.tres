@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dnaky3noijmwt"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_npy3k"]
+[ext_resource type="Resource" uid="uid://dw381krl826vg" path="res://DataResources/Weapons/SwordCoil/Effects/sc_wider_gyre_effect.tres" id="2_2r8dm"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_kpird"]
+
+[resource]
+script = ExtResource("2_kpird")
+upgrade_id = &"sc_wider_gyre"
+title = "Wider Gyre"
+description = "The spinning blade projects a larger field of energy, increasing its size and hitbox by 30%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_npy3k")]([ExtResource("2_2r8dm")])
+set_acquired_flag_on_weapon = &"sc_wider_gyre_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

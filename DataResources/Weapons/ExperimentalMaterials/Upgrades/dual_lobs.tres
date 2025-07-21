@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://dhlnlb8nkd8e6"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ayang"]
+[ext_resource type="Resource" uid="uid://cbi6c1fdopv2a" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/dual_lobs_additional_vial_flag.tres" id="2_4wecf"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_jvyhc"]
+[ext_resource type="Resource" uid="uid://ccu1bl8ahx0w7" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/dual_lobs_damage_flag.tres" id="3_cutyl"]
+
+[resource]
+script = ExtResource("2_jvyhc")
+upgrade_id = &"exp_mat_dual_lobs"
+title = "Dual Lobs"
+description = "An additional vial is tossed every 1.5 seconds to a random location near the player. All vials now deal 100% weapon impact damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ayang")]([ExtResource("2_4wecf"), ExtResource("3_cutyl")])
+set_acquired_flag_on_weapon = &"exp_mat_dual_lobs_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

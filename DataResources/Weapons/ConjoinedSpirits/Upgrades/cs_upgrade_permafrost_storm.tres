@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://nq0ppkn6lt28"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_rnfly"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_iibk5"]
+[ext_resource type="Resource" uid="uid://vmm14q72d07d" path="res://DataResources/Weapons/ConjoinedSpirits/Effects/permafrost_storm_effect.tres" id="2_uj2cg"]
+
+[resource]
+script = ExtResource("2_iibk5")
+upgrade_id = &"cs_permafrost_storm"
+title = "Permafrost Storm"
+description = "During its Roaming Phase, the Conjoined Spirit releases a smaller nova every 3 seconds."
+prerequisites_on_this_weapon = Array[StringName]([&"cs_elemental_fusion"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_rnfly")]([ExtResource("2_uj2cg")])
+set_acquired_flag_on_weapon = &"cs_permafrost_storm_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

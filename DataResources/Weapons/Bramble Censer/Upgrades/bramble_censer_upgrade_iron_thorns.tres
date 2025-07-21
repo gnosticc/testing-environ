@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://c78xj5lglikdd"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_8onh1"]
+[ext_resource type="Resource" uid="uid://boi35lb6tscqt" path="res://DataResources/Weapons/Bramble Censer/Effects/bramble_censer_iron_thorns_effect.tres" id="2_oa20q"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_t7vbq"]
+
+[resource]
+script = ExtResource("2_t7vbq")
+upgrade_id = &"bc_iron_thorns"
+title = "Iron Thorns"
+description = "The thorns that erupt from rooted enemies are now much deadlier. +150% Thorn Burst Damage."
+prerequisites_on_this_weapon = Array[StringName]([&"bc_weighted_core"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_8onh1")]([ExtResource("2_oa20q")])
+set_acquired_flag_on_weapon = &"bc_iron_thorns_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://cjljtnj0sfwtc"]
+
+[ext_resource type="Script" uid="uid://rku84ehlnyqa" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/OverloadExplosion.gd" id="1_nhesv"]
+[ext_resource type="Texture2D" uid="uid://tmsg4xcxmxfj" path="res://Assets/SFX/Living Conduit Overload Animation.png" id="2_rqbs7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0ilqe"]
+atlas = ExtResource("2_rqbs7")
+region = Rect2(0, 0, 100, 110)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2db65"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0ilqe")
+}],
+"loop": false,
+"name": &"explode",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_k7fy3"]
+radius = 15.0333
+
+[node name="OverloadExplosion" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_nhesv")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_2db65")
+animation = &"explode"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1.54972e-06, -2.38419e-07)
+shape = SubResource("CircleShape2D_k7fy3")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true

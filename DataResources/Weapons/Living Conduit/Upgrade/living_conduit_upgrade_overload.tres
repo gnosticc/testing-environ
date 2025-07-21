@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://k6eirka5lj5p"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_tjd30"]
+[ext_resource type="Resource" uid="uid://c3qvd8obc2w1u" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_overload_effect.tres" id="2_j17u0"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_syh62"]
+
+[resource]
+script = ExtResource("2_syh62")
+upgrade_id = &"living_conduit_overload"
+title = "Overload"
+description = "When the Living Conduit effect expires, the enemy erupts in a burst of electrical energy."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_tjd30")]([ExtResource("2_j17u0")])
+set_acquired_flag_on_weapon = &"living_conduit_overload_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

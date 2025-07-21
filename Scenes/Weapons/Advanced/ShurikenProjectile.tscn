@@ -1,0 +1,74 @@
+[gd_scene load_steps=11 format=3 uid="uid://dq3j1tywlhwrh"]
+
+[ext_resource type="Script" uid="uid://blm6ivkpysiu8" path="res://Scripts/DataResources/Weapons/Advanced/ShurikenProjectile.gd" id="1_mwrir"]
+[ext_resource type="Texture2D" uid="uid://dhxqvjm158t1p" path="res://Assets/Weapons/Advanced Weapons/Shuriken Animation.png" id="2_w3mat"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y1yla"]
+atlas = ExtResource("2_w3mat")
+region = Rect2(0, 0, 175, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fau8f"]
+atlas = ExtResource("2_w3mat")
+region = Rect2(875, 0, 175, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c4wo2"]
+atlas = ExtResource("2_w3mat")
+region = Rect2(700, 0, 175, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fk2dn"]
+atlas = ExtResource("2_w3mat")
+region = Rect2(525, 0, 175, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_stww0"]
+atlas = ExtResource("2_w3mat")
+region = Rect2(350, 0, 175, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_26th1"]
+atlas = ExtResource("2_w3mat")
+region = Rect2(175, 0, 175, 175)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_w3mat"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y1yla")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fau8f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c4wo2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fk2dn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_stww0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_26th1")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 30.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xkdfg"]
+radius = 89.0056
+
+[node name="ShurikenProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_mwrir")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_w3mat")
+animation = &"fly"
+frame_progress = 0.678772
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.08, 0.08)
+shape = SubResource("CircleShape2D_xkdfg")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

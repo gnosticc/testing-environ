@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://6msge34c2b3n"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ernrc"]
+[ext_resource type="Resource" uid="uid://3qlq4u8hq5jr" path="res://DataResources/Weapons/LuringPrism/Effects/territory_expansion_effect.tres" id="2_4gqo6"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_5ie8p"]
+
+[resource]
+script = ExtResource("2_5ie8p")
+upgrade_id = &"lp_territory_expansion"
+title = "Territory Expansion"
+description = "Increases the radius of the Ring of Shards' damage and area of influence by 30%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ernrc")]([ExtResource("2_4gqo6")])
+set_acquired_flag_on_weapon = &"lp_territory_expansion_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

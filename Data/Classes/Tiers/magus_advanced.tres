@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://b7ov3op8il7m1"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ipy4k"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_laxhf"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_xv6hl"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_hdmsl"]
+[ext_resource type="Resource" uid="uid://bd6w7o53m5e28" path="res://Data/Classes/Effects/knight_unlock_bonus_armor.tres" id="4_oe6xr"]
+[ext_resource type="Resource" uid="uid://bt4k2ct5yhm6s" path="res://Data/Classes/Effects/wizard_unlock_crit_damage.tres" id="5_khffg"]
+
+[resource]
+script = ExtResource("2_xv6hl")
+class_id = &"magus_advanced"
+display_name = "Magus"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_ipy4k")]([ExtResource("2_laxhf"), ExtResource("3_hdmsl"), ExtResource("4_oe6xr"), ExtResource("5_khffg")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"magus_living_conduit"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Knight and Wizard weapons to unlock the path of the Magus. A disciplined warrior who channels raw arcane energy, turning enemies into conduits of destruction. Unlocks the Living Conduit weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://lkivhn2xd353"]
+
+[ext_resource type="Script" uid="uid://cmdpuqq6ioayq" path="res://Scripts/DataResources/Weapons/Advanced/ChakramController.gd" id="1_d7wc3"]
+[ext_resource type="PackedScene" uid="uid://da5h7x8xu46ty" path="res://Scenes/Weapons/Advanced/Effect Scenes/SylvanChakramProjectile.tscn" id="2_vdpyt"]
+
+[node name="ChakramController" type="Node2D"]
+script = ExtResource("1_d7wc3")
+chakram_projectile_scene = ExtResource("2_vdpyt")

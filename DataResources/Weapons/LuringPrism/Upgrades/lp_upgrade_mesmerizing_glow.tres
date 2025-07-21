@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bj36f6uubl24q"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_xquhk"]
+[ext_resource type="Resource" uid="uid://by02qtjjnle3i" path="res://DataResources/Weapons/LuringPrism/Effects/mesmerizing_glow_area_effect.tres" id="2_a5mrc"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_rposf"]
+[ext_resource type="Resource" uid="uid://dtxbx5ovgxffm" path="res://DataResources/Weapons/LuringPrism/Effects/mesmerizing_glow_effect.tres" id="3_laayn"]
+
+[resource]
+script = ExtResource("2_rposf")
+upgrade_id = &"lp_mesmerizing_glow"
+title = "Mesmerizing Glow"
+description = "The area of influence increases by 50%, pulling enemies in from further away."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_xquhk")]([ExtResource("2_a5mrc"), ExtResource("3_laayn")])
+set_acquired_flag_on_weapon = &"lp_mesmerizing_glow_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

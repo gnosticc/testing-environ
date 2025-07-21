@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bga85aqrupa5w"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_gch1g"]
+[ext_resource type="Resource" uid="uid://1oqwmj8vur1b" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_splintering.tres" id="2_dwbw5"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_r44m8"]
+
+[resource]
+script = ExtResource("2_r44m8")
+upgrade_id = &"axe_splintering"
+title = "Splintering Impact"
+description = "The wooden haft of the axe splinters on impact, releasing a burst of damaging shards."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_gch1g")]([ExtResource("2_dwbw5")])
+set_acquired_flag_on_weapon = &"axe_splintering_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

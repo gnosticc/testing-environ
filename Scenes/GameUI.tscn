@@ -37,6 +37,11 @@ theme_override_styles/background = SubResource("StyleBoxFlat_xi5v6")
 theme_override_styles/fill = SubResource("StyleBoxFlat_gek4i")
 show_percentage = false
 
+[node name="TempHealthBar" type="ProgressBar" parent="HUDLayer"]
+offset_right = 60.0
+offset_bottom = 10.0
+show_percentage = false
+
 [node name="GameplayTimerLabel" type="Label" parent="HUDLayer"]
 anchors_preset = 5
 anchor_left = 0.5

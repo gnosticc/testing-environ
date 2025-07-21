@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://vwkn64rv56y1"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_82im6"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_lt572"]
+[ext_resource type="Resource" uid="uid://dgdo8d6bnt6uu" path="res://DataResources/StatusEffects/Alchemist/self_experimentation_movespeed_effect.tres" id="2_ocpe4"]
+
+[resource]
+script = ExtResource("2_lt572")
+id = &"alchemist_movespeed_buff"
+display_name = "Fleetfoot Draught"
+duration = 6.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_82im6")]([ExtResource("2_ocpe4")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

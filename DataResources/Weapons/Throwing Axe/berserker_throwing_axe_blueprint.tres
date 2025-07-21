@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://coxyy3jos6oix"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_7kf2x"]
+[ext_resource type="Resource" uid="uid://dji5vvmefkg7t" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_barbed.tres" id="2_nwes1"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_s4ttj"]
+[ext_resource type="Resource" uid="uid://bxbqnd3e27ob0" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_cunning.tres" id="3_6ctr7"]
+[ext_resource type="PackedScene" uid="uid://bnptnkhd7f5yk" path="res://Scenes/Weapons/Advanced/ThrowingAxeController.tscn" id="3_s4ttj"]
+[ext_resource type="Resource" uid="uid://qsi5eyjw0ns3" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_heavier_head.tres" id="4_qn6oy"]
+[ext_resource type="Resource" uid="uid://m5v35ktifagq" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_ricochet.tres" id="5_3rfvo"]
+[ext_resource type="Resource" uid="uid://bga85aqrupa5w" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_splintering.tres" id="6_nur0n"]
+[ext_resource type="Resource" uid="uid://b257ufp0e1pq" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_wild_regen.tres" id="7_legwm"]
+[ext_resource type="Resource" uid="uid://dqhsw3qs7fi3n" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_frenzied.tres" id="8_6k5va"]
+[ext_resource type="Resource" uid="uid://cvoxxx6jwjn3q" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_rampage.tres" id="9_4bkcs"]
+[ext_resource type="Resource" uid="uid://cp6iu61s7yslh" path="res://DataResources/Weapons/Throwing Axe/Upgrades/axe_upgrade_tornado.tres" id="10_yhxwy"]
+
+[resource]
+script = ExtResource("2_s4ttj")
+id = &"berserker_throwing_axe"
+title = "Throwing Axe"
+description = "A brutal axe that bites deeper into wounded foes. Returns after being thrown. Deals bonus damage the more damaged the enemy is. Adds 5% damage per missing 10% health."
+weapon_scene = ExtResource("3_s4ttj")
+tags = Array[StringName]([&"physical", &"projectile", &"berserker weapon"])
+class_tag_restrictions = [&"berserker_advanced"]
+cooldown = 1.5
+max_level = 10
+base_lifetime = 3.0
+spawn_as_child = false
+requires_direction = true
+targeting_type = &"mouse_direction"
+tracks_shot_count = false
+weight = 50.0
+initial_specific_stats = {
+"cooldown": 1.5,
+"execute_bonus_per_tier": 0.05,
+"execute_health_tier": 0.1,
+"has_execute_damage": true,
+&"max_cast_range": 450.0,
+&"pierce_count": 0,
+&"projectile_speed": 200.0,
+"ricochet_count": 0,
+&"weapon_damage_percentage": 1.1
+}
+available_upgrades = Array[ExtResource("1_7kf2x")]([ExtResource("2_nwes1"), ExtResource("3_6ctr7"), ExtResource("4_qn6oy"), ExtResource("5_3rfvo"), ExtResource("6_nur0n"), ExtResource("7_legwm"), ExtResource("8_6k5va"), ExtResource("9_4bkcs"), ExtResource("10_yhxwy")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

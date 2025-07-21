@@ -20,13 +20,14 @@ title = "Shortbow"
 description = "Fires quick arrows in multiple directions."
 weapon_scene = ExtResource("3_5kydh")
 tags = Array[StringName]([&"projectile", &"physical", &"rogue weapon"])
-class_tag_restrictions = Array[int]([3])
+class_tag_restrictions = [3]
 cooldown = 2.0
 max_level = 10
 base_lifetime = 2.0
 spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
+tracks_shot_count = false
 initial_specific_stats = {
 "arrow_storm_waves": 3,
 "arrows_per_direction": 1,

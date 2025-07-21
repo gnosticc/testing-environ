@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bogsfn5c3bb2o"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_2ejv3"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_1b6hf"]
+[ext_resource type="Resource" uid="uid://vidj0tsehegw" path="res://DataResources/Weapons/ChromaticAberration/Effects/ca_corrosive_sap_flag.tres" id="2_eq1mm"]
+
+[resource]
+script = ExtResource("2_1b6hf")
+upgrade_id = &"ca_corrosive_sap"
+title = "Corrosive Sap"
+description = "The Nature pool is 25% larger and applies a flat -10 Armor debuff to enemies standing within it."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_2ejv3")]([ExtResource("2_eq1mm")])
+set_acquired_flag_on_weapon = &"ca_corrosive_sap_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

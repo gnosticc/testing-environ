@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://cwcxaurdcrcb2"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ohuji"]
+[ext_resource type="Resource" uid="uid://b6xea3yr42f28" path="res://DataResources/StatusEffects/Alchemist/self_experimentation_damage_effect.tres" id="2_5fjr5"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_ta7kk"]
+
+[resource]
+script = ExtResource("2_ta7kk")
+id = &"alchemist_damage_buff"
+display_name = "Adrenal Stimulant"
+duration = 6.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_ohuji")]([ExtResource("2_5fjr5")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

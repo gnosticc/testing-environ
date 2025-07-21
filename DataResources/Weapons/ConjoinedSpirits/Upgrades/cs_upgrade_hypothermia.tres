@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cjklksxk47dse"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_jydxi"]
+[ext_resource type="Resource" uid="uid://dxn2i7aiufsbd" path="res://DataResources/Weapons/ConjoinedSpirits/Effects/hypothermia_effect.tres" id="2_50gdg"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_e83h1"]
+
+[resource]
+script = ExtResource("2_e83h1")
+upgrade_id = &"cs_hypothermia"
+title = "Hypothermia"
+description = "The Ice Spirit's focus intensifies, reducing its attack cooldown by 35%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_jydxi")]([ExtResource("2_50gdg")])
+set_acquired_flag_on_weapon = &"cs_hypothermia_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

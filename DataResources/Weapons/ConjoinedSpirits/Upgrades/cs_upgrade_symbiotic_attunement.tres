@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cdxww5071qiw1"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_wsqdw"]
+[ext_resource type="Resource" uid="uid://b6wgsqjfuxkj0" path="res://DataResources/Weapons/ConjoinedSpirits/Effects/symbiotic_attunement_flag.tres" id="2_15djo"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_vx47c"]
+
+[resource]
+script = ExtResource("2_vx47c")
+upgrade_id = &"cs_symbiotic_attunement"
+title = "Symbiotic Attunement"
+description = "While the spirit is in its passive Attunement Phase, you gain a +25% global damage bonus."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_wsqdw")]([ExtResource("2_15djo")])
+set_acquired_flag_on_weapon = &"cs_symbiotic_attunement_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bambl3b8uoy07"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_4sl41"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_2ob22"]
+[ext_resource type="Resource" uid="uid://cub1asj05ra1h" path="res://DataResources/Weapons/Reinforcements/Effects/effect_optimized_servos.tres" id="2_bfqhf"]
+
+[resource]
+script = ExtResource("2_2ob22")
+upgrade_id = &"reinforcements_optimized_servos"
+title = "Optimized Servos"
+description = "Increases the attack speed of all turrets by 25%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_4sl41")]([ExtResource("2_bfqhf")])
+set_acquired_flag_on_weapon = &"reinforcements_optimized_servos_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

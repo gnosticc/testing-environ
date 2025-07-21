@@ -1,0 +1,34 @@
+[gd_scene load_steps=6 format=3 uid="uid://b2sushlvlxntw"]
+
+[ext_resource type="Script" uid="uid://dsk5txgqvp3l6" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/SeedProjectile.gd" id="1_yxff7"]
+[ext_resource type="Texture2D" uid="uid://br456esuo7w52" path="res://Assets/Weapons/Advanced Weapons/Seed Projectile Animation.png" id="2_xst6v"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_excds"]
+atlas = ExtResource("2_xst6v")
+region = Rect2(0, 0, 60, 50)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_i500j"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_excds")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gya32"]
+radius = 32.1403
+
+[node name="SeedProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_yxff7")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_i500j")
+animation = &"fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_gya32")

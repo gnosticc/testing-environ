@@ -16,4 +16,6 @@ tick_interval = 0.1
 tick_on_application = false
 effects_while_active = Array[ExtResource("1_cfla1")]([ExtResource("2_dcy2i")])
 next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
 metadata/_custom_type_script = "uid://5du86wr4q1bj"

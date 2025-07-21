@@ -12,6 +12,7 @@ extends Node2D
 
 var _received_stats: Dictionary
 var _owner_player_stats: PlayerStats
+var _weapon_manager: WeaponManager # Reference to call back for cooldown reduction
 
 ## NEW: Queue and Timer for handling multi-shot volleys without async/await.
 ## The queue can now hold either single shot dictionaries or arrays of shot dictionaries (for simultaneous volleys).
@@ -26,9 +27,10 @@ func _ready():
 	add_child(_shot_timer)
 	_shot_timer.timeout.connect(_process_shot_queue)
 
-func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(_direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	_received_stats = p_attack_stats.duplicate(true)
 	_owner_player_stats = p_player_stats
+	_weapon_manager = _p_weapon_manager
 
 	if not is_instance_valid(arrow_scene):
 		push_error("ERROR (ShortbowAttackController): Arrow scene not assigned!"); queue_free(); return
@@ -117,6 +119,6 @@ func _fire_arrow(direction: Vector2):
 	arrow_instance.global_position = self.global_position
 
 	if arrow_instance.has_method("set_attack_properties"):
-		arrow_instance.set_attack_properties(direction, arrow_stats, _owner_player_stats)
+		arrow_instance.set_attack_properties(direction, arrow_stats, _owner_player_stats, _weapon_manager)
 	else:
 		push_error("ShortbowAttackController: Spawned arrow is missing 'set_attack_properties' method.")

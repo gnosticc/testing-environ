@@ -1,0 +1,61 @@
+[gd_scene load_steps=7 format=3 uid="uid://x8p1x2yjddhs"]
+
+[ext_resource type="Script" uid="uid://bvm88rvomsvco" path="res://Scripts/DataResources/Weapons/Advanced/AegisProtector.gd" id="1_16ujw"]
+[ext_resource type="Texture2D" uid="uid://uieuh6o156nl" path="res://Assets/Pets and Summons/Mechamaster Pets/Aegis Protector Animation.png" id="1_503pk"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_16ujw"]
+atlas = ExtResource("1_503pk")
+region = Rect2(630, 0, 630, 800)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o7tcd"]
+atlas = ExtResource("1_503pk")
+region = Rect2(0, 0, 630, 800)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_dw81b"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_16ujw")
+}],
+"loop": false,
+"name": &"fire",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o7tcd")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_s0ncf"]
+radius = 556.354
+
+[node name="AegisProtector" type="CharacterBody2D"]
+collision_layer = 512
+collision_mask = 136
+script = ExtResource("1_16ujw")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_dw81b")
+animation = &"fire"
+
+[node name="TargetingRange" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 136
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TargetingRange"]
+shape = SubResource("CircleShape2D_s0ncf")
+
+[node name="AttackCooldownTimer" type="Timer" parent="."]
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="ProjectileSpawnPoint" type="Marker2D" parent="."]
+position = Vector2(0, -8)
+
+[node name="FireAnimTimer" type="Timer" parent="."]
+wait_time = 0.2
+one_shot = true

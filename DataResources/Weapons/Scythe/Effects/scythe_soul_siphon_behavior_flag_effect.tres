@@ -4,9 +4,9 @@
 
 [resource]
 script = ExtResource("1_h7sod")
-flag_key = &"has_soul_siphon"
+flag_key = &"player_has_soul_siphon"
 flag_value = true
 effect_type_id = &"set_flag"
-target_scope = &"weapon_specific_stats"
+target_scope = &"player_stats"
 developer_note = ""
 metadata/_custom_type_script = "uid://dc316ihl7h1xg"

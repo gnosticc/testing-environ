@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b0xibi2yce0gj"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_g0kw5"]
+[ext_resource type="Resource" uid="uid://dxjvws3lsq3t2" path="res://DataResources/Weapons/SwordCoil/Effects/sc_kinetic_resonance_effect.tres" id="2_dpqkn"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="3_cedm5"]
+
+[resource]
+script = ExtResource("3_cedm5")
+upgrade_id = &"sc_kinetic_resonance"
+title = "Kinetic Resonance"
+description = "The further the projectile travels, the more unstable its magic becomes. It's damage and size increases moderately the further it travels."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_g0kw5")]([ExtResource("2_dpqkn")])
+set_acquired_flag_on_weapon = &"sc_kinetic_resonance_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

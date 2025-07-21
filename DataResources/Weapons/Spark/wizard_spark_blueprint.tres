@@ -20,15 +20,17 @@ title = "Spark"
 description = "Fires a small, firey ball of magical energy."
 weapon_scene = ExtResource("12_ddqid")
 tags = Array[StringName]([&"projectile", &"magical", &"fire", &"wizard weapon"])
-class_tag_restrictions = Array[int]([4])
+class_tag_restrictions = [4]
 cooldown = 1.7
 max_level = 10
 base_lifetime = 1.5
 spawn_as_child = false
 requires_direction = true
 targeting_type = &"mouse_direction"
+tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
-"base_attack_duration": 0.2,
+"base_attack_duration": 0.4,
 "explosion_chance": 0.0,
 "explosion_echoes": false,
 "explosion_radius": 25.0,

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bs7l7bio3ynji"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_llhj4"]
+[ext_resource type="Resource" uid="uid://bhnpafdh0amgu" path="res://DataResources/Weapons/LuringPrism/Effects/enervating_field_effect.tres" id="2_26xbr"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_e75l7"]
+
+[resource]
+script = ExtResource("2_e75l7")
+upgrade_id = &"lp_enervating_field"
+title = "Enervating Field"
+description = "The Ring of Shards now projects a debilitating field, applying a Slow effect to all enemies within its damaging radius."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_llhj4")]([ExtResource("2_26xbr")])
+set_acquired_flag_on_weapon = &"lp_enervating_field_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

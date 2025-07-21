@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://cn4ed8so84dmq"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_bnlp3"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_aufkp"]
+[ext_resource type="Resource" uid="uid://kiq4lohosnox" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_crushing_force_1.tres" id="2_vupw7"]
+[ext_resource type="PackedScene" uid="uid://cf3jpod06lvfc" path="res://Scenes/Weapons/Advanced/WarhammerController.tscn" id="3_aufkp"]
+[ext_resource type="Resource" uid="uid://fdpi5tfn6ytn" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_crushing_force_2.tres" id="3_u1325"]
+[ext_resource type="Resource" uid="uid://c54ipxu2v28ib" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_momentum.tres" id="4_l6i2f"]
+[ext_resource type="Resource" uid="uid://b7hjvpt60ywf1" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_overwhelming_reach.tres" id="5_xmd0i"]
+[ext_resource type="Resource" uid="uid://dbesje2itwl7" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_skullsplitter.tres" id="6_u6fg7"]
+[ext_resource type="Resource" uid="uid://db3x024gvbp0a" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_steadfast_advance.tres" id="7_sbxkm"]
+[ext_resource type="Resource" uid="uid://b00rikop5d4oc" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_tactician.tres" id="8_s48ve"]
+[ext_resource type="Resource" uid="uid://bagm3up3aww11" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_champions_resolve.tres" id="9_0up4e"]
+[ext_resource type="Resource" uid="uid://cngktlb1niq88" path="res://DataResources/Weapons/Warhammer/Upgrades/warhammer_upgrade_cataclysmic_slam.tres" id="10_sxo4m"]
+
+[resource]
+script = ExtResource("2_aufkp")
+id = &"champion_warhammer"
+title = "Warhammer"
+description = "A mighty hammer that crushes enemy defenses."
+weapon_scene = ExtResource("3_aufkp")
+tags = Array[StringName]([&"melee", &"physical", &"champion weapon", &"centered_melee"])
+class_tag_restrictions = [&"champion_advanced"]
+cooldown = 2.5
+max_level = 10
+base_lifetime = 0.6
+spawn_as_child = true
+requires_direction = true
+targeting_type = &"mouse_direction"
+tracks_shot_count = true
+initial_specific_stats = {
+"area_scale": 1.0,
+"armor_break_base": 10.0,
+"cataclysmic_slam_damage_mult": 2.0,
+"cataclysmic_slam_knockback": 200.0,
+"cataclysmic_slam_radius": 225.0,
+"has_cataclysmic_slam": false,
+"inherent_visual_scale_x": 0.1,
+"inherent_visual_scale_y": 0.1,
+&"weapon_damage_percentage": 2.8
+}
+available_upgrades = Array[ExtResource("1_bnlp3")]([ExtResource("2_vupw7"), ExtResource("3_u1325"), ExtResource("4_l6i2f"), ExtResource("5_xmd0i"), ExtResource("6_u6fg7"), ExtResource("7_sbxkm"), ExtResource("8_s48ve"), ExtResource("9_0up4e"), ExtResource("10_sxo4m")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

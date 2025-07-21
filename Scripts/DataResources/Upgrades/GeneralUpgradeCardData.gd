@@ -35,7 +35,7 @@ extends Resource
 
 ## Relative weight for this upgrade to be chosen when offering upgrade options.
 ## Higher values mean it's more likely to appear (if class filter and prerequisites are met).
-@export var weight: float = 100.0
+@export var weight: float = 60.0
 
 ## How many times this specific general upgrade can be acquired by the player.
 ## Some might be unique (1), others might be stackable (e.g., "+5 Max Health" up to 5 times).

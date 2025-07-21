@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://u2y17280tfbt"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_0qkgl"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_nxbka"]
+[ext_resource type="Resource" uid="uid://baybrxdy6rkc7" path="res://DataResources/Weapons/SwordCoil/Effects/sc_empowered_conduit_effect.tres" id="2_tsn3a"]
+
+[resource]
+script = ExtResource("2_nxbka")
+upgrade_id = &"sc_empowered_conduit"
+title = "Empowered Conduit"
+description = "The blade's core is focused to a razor's edge, increasing its base damage by 60%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_0qkgl")]([ExtResource("2_tsn3a")])
+set_acquired_flag_on_weapon = &"sc_empowered_conduit_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

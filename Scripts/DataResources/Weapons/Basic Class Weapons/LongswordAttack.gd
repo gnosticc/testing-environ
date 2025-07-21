@@ -31,7 +31,7 @@ func _ready():
 	damage_area.body_entered.connect(_on_body_entered)
 	collision_shape.disabled = true
 
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	specific_stats = p_attack_stats
 	owner_player_stats = p_player_stats
 	
@@ -74,7 +74,9 @@ func _start_attack_animation():
 
 func _on_body_entered(body: Node2D):
 	if not _is_attack_active or not body is BaseEnemy or _enemies_hit_this_sweep.has(body): return
-	
+	var weapon_tags: Array[StringName] = []
+	if specific_stats.has("tags"):
+		weapon_tags = specific_stats.get("tags")
 	var enemy_target = body as BaseEnemy
 	if enemy_target.is_dead(): return
 
@@ -107,7 +109,7 @@ func _on_body_entered(body: Node2D):
 	
 	# DEBUG: Print the final damage being dealt to the enemy.
 	print_debug("LongswordAttack: Dealing ", int(round(damage_to_deal)), " damage to ", enemy_target.name)
-	enemy_target.take_damage(int(round(damage_to_deal)), owner_player, attack_stats)
+	enemy_target.take_damage(int(round(damage_to_deal)), owner_player, attack_stats, weapon_tags)
 
 func _on_tree_exiting():
 	if specific_stats.get(&"has_parry_riposte", false):

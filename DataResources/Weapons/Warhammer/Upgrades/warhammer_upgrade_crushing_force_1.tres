@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://kiq4lohosnox"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_8ddhg"]
+[ext_resource type="Resource" uid="uid://blvp2fkf8j0vv" path="res://DataResources/Weapons/Warhammer/Effects/crushing_force_damage_effect.tres" id="2_qid1d"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="3_2lwwv"]
+
+[resource]
+script = ExtResource("3_2lwwv")
+upgrade_id = &"wh_crushing_force_1"
+title = "Crushing Force I"
+description = "The Warhammer's strikes hit harder, dealing 75% increased base damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_8ddhg")]([ExtResource("2_qid1d")])
+set_acquired_flag_on_weapon = &"wh_crushing_force_1_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

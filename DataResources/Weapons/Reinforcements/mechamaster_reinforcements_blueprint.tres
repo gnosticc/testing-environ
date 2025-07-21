@@ -1,0 +1,79 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://cksnfdjxlvf2x"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_2sshw"]
+[ext_resource type="Resource" uid="uid://bambl3b8uoy07" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_optimized_servos.tres" id="2_2jcfa"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_nrrmk"]
+[ext_resource type="PackedScene" uid="uid://c4tq6u0g68bjb" path="res://Scenes/Weapons/Advanced/ReinforcementsController.tscn" id="3_nrrmk"]
+[ext_resource type="Resource" uid="uid://c1yn6coxrvmcc" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_fortified_plating.tres" id="3_okgbx"]
+[ext_resource type="Resource" uid="uid://bdgu02n5acd6h" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_integrated_weaponry.tres" id="4_nrofn"]
+[ext_resource type="Resource" uid="uid://b8ju8glq20xde" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_mobile_emplacements.tres" id="5_ujptv"]
+[ext_resource type="Resource" uid="uid://bs77vbrxsb5wj" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_overdrive_protocol.tres" id="6_m7ao5"]
+[ext_resource type="Resource" uid="uid://dfq6inyv8q8v4" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_deploy_artillery.tres" id="7_g0t34"]
+[ext_resource type="Resource" uid="uid://coe5axsprolaq" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_deploy_hk.tres" id="8_3ee8m"]
+[ext_resource type="Resource" uid="uid://cauukwo68uc71" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_deploy_aegis.tres" id="9_4ef6r"]
+[ext_resource type="Resource" uid="uid://dn0bi278gaxds" path="res://DataResources/Weapons/Reinforcements/Upgrades/upgrade_assembly_line.tres" id="10_gn0o4"]
+
+[resource]
+script = ExtResource("2_nrrmk")
+id = &"mechamaster_reinforcements"
+title = "Reinforcements"
+description = "Deploys various temporary autonomous turrets to the battlefield."
+weapon_scene = ExtResource("3_nrrmk")
+tags = Array[StringName]([&"physical", &"summon", &"mechamaster weapon", &"controller", &"pet"])
+class_tag_restrictions = [&"mechamaster_advanced"]
+cooldown = 0.0
+max_level = 10
+base_lifetime = -1.0
+spawn_as_child = true
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+initial_specific_stats = {
+"aegis_attack_cooldown": 1.0,
+"aegis_damage_percent": 0.8,
+"aegis_deployment_cooldown": 7.0,
+"aegis_lifetime": 10.0,
+"aegis_projectile_scale": 0.2,
+"aegis_targeting_range": 100.0,
+"aegis_visual_scale": 0.04,
+"artillery_attack_cooldown": 2.5,
+"artillery_cluster_radius": 75.0,
+"artillery_damage_percent": 2.2,
+"artillery_deployment_cooldown": 6.0,
+"artillery_explosion_base_radius": 45.0,
+"artillery_lifetime": 5.0,
+"artillery_projectile_scale": 0.2,
+"artillery_targeting_range": 315.0,
+"artillery_visual_scale": 0.17,
+"assembly_line_cooldown": 6.0,
+"has_aegis_protector": false,
+"has_artillery_bot": false,
+"has_assembly_line": false,
+"has_hk_bot": false,
+"hk_attack_cooldown": 0.2,
+"hk_damage_percent": 0.75,
+"hk_lifetime": 8.0,
+"hk_projectile_scale": 0.3,
+"hk_projectile_speed": 500.0,
+"hk_targeting_range": 315.0,
+"hk_visual_scale": 0.13,
+"hunter_killer_deployment_cooldown": 6.0,
+"sentry_attack_cooldown": 0.5,
+"sentry_damage_percent": 0.5,
+"sentry_deployment_cooldown": 4.0,
+"sentry_lifetime": 8.0,
+"sentry_projectile_scale": 0.08,
+"sentry_projectile_speed": 215.0,
+"sentry_targeting_range": 215.0,
+"sentry_visual_scale": 0.13,
+"turret_attack_speed_mult": 1.0,
+"turret_base_scale": 1.0,
+"turret_damage_mult": 1.0,
+"turret_deployment_cdr": 0.0,
+"turret_explosion_damage_percent": 1.0,
+"turret_explosion_radius": 60.0,
+"turrets_explode_on_death": false,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_2sshw")]([ExtResource("2_2jcfa"), ExtResource("3_okgbx"), ExtResource("4_nrofn"), ExtResource("5_ujptv"), ExtResource("6_m7ao5"), ExtResource("7_g0t34"), ExtResource("8_3ee8m"), ExtResource("9_4ef6r"), ExtResource("10_gn0o4")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

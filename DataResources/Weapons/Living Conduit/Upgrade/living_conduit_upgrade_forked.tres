@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://b30xigg02j5ro"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_i4dxc"]
+[ext_resource type="Resource" uid="uid://dv4eyrptsisbq" path="res://DataResources/Weapons/Living Conduit/Effects/living_conduit_forked_effect.tres" id="2_0tjho"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_xe8iw"]
+
+[resource]
+script = ExtResource("2_xe8iw")
+upgrade_id = &"living_conduit_forked_lightning"
+title = "Forked Lightning"
+description = "Your mastery allows you to split the initial bolt, striking an additional foe."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_i4dxc")]([ExtResource("2_0tjho")])
+set_acquired_flag_on_weapon = &"living_conduit_forked_lightning_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

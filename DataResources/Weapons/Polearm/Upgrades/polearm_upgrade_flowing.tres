@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cwbfq7raa7lr8"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_tqc0n"]
+[ext_resource type="Resource" uid="uid://uguqbshk3maa" path="res://DataResources/Weapons/Polearm/Effects/polearm_flowing_effect.tres" id="2_6tyg6"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_movbn"]
+
+[resource]
+script = ExtResource("2_movbn")
+upgrade_id = &"polearm_flowing_strikes"
+title = "Flowing Strikes"
+description = "Your sweeping attacks flow into one another with deadly grace. Sweeps have a 40% chance to trigger a second sweep."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_tqc0n")]([ExtResource("2_6tyg6")])
+set_acquired_flag_on_weapon = &"polearm_flowing_strikes_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

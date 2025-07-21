@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://doowtf48n05e1"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_i7oxt"]
+[ext_resource type="Resource" uid="uid://beilornuxuwpu" path="res://Data/Classes/Tiers/champion_advanced.tres" id="1_nq5rc"]
+
+[resource]
+script = ExtResource("1_i7oxt")
+progression_id = &"unlock_champion"
+class_tier_to_unlock = ExtResource("1_nq5rc")
+unlock_description = "A paragon of martial prowess, blending raw power with unyielding defense. Unlocks the Warhammer weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 12
+Armor: 5"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 1,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 2,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

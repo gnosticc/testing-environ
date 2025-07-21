@@ -73,6 +73,9 @@ func _apply_visual_scale():
 
 func _on_body_entered(body: Node2D): 
 	if body.is_in_group("enemies") and body.has_method("take_damage"):
+		var weapon_tags: Array[StringName] = []
+		if _received_stats.has("tags"):
+			weapon_tags = _received_stats.get("tags")
 		body.take_damage(final_damage_amount); current_pierce_count += 1
 		if current_pierce_count >= max_pierce_count + 1: call_deferred("queue_free") # +1 because max_pierce is how many it passes THROUGH
 	elif body.is_in_group("world_obstacles"): call_deferred("queue_free") 

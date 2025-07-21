@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dxwt5dvfwkxdw"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_1cus5"]
+[ext_resource type="Resource" uid="uid://ba021ft2nb5vr" path="res://DataResources/Weapons/Shuriken/Effects/shuriken_effect_substitution.tres" id="2_gddb4"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_o2pua"]
+
+[resource]
+script = ExtResource("2_o2pua")
+upgrade_id = &"shuriken_shadow_substitution"
+title = "Shadow Substitution"
+description = "Your clone appears with a burst of disorienting chakra, briefly stunning all nearby enemies."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_1cus5")]([ExtResource("2_gddb4")])
+set_acquired_flag_on_weapon = &"shuriken_shadow_substitution_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

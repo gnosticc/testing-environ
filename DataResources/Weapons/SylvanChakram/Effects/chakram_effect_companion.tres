@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CustomFlagEffectData" load_steps=2 format=3 uid="uid://bbo8px4j4we0d"]
+
+[ext_resource type="Script" uid="uid://dc316ihl7h1xg" path="res://Scripts/DataResources/Effects/CustomFlagEffectData.gd" id="1_6a660"]
+
+[resource]
+script = ExtResource("1_6a660")
+flag_key = &"has_companion_chakram"
+flag_value = true
+effect_type_id = &"set_flag"
+target_scope = &"weapon_behavior"
+developer_note = ""
+metadata/_custom_type_script = "uid://dc316ihl7h1xg"

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=4 format=3 uid="uid://bi2usl4s26qkn"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_s8el2"]
+[ext_resource type="Resource" uid="uid://clxkq3qrh13ov" path="res://DataResources/Upgrades/General/Effects/Global Damage Multiplier/might_10.tres" id="2_11k80"]
+[ext_resource type="Script" uid="uid://c3gbs6gwsa23p" path="res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd" id="3_wwf5q"]
+
+[resource]
+script = ExtResource("3_wwf5q")
+id = &"gen_might_4"
+title = "Might IV"
+description = "Increases all damage by 10%."
+class_tag_filter = Array[int]([])
+effects = Array[ExtResource("1_s8el2")]([ExtResource("2_11k80")])
+weight = 60.0
+max_stacks = 1
+prerequisites = Array[StringName]([&"gen_might_3"])
+metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

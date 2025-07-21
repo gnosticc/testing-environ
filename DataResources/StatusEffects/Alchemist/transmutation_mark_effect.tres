@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CustomFlagEffectData" load_steps=2 format=3 uid="uid://45k1mypkwyjv"]
+
+[ext_resource type="Script" uid="uid://dc316ihl7h1xg" path="res://Scripts/DataResources/Effects/CustomFlagEffectData.gd" id="1_twb6b"]
+
+[resource]
+script = ExtResource("1_twb6b")
+flag_key = &"is_marked_for_transmutation"
+flag_value = true
+effect_type_id = &"set_flag"
+target_scope = &"enemy_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://dc316ihl7h1xg"

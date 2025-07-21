@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bh2krufl2mhdj"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_350ka"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_4843u"]
+[ext_resource type="Resource" uid="uid://d0mvfk04kcgw0" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_mirrored_strike.tres" id="2_kp5g6"]
+
+[resource]
+script = ExtResource("2_4843u")
+upgrade_id = &"chakram_mirrored_strike"
+title = "Mirrored Strike"
+description = "hrow a second chakram that travels in a mirrored arc."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_350ka")]([ExtResource("2_kp5g6")])
+set_acquired_flag_on_weapon = &"chakram_mirrored_strike_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

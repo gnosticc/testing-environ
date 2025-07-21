@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cfq5eunouf0fb"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_qayio"]
+[ext_resource type="Resource" uid="uid://c46we1shqut8t" path="res://DataResources/Weapons/LuringPrism/Effects/lasting_mirage_effect.tres" id="2_ajibt"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_j6778"]
+
+[resource]
+script = ExtResource("2_j6778")
+upgrade_id = &"lp_lasting_mirage"
+title = "Lasting Mirage"
+description = "Increases the duration of the Ring of Shards by 1.5 seconds."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_qayio")]([ExtResource("2_ajibt")])
+set_acquired_flag_on_weapon = &"lp_lasting_mirage_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://uh45ht2eo61x"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_d0kui"]
+[ext_resource type="Resource" uid="uid://u0gdbx8dv5wt" path="res://Data/Classes/Tiers/spirit_master_advanced.tres" id="1_dthn2"]
+
+[resource]
+script = ExtResource("1_d0kui")
+progression_id = &"unlock_spirit_master"
+class_tier_to_unlock = ExtResource("1_dthn2")
+unlock_description = "A powerful shaman who commands wandering spirits of water and ice to assail their foes. Unlocks the Conjoined Spirit weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Movement Speed: 15
+Luck: 3
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 6,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 5,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

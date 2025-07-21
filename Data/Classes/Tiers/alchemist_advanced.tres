@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://5i4yu5wve02q"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_btu4m"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_05bl0"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_gosml"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_h764s"]
+[ext_resource type="Resource" uid="uid://dnh2nswm5k4mx" path="res://Data/Classes/Effects/rogue_unlock_crit_chance.tres" id="4_rtlwi"]
+[ext_resource type="Resource" uid="uid://bt4k2ct5yhm6s" path="res://Data/Classes/Effects/wizard_unlock_crit_damage.tres" id="5_sgsj5"]
+
+[resource]
+script = ExtResource("2_05bl0")
+class_id = &"alchemist_advanced"
+display_name = "Alchemist"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_btu4m")]([ExtResource("2_gosml"), ExtResource("3_h764s"), ExtResource("4_rtlwi"), ExtResource("5_sgsj5")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"alchemist_experimental_materials"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Rogue and Wizard weapons to unlock the path of the Alchemist. A master of concoctions who uses volatile reagents to create powerful chain reactions. Unlocks the Experimental Materials weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

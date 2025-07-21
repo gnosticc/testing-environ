@@ -38,7 +38,7 @@ func _ready():
 	
 	# The collision shape is now enabled/disabled only when the attack starts and ends.
 
-func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats):
+func set_attack_properties(direction: Vector2, p_attack_stats: Dictionary, p_player_stats: PlayerStats, _p_weapon_manager: WeaponManager):
 	specific_stats = p_attack_stats.duplicate(true)
 	owner_player_stats = p_player_stats
 	_stats_have_been_set = true
@@ -154,10 +154,17 @@ func _deal_damage_and_effects(target_enemy: BaseEnemy, p_owner_player: PlayerCha
 	
 	var weapon_damage_percent = float(specific_stats.get(&"weapon_damage_percentage", 0.9))
 	var hit_damage_mult = float(specific_stats.get("damage_multiplier", 1.0))
-	var weapon_tags: Array[StringName] = specific_stats.get(&"tags", [])
-	var calculated_damage_float = owner_player_stats.get_calculated_player_damage(weapon_damage_percent * hit_damage_mult, weapon_tags)
+	var weapon_tags: Array[StringName] = []
+	if specific_stats.has("tags"):
+		weapon_tags = specific_stats.get("tags")
+
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = owner_player_stats.get_calculated_base_damage(weapon_damage_percent * hit_damage_mult)
+	var calculated_damage_float = owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
+	# --- END REFACTOR ---
 	
 	var weapon_crit_chance = float(specific_stats.get(&"crit_chance", 0.0))
+
 	var total_crit_chance = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_CHANCE) + weapon_crit_chance
 	if randf() < total_crit_chance:
 		var player_crit_mult = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.CRIT_DAMAGE_MULTIPLIER)
@@ -165,7 +172,7 @@ func _deal_damage_and_effects(target_enemy: BaseEnemy, p_owner_player: PlayerCha
 		calculated_damage_float *= (player_crit_mult + weapon_crit_mult - 1.0)
 
 	var final_damage_to_deal = int(round(maxf(1.0, calculated_damage_float)))
-	target_enemy.take_damage(final_damage_to_deal, p_owner_player, p_attack_stats)
+	target_enemy.take_damage(final_damage_to_deal, p_owner_player, p_attack_stats, weapon_tags)
 	
 	var global_lifesteal_percent = owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_LIFESTEAL_PERCENT)
 	if global_lifesteal_percent > 0:
@@ -194,6 +201,7 @@ func _deal_damage_and_effects(target_enemy: BaseEnemy, p_owner_player: PlayerCha
 	
 	emit_signal("hit_enemy_for_combo", target_enemy)
 	emit_signal("dealt_damage", target_enemy, final_damage_to_deal)
+
 
 func _find_cleave_target(hit_position: Vector2) -> BaseEnemy:
 	var cleave_radius = float(specific_stats.get(&"cleave_radius", 100.0))

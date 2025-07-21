@@ -1,0 +1,103 @@
+[gd_scene load_steps=15 format=3 uid="uid://di0ynaa0xydc3"]
+
+[ext_resource type="Script" uid="uid://c6hpasaj3e4oa" path="res://Scripts/DataResources/Weapons/Advanced/ThrowingAxeProjectile.gd" id="1_wid35"]
+[ext_resource type="Texture2D" uid="uid://d0n78ok1wsybw" path="res://Assets/Weapons/Advanced Weapons/Throwing Axe Animation.png" id="2_pvk8r"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_omifw"]
+radius = 56.0
+height = 146.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fn5ai"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d4r4n"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hsv5h"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m5ivm"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kpd1n"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y0f6w"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_y6udj"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(768, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xeeyw"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(896, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sd0t8"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(1024, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5ddba"]
+atlas = ExtResource("2_pvk8r")
+region = Rect2(1152, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gjeqy"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fn5ai")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d4r4n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hsv5h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_m5ivm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kpd1n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y0f6w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_y6udj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xeeyw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sd0t8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5ddba")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 30.0
+}]
+
+[node name="ThrowingAxeProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_wid35")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-2, 0)
+scale = Vector2(0.2, 0.2)
+shape = SubResource("CapsuleShape2D_omifw")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_gjeqy")
+animation = &"fly"
+
+[node name="LifetimeTimer" type="Timer" parent="."]

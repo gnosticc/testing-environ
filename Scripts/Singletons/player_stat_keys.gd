@@ -140,6 +140,7 @@ enum Keys {
 	PHYSICAL_DAMAGE_MULTIPLIER, # This is a tag, not a damage type (use NUMERICAL_DAMAGE for general physical damage)
 	FIRE_DAMAGE_MULTIPLIER, # If elemental damage types exist
 	ICE_DAMAGE_MULTIPLIER,
+	NATURE_DAMAGE_MULTIPLIER,
 
 	MELEE_ATTACK_SPEED_MULTIPLIER,
 	PROJECTILE_ATTACK_SPEED_MULTIPLIER,
@@ -171,6 +172,7 @@ enum Keys {
 	# --- Reaping Momentum Specific Keys (clarified from previous discussion) ---
 	REAPING_MOMENTUM_DAMAGE_PER_HIT, # The base damage per hit for Reaping Momentum
 	REAPING_MOMENTUM_ACCUMULATED_BONUS, # The current accumulated bonus for Reaping Momentum
+	PLAYER_HAS_SOUL_SIPHON, # NEW: Added the key for the Soul Siphon flag
 	
 	# --- Enemy Debuff Resistance ---
 	ENEMY_DEBUFF_RESISTANCE_REDUCTION, # Reduces enemy resistance to your debuffs.
@@ -188,7 +190,13 @@ enum Keys {
 	CROSSBOW_PIERCING_BOLTS_ACQUIRED,
 	DAGGER_SHADOW_STEP_ACQUIRED,
 	PLAYER_HAS_TREMORWAVE,
-	PLAYER_HAS_CHAIN_BASH
+	PLAYER_HAS_CHAIN_BASH,
+	PLAYER_HAS_TACTICIAN,
+	PLAYER_HAS_CHAMPIONS_RESOLVE,
+	PLAYER_HAS_STEADFAST_ADVANCE,
+	PLAYER_HAS_SKULLSPLITTER,
+	PLAYER_HAS_RAMPAGE,
+	GLOBAL_MAGIC_COOLDOWN_REDUCTION
 }
 
 # This dictionary maps the enum keys to their actual StringName values.
@@ -308,6 +316,7 @@ const KEY_NAMES: Dictionary = {
 	Keys.PHYSICAL_DAMAGE_MULTIPLIER: &"physical_damage_multiplier", # Note: This refers to the 'physical' tag, not a damage type.
 	Keys.FIRE_DAMAGE_MULTIPLIER: &"fire_damage_multiplier", # For elemental damage types
 	Keys.ICE_DAMAGE_MULTIPLIER: &"ice_damage_multiplier",
+	Keys.NATURE_DAMAGE_MULTIPLIER: &"nature_damage_multiplier",
 
 	Keys.MELEE_ATTACK_SPEED_MULTIPLIER: &"melee_attack_speed_multiplier",
 	Keys.PROJECTILE_ATTACK_SPEED_MULTIPLIER: &"projectile_attack_speed_multiplier",
@@ -339,6 +348,7 @@ const KEY_NAMES: Dictionary = {
 	# Reaping Momentum Specific Keys (clarified from previous discussion)
 	Keys.REAPING_MOMENTUM_DAMAGE_PER_HIT: &"reaping_momentum_damage_per_hit", # The static damage per hit value
 	Keys.REAPING_MOMENTUM_ACCUMULATED_BONUS: &"reaping_momentum_accumulated_bonus", # The dynamic, accumulated bonus
+	Keys.PLAYER_HAS_SOUL_SIPHON: &"player_has_soul_siphon", # NEW: Mapped the new key to its StringName
 	
 	# Enemy Debuff Resistance
 	Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION: &"enemy_debuff_resistance_reduction",
@@ -356,5 +366,11 @@ const KEY_NAMES: Dictionary = {
 	Keys.CROSSBOW_PIERCING_BOLTS_ACQUIRED: &"crossbow_piercing_bolts_acquired",
 	Keys.DAGGER_SHADOW_STEP_ACQUIRED: &"dagger_shadow_step_acquired",
 	Keys.PLAYER_HAS_TREMORWAVE: &"player_has_tremorwave",
-	Keys.PLAYER_HAS_CHAIN_BASH: &"player_has_chain_bash"
+	Keys.PLAYER_HAS_CHAIN_BASH: &"player_has_chain_bash",
+	Keys.PLAYER_HAS_TACTICIAN: &"player_has_tactician",
+	Keys.PLAYER_HAS_CHAMPIONS_RESOLVE: &"player_has_champions_resolve",
+	Keys.PLAYER_HAS_STEADFAST_ADVANCE: &"player_has_steadfast_advance",
+	Keys.PLAYER_HAS_SKULLSPLITTER: &"player_has_skullsplitter",
+	Keys.PLAYER_HAS_RAMPAGE: &"player_has_rampage",
+	Keys.GLOBAL_MAGIC_COOLDOWN_REDUCTION: &"global_magic_cooldown_reduction"
 }

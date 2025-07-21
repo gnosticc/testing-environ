@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CustomFlagEffectData" load_steps=2 format=3 uid="uid://24iai1oqqqnr"]
+
+[ext_resource type="Script" uid="uid://dc316ihl7h1xg" path="res://Scripts/DataResources/Effects/CustomFlagEffectData.gd" id="1_ae1p1"]
+
+[resource]
+script = ExtResource("1_ae1p1")
+flag_key = &"player_has_steadfast_advance"
+flag_value = true
+effect_type_id = &"set_flag"
+target_scope = &"player_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://dc316ihl7h1xg"

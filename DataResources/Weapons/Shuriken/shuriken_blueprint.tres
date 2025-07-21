@@ -1,0 +1,43 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://ccjp4ub0upq1r"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_fldhd"]
+[ext_resource type="Resource" uid="uid://dh5opg2cy3n0u" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_honed_steel.tres" id="2_0mosf"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_1vrei"]
+[ext_resource type="PackedScene" uid="uid://ch3m8iu1cupla" path="res://Scenes/Weapons/Advanced/ShurikenController.tscn" id="3_1vrei"]
+[ext_resource type="Resource" uid="uid://cawqb8da45yt6" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_whirlwind_edge.tres" id="3_3bo45"]
+[ext_resource type="Resource" uid="uid://bse48ben1welo" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_twin_throw.tres" id="4_n16ht"]
+[ext_resource type="Resource" uid="uid://dxwt5dvfwkxdw" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_shadow_substitution.tres" id="5_aq0s4"]
+[ext_resource type="Resource" uid="uid://dsaokr463efri" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_empowered_shadows.tres" id="6_2xlus"]
+[ext_resource type="Resource" uid="uid://ddk2plwwsyvtf" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_art_of_the_shadow.tres" id="7_qlwaf"]
+[ext_resource type="Resource" uid="uid://ccwgqr30irlb8" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_caltrops.tres" id="8_rbitg"]
+[ext_resource type="Resource" uid="uid://dxa0xex5mw66e" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_poisoned_edge.tres" id="9_3tdia"]
+[ext_resource type="Resource" uid="uid://b5lgvjy5t6slf" path="res://DataResources/Weapons/Shuriken/Upgrades/shuriken_upgrade_shadows_embrace.tres" id="10_no0cw"]
+
+[resource]
+script = ExtResource("2_1vrei")
+id = &"shinobi_shuriken"
+title = "Shuriken"
+description = "A swift throwing star that summons a shadow clone to perform a surprise attack on impact."
+weapon_scene = ExtResource("3_1vrei")
+tags = Array[StringName]([&"projectile", &"physical", &"shinobi weapon", &"pet"])
+class_tag_restrictions = [&"shinobi_advanced"]
+cooldown = 2.6
+max_level = 10
+base_lifetime = 3.0
+spawn_as_child = false
+requires_direction = true
+targeting_type = &"mouse_direction"
+tracks_shot_count = false
+initial_specific_stats = {
+"clone_area_scale": 1.0,
+"clone_damage_percentage": 1.5,
+"clone_leaves_caltrops": false,
+"clone_slash_count": 1,
+"cooldown": 2.6,
+"crit_chance": 0.0,
+&"pierce_count": 0,
+&"projectile_speed": 450.0,
+&"weapon_damage_percentage": 1.2
+}
+available_upgrades = Array[ExtResource("1_fldhd")]([ExtResource("2_0mosf"), ExtResource("3_3bo45"), ExtResource("4_n16ht"), ExtResource("5_aq0s4"), ExtResource("6_2xlus"), ExtResource("7_qlwaf"), ExtResource("8_rbitg"), ExtResource("9_3tdia"), ExtResource("10_no0cw")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

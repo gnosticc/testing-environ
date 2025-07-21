@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://s4e04yj1sdk7"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_30feo"]
+[ext_resource type="Resource" uid="uid://bbpllkq1ejlou" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/potent_volatility_damage_effect.tres" id="2_h0iiu"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_wndff"]
+[ext_resource type="Resource" uid="uid://dvdf2renugsn7" path="res://DataResources/Weapons/ExperimentalMaterials/Effects/potent_volatility_area_effect.tres" id="3_wxcuq"]
+
+[resource]
+script = ExtResource("2_wndff")
+upgrade_id = &"exp_mat_potent_volatility"
+title = "Potent Volatility"
+description = "The AoE Volatile Eruption (magical reaction) now has a 50% larger radius and deals 100% more damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_30feo")]([ExtResource("2_h0iiu"), ExtResource("3_wxcuq")])
+set_acquired_flag_on_weapon = &"exp_mat_potent_volatility_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

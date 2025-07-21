@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=5 format=3 uid="uid://bajeymkbikcm0"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_5rug0"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_kbhfa"]
+[ext_resource type="Resource" uid="uid://byyfqxpbhhtn" path="res://DataResources/Weapons/Katana/Effects/katana_wide_arc_width_effect.tres" id="2_p1x6p"]
+[ext_resource type="Resource" uid="uid://dwpny3q71hhxl" path="res://DataResources/Weapons/Katana/Effects/katana_wide_arc_len_effect.tres" id="3_ehy8n"]
+
+[resource]
+script = ExtResource("2_kbhfa")
+upgrade_id = &"katana_wide_arc"
+title = "Wide Arc"
+description = "Improves your slashing technique, increasing the length of the slash."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_5rug0")]([ExtResource("2_p1x6p"), ExtResource("3_ehy8n")])
+set_acquired_flag_on_weapon = &"katana_wide_arc_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

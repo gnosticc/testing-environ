@@ -1,0 +1,11 @@
+[gd_scene load_steps=4 format=3 uid="uid://cf3jpod06lvfc"]
+
+[ext_resource type="Script" uid="uid://cry4ylsrcjjn6" path="res://Scripts/DataResources/Weapons/Advanced/WarhammerController.gd" id="1_lbfip"]
+[ext_resource type="PackedScene" uid="uid://corog51ww70gj" path="res://Scenes/Weapons/Advanced/Warhammer.tscn" id="2_o7xsd"]
+[ext_resource type="PackedScene" uid="uid://dwq538djypw05" path="res://Scenes/Weapons/Advanced/Effect Scenes/CataclysmHitEffect.tscn" id="3_o7xsd"]
+
+[node name="WarhammerController" type="Node2D"]
+script = ExtResource("1_lbfip")
+attack_scene = ExtResource("2_o7xsd")
+cataclysmic_slam_vfx_scene = ExtResource("3_o7xsd")
+cataclysm_hit_effect_scene = ExtResource("3_o7xsd")

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://gqary4pjarhk"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_vbdnh"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_3n0pc"]
+[ext_resource type="Resource" uid="uid://cu45x66phf7p" path="res://DataResources/Weapons/Polearm/Effects/polearm_mastery_effect.tres" id="2_t8e5f"]
+
+[resource]
+script = ExtResource("2_3n0pc")
+upgrade_id = &"polearm_phalanx_mastery"
+title = "Phalanx Mastery"
+description = "Your mastery of the polearm creates a zone of denial around you. While in Phalanx Stance, the base of your polearm periodically slams the ground near random enemies."
+prerequisites_on_this_weapon = Array[StringName]([&"polearm_retreating_sweep"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_vbdnh")]([ExtResource("2_t8e5f")])
+set_acquired_flag_on_weapon = &"polearm_phalanx_mastery_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

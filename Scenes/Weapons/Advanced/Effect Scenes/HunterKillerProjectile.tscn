@@ -1,0 +1,42 @@
+[gd_scene load_steps=7 format=3 uid="uid://dbn2inuoeapop"]
+
+[ext_resource type="Script" uid="uid://cu88y4f6eo31y" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/HunterKillerProjectile.gd" id="1_1lpll"]
+[ext_resource type="Texture2D" uid="uid://cc45756ik76tb" path="res://Assets/Pets and Summons/Mechamaster Pets/Laser Turret Projectile Animation.png" id="1_mirky"]
+[ext_resource type="Script" uid="uid://dck8ogq4gsyox" path="res://Scripts/Weapons/Projectiles/HomingComponent.gd" id="2_1lpll"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ed4oc"]
+atlas = ExtResource("1_mirky")
+region = Rect2(0, 0, 135, 30)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_06aym"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ed4oc")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ives4"]
+radius = 13.0
+height = 130.001
+
+[node name="HunterKillerProjectile" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_1lpll")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_06aym")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.57067
+shape = SubResource("CapsuleShape2D_ives4")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+
+[node name="HomingComponent" type="Node" parent="."]
+script = ExtResource("2_1lpll")
+metadata/_custom_type_script = "uid://dck8ogq4gsyox"

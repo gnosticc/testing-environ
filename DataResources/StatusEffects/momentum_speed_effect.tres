@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://nlb1vmq6hqd3"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_o3rjg"]
+
+[resource]
+script = ExtResource("1_o3rjg")
+id = &""
+modification_type = &"percent_add_to_base"
+stat_key = &"movement_speed"
+value_type = 1
+value_float = 0.0
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"player_stats"
+developer_note = "The speed value is dynamically set by PolearmAttack.gd via potency_override."
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

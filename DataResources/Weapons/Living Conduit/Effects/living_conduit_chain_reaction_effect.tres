@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://ciyx6j2u3dg2l"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_x6huv"]
+
+[resource]
+script = ExtResource("1_x6huv")
+id = &""
+modification_type = &"flat_add"
+stat_key = &"conduit_arc_chain_count"
+value_type = 0
+value_float = 0.0
+value_int = 1
+effect_type_id = &"stat_mod"
+target_scope = &"weapon_specific_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

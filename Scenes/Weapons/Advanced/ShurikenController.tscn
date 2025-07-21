@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://ch3m8iu1cupla"]
+
+[ext_resource type="Script" uid="uid://diqllktkmk4hx" path="res://Scripts/DataResources/Weapons/Advanced/ShurikenController.gd" id="1_6udg2"]
+[ext_resource type="PackedScene" uid="uid://dq3j1tywlhwrh" path="res://Scenes/Weapons/Advanced/ShurikenProjectile.tscn" id="2_et3no"]
+
+[node name="ShurikenController" type="Node2D"]
+script = ExtResource("1_6udg2")
+shuriken_projectile_scene = ExtResource("2_et3no")

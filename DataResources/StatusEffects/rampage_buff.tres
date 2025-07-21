@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://dwhr046hwt7eh"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_bkvpc"]
+[ext_resource type="Resource" uid="uid://cjv4koccvopmc" path="res://DataResources/StatusEffects/rampage_buff_effect.tres" id="2_12kxm"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_3706i"]
+
+[resource]
+script = ExtResource("2_3706i")
+id = &"rampage_buff"
+display_name = "Rampage"
+duration = 8.0
+is_stackable = true
+max_stacks = 25
+refresh_duration_on_reapply = true
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_bkvpc")]([ExtResource("2_12kxm")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

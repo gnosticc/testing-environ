@@ -1,0 +1,59 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://wtg6yetiobbm"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_m0ggq"]
+[ext_resource type="Resource" uid="uid://cbduky4e4g2la" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_blade_of_the_gale.tres" id="2_7p513"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_24p4v"]
+[ext_resource type="PackedScene" uid="uid://dqmjw55secd16" path="res://Scenes/Weapons/Advanced/KatanaAttackController.tscn" id="3_24p4v"]
+[ext_resource type="Resource" uid="uid://c6jjlm3800l1f" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_cherry_blossom.tres" id="3_sy7oa"]
+[ext_resource type="Resource" uid="uid://eptvvp436dux" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_flowing_strikes.tres" id="4_0l5aa"]
+[ext_resource type="Resource" uid="uid://drphuwtj87jqq" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_honed_edge.tres" id="5_ryqh4"]
+[ext_resource type="Resource" uid="uid://mci6ggjix02t" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_iaijutsu_spirit.tres" id="6_qw7p3"]
+[ext_resource type="Resource" uid="uid://b8u33xc71t27i" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_phantom_step.tres" id="7_u0k74"]
+[ext_resource type="Resource" uid="uid://c4puhgtj52uhq" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_return_swallow.tres" id="8_7jba6"]
+[ext_resource type="Resource" uid="uid://cwqn0eay1podh" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_unbroken_flow.tres" id="9_11rqu"]
+[ext_resource type="Resource" uid="uid://bajeymkbikcm0" path="res://DataResources/Weapons/Katana/Upgrades/katana_upgrade_wide_arc.tres" id="10_ah3r5"]
+
+[resource]
+script = ExtResource("2_24p4v")
+id = &"samurai_katana"
+title = "Katana"
+description = "A swift blade that rewards focusing on a single foe. Hits accumulate Focus, a unit equal to 10% damage dealt per hit, adding back to the base damage of the Katana against the focused target. Focus stacks reset if the target(s) are not hit by the Katana for 3 seconds. No stack limit."
+weapon_scene = ExtResource("3_24p4v")
+tags = Array[StringName]([&"physical", &"combo", &"samuari weapon", &"melee"])
+class_tag_restrictions = [&"samurai_advanced"]
+cooldown = 2.0
+max_level = 10
+base_lifetime = 3.0
+spawn_as_child = false
+requires_direction = true
+targeting_type = &"mouse_direction"
+tracks_shot_count = false
+initial_specific_stats = {
+"attack_area_scale_x": 1.0,
+"attack_area_scale_y": 1.0,
+"attack_sequence": [{
+"damage_multiplier": 1.0,
+"delay": 0.0,
+"rotation_offset": -15.0
+}, {
+"damage_multiplier": 1.0,
+"delay": 0.1,
+"rotation_offset": 15.0
+}, {
+"damage_multiplier": 1.0,
+"delay": 0.1,
+"rotation_offset": -25.0
+}, {
+"damage_multiplier": 1.0,
+"delay": 0.15,
+"rotation_offset": 0.0
+}],
+"base_attack_duration": 0.25,
+"focus_damage_bonus_per_stack": 0.1,
+"focus_reset_time": 3.0,
+"has_focus_mechanic": true,
+"weapon_attack_speed_mod": 1.0,
+&"weapon_damage_percentage": 0.7
+}
+available_upgrades = Array[ExtResource("1_m0ggq")]([ExtResource("2_7p513"), ExtResource("3_sy7oa"), ExtResource("4_0l5aa"), ExtResource("5_ryqh4"), ExtResource("6_qw7p3"), ExtResource("7_u0k74"), ExtResource("8_7jba6"), ExtResource("9_11rqu"), ExtResource("10_ah3r5")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

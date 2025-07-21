@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=7 format=3 uid="uid://dhlvaqpfcas8m"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_0yywj"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_5deh6"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_bhwfd"]
+[ext_resource type="Resource" uid="uid://bt7gxp75ckgyr" path="res://Data/Classes/Effects/general_unlock_bonus_damage.tres" id="3_qv8ok"]
+[ext_resource type="Resource" uid="uid://bd6w7o53m5e28" path="res://Data/Classes/Effects/knight_unlock_bonus_armor.tres" id="4_fvbxh"]
+[ext_resource type="Resource" uid="uid://bu6ytjrwayyg8" path="res://Data/Classes/Effects/druid_unlock_speed.tres" id="5_m2nae"]
+
+[resource]
+script = ExtResource("2_5deh6")
+class_id = &"warden_advanced"
+display_name = "Warden"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_0yywj")]([ExtResource("2_bhwfd"), ExtResource("3_qv8ok"), ExtResource("4_fvbxh"), ExtResource("5_m2nae")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"warden_bramble_censer"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Knight and Druid weapons to unlock the path of the Warden. A guardian of the wilds who uses the power of nature to ensnare and crush their foes. Unlocks the Bramble Censer weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

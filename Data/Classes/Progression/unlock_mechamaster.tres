@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://bfl8ynpaadn8h"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_cljqx"]
+[ext_resource type="Resource" uid="uid://bgkxrw1iw2vh3" path="res://Data/Classes/Tiers/mechamaster_advanced.tres" id="1_esw8i"]
+
+[resource]
+script = ExtResource("1_cljqx")
+progression_id = &"unlock_mechamaster"
+class_tier_to_unlock = ExtResource("1_esw8i")
+unlock_description = "A brilliant engineer who deploys an army of autonomous turrets to control the battlefield. Unlocks the Reinforcements weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Armor: 5
+Luck: 3
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 2,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 6,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

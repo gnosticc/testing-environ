@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://cf6jka4qgo85g"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_i183x"]
+[ext_resource type="Resource" uid="uid://braqfqbnkgy5b" path="res://DataResources/Weapons/ChromaticAberration/Effects/ca_elemental_attunement_flag.tres" id="2_rptmk"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_s3xx4"]
+
+[resource]
+script = ExtResource("2_s3xx4")
+upgrade_id = &"ca_elemental_attunement"
+title = "Elemental Attunement"
+description = "The Unstable Orb's detonation now triggers all three elemental effects (Fire, Ice, and Nature) simultaneously with every cast."
+prerequisites_on_this_weapon = Array[StringName]([&"ca_intensify_flames", &"ca_violent_snap", &"ca_corrosive_sap"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_i183x")]([ExtResource("2_rptmk")])
+set_acquired_flag_on_weapon = &"ca_elemental_attunement_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

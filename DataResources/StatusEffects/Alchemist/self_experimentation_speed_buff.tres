@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=4 format=3 uid="uid://b0s8us6tumvne"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_n6ipm"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_bpyeh"]
+[ext_resource type="Resource" uid="uid://b5ycelkluctef" path="res://DataResources/StatusEffects/Alchemist/self_experimentation_speed_effect.tres" id="2_sr82y"]
+
+[resource]
+script = ExtResource("2_bpyeh")
+id = &"alchemist_speed_buff"
+display_name = "Haste Serum"
+duration = 6.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_n6ipm")]([ExtResource("2_sr82y")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://denb7n4x4oqd2"]
+
+[ext_resource type="Script" uid="uid://c0pnovjky0mco" path="res://Scripts/DataResources/Weapons/Advanced/SwordCoilController.gd" id="1_kl3g1"]
+[ext_resource type="PackedScene" uid="uid://vv3laugvk6ht" path="res://Scenes/Weapons/Advanced/SwordCoil.tscn" id="2_8p4jd"]
+[ext_resource type="PackedScene" uid="uid://fx34168tt2ji" path="res://Scenes/Weapons/Advanced/SwordCoilProjectile.tscn" id="3_x6f6y"]
+
+[node name="SwordCoilController" type="Node2D"]
+script = ExtResource("1_kl3g1")
+sword_visual_scene = ExtResource("2_8p4jd")
+projectile_scene = ExtResource("3_x6f6y")

@@ -1,0 +1,90 @@
+[gd_scene load_steps=14 format=3 uid="uid://b2gm343242ii4"]
+
+[ext_resource type="Script" uid="uid://djonpvhm3soiw" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/VolatileEruption.gd" id="1_rs8oo"]
+[ext_resource type="Texture2D" uid="uid://bg32usvhvhmer" path="res://Assets/Weapons/Advanced Weapons/Experimental Materials/Chemical Explosion Animation.png" id="2_t0vqw"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_awu2m"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(0, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hv0lx"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(310, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kfc4m"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(620, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cp7kp"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(930, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1xhch"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(1240, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xou48"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(1550, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d0wdg"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(1860, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dnv5j"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(2170, 0, 310, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ie84w"]
+atlas = ExtResource("2_t0vqw")
+region = Rect2(2480, 0, 310, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_t0vqw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_awu2m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hv0lx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kfc4m")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cp7kp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1xhch")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xou48")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d0wdg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dnv5j")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ie84w")
+}],
+"loop": false,
+"name": &"explode",
+"speed": 9.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ytqfn"]
+radius = 145.993
+
+[node name="VolatileEruption" type="Area2D"]
+collision_layer = 0
+collision_mask = 8
+script = ExtResource("1_rs8oo")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_t0vqw")
+animation = &"explode"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ytqfn")

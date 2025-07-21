@@ -1,0 +1,87 @@
+[gd_scene load_steps=13 format=3 uid="uid://1e3mp043cth4"]
+
+[ext_resource type="Script" uid="uid://mq0i3byvqvhb" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/EntanglingRoots.gd" id="1_x6f1m"]
+[ext_resource type="Texture2D" uid="uid://bah6f7w86oup7" path="res://Assets/SFX/Entangling Roots Animation.png" id="2_iicqd"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ldvr0"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(0, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_upwxt"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(400, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_51k26"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(800, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mv4vq"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(1200, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wxryp"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(1600, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p7qr0"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(2000, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aw7fc"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(2400, 0, 400, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_h5kf0"]
+atlas = ExtResource("2_iicqd")
+region = Rect2(2800, 0, 400, 175)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0cnkk"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ldvr0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_upwxt")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_51k26")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mv4vq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wxryp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p7qr0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aw7fc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_h5kf0")
+}],
+"loop": true,
+"name": &"active",
+"speed": 8.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jlvq7"]
+size = Vector2(390, 111)
+
+[node name="EntanglingRoots" type="Area2D"]
+collision_layer = 4
+collision_mask = 138
+script = ExtResource("1_x6f1m")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_0cnkk")
+animation = &"active"
+frame_progress = 0.20196
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 11.5)
+shape = SubResource("RectangleShape2D_jlvq7")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

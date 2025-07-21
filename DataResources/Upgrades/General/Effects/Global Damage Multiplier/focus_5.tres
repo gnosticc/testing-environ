@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://bahhf8l8ink44"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_gwse0"]
+
+[resource]
+script = ExtResource("1_gwse0")
+id = &""
+modification_type = &"percent_mult_final"
+stat_key = &"global_cooldown_reduction_mult"
+value_type = 1
+value_float = -0.05
+value_int = 0
+effect_type_id = &"stat_mod"
+target_scope = &"player_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

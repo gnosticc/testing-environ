@@ -1,0 +1,56 @@
+[gd_scene load_steps=9 format=3 uid="uid://dhb35ofqiqfnd"]
+
+[ext_resource type="Script" uid="uid://px1g3mmausu3" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/VolatileEssenceExplosion.gd" id="1_fqg3r"]
+[ext_resource type="Texture2D" uid="uid://fwxqa6uwe5nu" path="res://Assets/Pets and Summons/Summoner/Volatile Essence Explosion Animation.png" id="2_a3nyq"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wmlmj"]
+atlas = ExtResource("2_a3nyq")
+region = Rect2(0, 0, 300, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d7x4c"]
+atlas = ExtResource("2_a3nyq")
+region = Rect2(300, 0, 300, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_16pdw"]
+atlas = ExtResource("2_a3nyq")
+region = Rect2(600, 0, 300, 300)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_32qws"]
+atlas = ExtResource("2_a3nyq")
+region = Rect2(900, 0, 300, 300)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_2ssws"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wmlmj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d7x4c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_16pdw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_32qws")
+}],
+"loop": false,
+"name": &"default",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_xp2oq"]
+radius = 147.014
+
+[node name="VolatileEssenceExplosion" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_fqg3r")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_2ssws")
+frame = 3
+frame_progress = 1.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_xp2oq")

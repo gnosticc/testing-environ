@@ -20,7 +20,7 @@ title = "Moth Golem"
 description = "Summons a loyal golem that seeks out and attacks enemies."
 weapon_scene = ExtResource("3_q2bjc")
 tags = Array[StringName]([&"summon", &"physical", &"melee", &"pet"])
-class_tag_restrictions = Array[int]([6])
+class_tag_restrictions = [6]
 cooldown = 0.0
 max_level = 10
 base_lifetime = -1.0
@@ -38,14 +38,14 @@ initial_specific_stats = {
 "crit_chance": 0.0,
 "crushing_blow_chance": 0.0,
 "crushing_blow_radius": 35.0,
-"follow_distance": 150.0,
+"follow_distance": 300.0,
 "has_caustic_aura": false,
 "has_crushing_blows": false,
 "has_guardian_spirit": false,
 "has_primal_fury": false,
 "has_protective_dust": false,
 "max_summons_of_type": 1,
-"movement_speed": 100.0,
+"movement_speed": 130.0,
 "pierce_count": 0,
 "primal_fury_proc_chance": 0.0,
 "projectile_speed": 200.0,

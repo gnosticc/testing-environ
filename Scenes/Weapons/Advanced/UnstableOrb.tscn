@@ -1,0 +1,81 @@
+[gd_scene load_steps=12 format=3 uid="uid://dwjenponsb4ov"]
+
+[ext_resource type="Script" uid="uid://bsu8fwgya52qq" path="res://Scripts/DataResources/Weapons/Advanced/UnstableOrb.gd" id="1_vqc8s"]
+[ext_resource type="Texture2D" uid="uid://b43w1nlb8srk2" path="res://Assets/Weapons/Advanced Weapons/Chromatic Aberration/Chromatic Orb Animation.png" id="2_hyych"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qeesm"]
+atlas = ExtResource("2_hyych")
+region = Rect2(0, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lkvls"]
+atlas = ExtResource("2_hyych")
+region = Rect2(225, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_61v48"]
+atlas = ExtResource("2_hyych")
+region = Rect2(450, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1v01e"]
+atlas = ExtResource("2_hyych")
+region = Rect2(675, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_65umk"]
+atlas = ExtResource("2_hyych")
+region = Rect2(900, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_njbnw"]
+atlas = ExtResource("2_hyych")
+region = Rect2(1125, 0, 225, 225)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6goef"]
+atlas = ExtResource("2_hyych")
+region = Rect2(1350, 0, 225, 225)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_lacwg"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qeesm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lkvls")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_61v48")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1v01e")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_65umk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_njbnw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6goef")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 14.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4gde2"]
+radius = 114.018
+
+[node name="UnstableOrb" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_vqc8s")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_lacwg")
+animation = &"fly"
+autoplay = "fly"
+frame_progress = 0.559485
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_4gde2")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

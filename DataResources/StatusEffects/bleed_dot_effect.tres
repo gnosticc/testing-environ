@@ -12,5 +12,5 @@ value_float = 0.0
 value_int = 0
 effect_type_id = &"stat_mod"
 target_scope = &"enemy_stats"
-developer_note = ""
+developer_note = "The damage value for this effect is dynamically calculated by StatusEffectComponent.gd. It takes the total damage of the applying hit and divides it over the duration of the Bleed status."
 metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

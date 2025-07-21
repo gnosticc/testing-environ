@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://dbesje2itwl7"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ie6bk"]
+[ext_resource type="Resource" uid="uid://c8coibc7ali75" path="res://DataResources/Weapons/Warhammer/Effects/wh_skullsplitter_effect.tres" id="2_3q38p"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_77v6q"]
+
+[resource]
+script = ExtResource("2_77v6q")
+upgrade_id = &"wh_skullsplitter"
+title = "Skullsplitter"
+description = "Warhammer attacks against stunned, rooted, or slowed enemies deal 150% bonus damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ie6bk")]([ExtResource("2_3q38p")])
+set_acquired_flag_on_weapon = &"wh_skullsplitter_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

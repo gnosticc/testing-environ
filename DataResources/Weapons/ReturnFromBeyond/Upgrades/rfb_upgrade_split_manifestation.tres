@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bxaciu0n5k0r2"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ibwrx"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_fo2fb"]
+[ext_resource type="Resource" uid="uid://lmpshnffki8" path="res://DataResources/Weapons/ReturnFromBeyond/Effects/split_manifestation_effect.tres" id="2_iic0u"]
+
+[resource]
+script = ExtResource("2_fo2fb")
+upgrade_id = &"rfb_split_manifestation"
+title = "Split Manifestation"
+description = "You now summon two Ethereal Echoes in different enemy clusters with each cast."
+prerequisites_on_this_weapon = Array[StringName]([&"rfb_lingering_presence"])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ibwrx")]([ExtResource("2_iic0u")])
+set_acquired_flag_on_weapon = &"rfb_split_manifestation_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

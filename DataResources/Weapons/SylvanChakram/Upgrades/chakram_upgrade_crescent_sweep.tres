@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=7 format=3 uid="uid://br0g1637av6vv"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_lrgfk"]
+[ext_resource type="Resource" uid="uid://bbsc1rkqvk31j" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_crescent_angle.tres" id="2_dfmw5"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_n0y5e"]
+[ext_resource type="Resource" uid="uid://4ls2lxbgw36e" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_crescent_companion.tres" id="3_7mb7r"]
+[ext_resource type="Resource" uid="uid://b6u8qjtnrifg7" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_crescent_damage.tres" id="4_iuqal"]
+[ext_resource type="Resource" uid="uid://ccmddlatlm4pt" path="res://DataResources/Weapons/SylvanChakram/Effects/chakram_effect_crescent_sweep_flag.tres" id="5_7mb7r"]
+
+[resource]
+script = ExtResource("2_n0y5e")
+upgrade_id = &"chakram_crescent_sweep"
+title = "Crescent Sweep"
+description = "The chakram now returns in a wide 180-degree arc. +25% base damage."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_lrgfk")]([ExtResource("2_dfmw5"), ExtResource("3_7mb7r"), ExtResource("4_iuqal"), ExtResource("5_7mb7r")])
+set_acquired_flag_on_weapon = &"chakram_crescent_sweep_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

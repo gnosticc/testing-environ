@@ -1,0 +1,36 @@
+[gd_scene load_steps=6 format=3 uid="uid://bopg3ge4httxh"]
+
+[ext_resource type="Texture2D" uid="uid://6nuvxgms1gjs" path="res://Assets/Pets and Summons/Spirit Master/Ice Shard Animation.png" id="1_it8l8"]
+[ext_resource type="Script" uid="uid://bst1w4s4d21lf" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/IceShard.gd" id="1_jvcw1"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jvcw1"]
+atlas = ExtResource("1_it8l8")
+region = Rect2(0, 0, 440, 440)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_gurc3"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jvcw1")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_vwiy2"]
+radius = 216.023
+
+[node name="IceShard" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_jvcw1")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_gurc3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_vwiy2")
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+one_shot = true

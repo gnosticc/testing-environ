@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="PlayerClassProgressionData" load_steps=3 format=3 uid="uid://b5ngcb81dus3o"]
+
+[ext_resource type="Script" uid="uid://cvgwwwqa2yasb" path="res://Scripts/DataResources/Classes/PlayerClassProgressionData.gd" id="1_0ivq7"]
+[ext_resource type="Resource" uid="uid://dii31ohgkindb" path="res://Data/Classes/Tiers/summoner_advanced.tres" id="1_1qaeq"]
+
+[resource]
+script = ExtResource("1_0ivq7")
+progression_id = &"unlock_summoner"
+class_tier_to_unlock = ExtResource("1_1qaeq")
+unlock_description = "A master of portals who calls forth ethereal echoes from other dimensions to fight. Unlocks the Return from Beyond weapon.
+Permanent Stat Bonuses:
+Max Health: 40
+Base Damage: 8
+Crit Damage: 35%
+Luck: 3
+"
+required_basic_class_contributions = Array[Dictionary]([{
+"class_tag": 4,
+"total_weapon_levels_needed": 10
+}, {
+"class_tag": 6,
+"total_weapon_levels_needed": 10
+}])
+required_advanced_class_ids = Array[StringName]([])
+minimum_player_level = 0
+metadata/_custom_type_script = "uid://cvgwwwqa2yasb"

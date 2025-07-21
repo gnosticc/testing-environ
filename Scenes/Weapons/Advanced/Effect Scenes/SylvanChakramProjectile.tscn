@@ -1,0 +1,77 @@
+[gd_scene load_steps=11 format=3 uid="uid://da5h7x8xu46ty"]
+
+[ext_resource type="Script" uid="uid://dn8yqvw0dhi2v" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/SylvanChakramProjectile.gd" id="1_xe7ey"]
+[ext_resource type="Texture2D" uid="uid://c3c2ljl33ibji" path="res://Assets/Weapons/Advanced Weapons/Chakram/Chakram Animation.png" id="2_26xhb"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dgydm"]
+radius = 108.005
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s6g2l"]
+atlas = ExtResource("2_26xhb")
+region = Rect2(0, 0, 215, 210)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3ayxg"]
+atlas = ExtResource("2_26xhb")
+region = Rect2(215, 0, 215, 210)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_07g51"]
+atlas = ExtResource("2_26xhb")
+region = Rect2(430, 0, 215, 210)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fphjs"]
+atlas = ExtResource("2_26xhb")
+region = Rect2(645, 0, 215, 210)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yu5gc"]
+atlas = ExtResource("2_26xhb")
+region = Rect2(860, 0, 215, 210)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o7uyu"]
+atlas = ExtResource("2_26xhb")
+region = Rect2(1075, 0, 215, 210)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_26xhb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s6g2l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3ayxg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_07g51")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fphjs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yu5gc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o7uyu")
+}],
+"loop": true,
+"name": &"fly",
+"speed": 12.0
+}]
+
+[node name="SylvanChakramProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_xe7ey")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_dgydm")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_26xhb")
+animation = &"fly"
+frame_progress = 0.160373
+
+[node name="LifetimeTimer" type="Timer" parent="."]
+wait_time = 4.0
+one_shot = true
+
+[node name="CompanionOrbitPoint" type="Node2D" parent="."]
+position = Vector2(217, 0)

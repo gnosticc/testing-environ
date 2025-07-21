@@ -1,14 +1,4 @@
 # player.gd
-# This script manages the player's core behavior, input, health, experience,
-# and acts as the central hub for interacting with PlayerStats and WeaponManager.
-# It now fully integrates with the standardized stat system using PlayerStatKeys.
-#
-# UPDATED: Re-added player walk/idle animation logic.
-# UPDATED: Implemented UI anchoring logic for health/exp bars using GameUI's public methods.
-# FIXED: Declared 'is_dead_flag' variable.
-# FIXED: Resolved "parameter named 'new_max_health' declared in this scope" error.
-# FIXED: Ensured _last_known_max_health is initialized correctly.
-# ADDED: get_current_basic_class_id() for PlayerStats debug reset.
 
 extends CharacterBody2D
 class_name PlayerCharacter
@@ -16,20 +6,16 @@ class_name PlayerCharacter
 # --- Visual Adjustment of Character Sprite ---
 @export var sprite_flip_x_compensation: float = 0.0
 
-# --- Player Core Variables (now primarily derived from PlayerStats) ---
-# These variables hold the CURRENT state of health and magnet radius,
-# which are updated based on the calculations in PlayerStats.gd.
 var current_health: float = 0.0 # Initialized here, will be set from PlayerStats.MAX_HEALTH on init
 var current_pickup_magnet_radius: float = 0.0
 var is_dead_flag: bool = false # FIXED: Declared is_dead_flag here
 var is_invulnerable: bool = false
-
-# Store the last known max health to correctly scale current health percentage
 var _last_known_max_health: float = 0.0 # Initialize here to ensure it's always set
 
 # --- Component References ---
 @onready var weapon_manager: WeaponManager = $WeaponManager
 @onready var player_stats: PlayerStats = $PlayerStats # Reference to the PlayerStats child node
+@onready var status_effect_component: StatusEffectComponent = $StatusEffectComponent
 @onready var attacks_container: Node2D # Container for spawned attacks (e.g., projectiles)
 @onready var experience_collector_area: Area2D = $ExperienceCollectorArea
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -38,6 +24,7 @@ var _last_known_max_health: float = 0.0 # Initialize here to ensure it's always 
 
 # --- Signals ---
 signal health_changed(current_health_value, max_health_value)
+signal temp_health_changed(current_temp_health) # NEW: Signal for the temp health bar
 signal experience_changed(current_exp, exp_to_next_level, player_level)
 signal player_level_up(new_level)
 signal player_class_tier_upgraded(new_class_id, contributing_basic_classes)
@@ -58,13 +45,15 @@ enum BasicClass {
 	NONE, WARRIOR, KNIGHT, ROGUE, WIZARD, DRUID, CONJURER
 }
 var current_basic_class_enum_val: PlayerCharacter.BasicClass = BasicClass.NONE
-var _current_basic_class_string_id: StringName = &"none" # NEW: Stores StringName ID for PlayerStats debug reset
+var _current_basic_class_string_id: StringName = &"none"
+# NEW: Dictionary to track total levels for each basic class.
 var basic_class_levels: Dictionary = {
 	BasicClass.WARRIOR: 0, BasicClass.KNIGHT: 0, BasicClass.ROGUE: 0,
 	BasicClass.WIZARD: 0, BasicClass.DRUID: 0, BasicClass.CONJURER: 0
 }
-const BASIC_CLASS_LEVEL_THRESHOLD_FOR_ADVANCEMENT: int = 10
+# NEW: Array to track which advanced classes have been unlocked.
 var acquired_advanced_classes: Array[StringName] = []
+var acquired_general_upgrade_ids: Array[StringName] = []
 var current_sprite_preference: String = "default"
 var prefer_current_sprite_after_first_advanced: bool = false
 
@@ -72,7 +61,14 @@ var prefer_current_sprite_after_first_advanced: bool = false
 var _initial_chosen_class_enum: PlayerCharacter.BasicClass = PlayerCharacter.BasicClass.NONE
 var _initial_chosen_weapon_id: StringName = &""
 var _initial_weapon_equipped: bool = false
-var game_node_ref: Node # Reference to the global Game node (Main scene's root)
+var game_node_ref: Node
+
+var _tactician_bonus_armor: int = 0
+var _tactician_timer: Timer
+var _temp_max_health_bonus: float = 0.0
+var _temp_health_decay_timer: Timer
+
+const SHADOW_CLONE_SCENE = preload("res://Scenes/Weapons/Advanced/Summons/ShadowClone.tscn")
 
 
 func _ready():
@@ -80,35 +76,43 @@ func _ready():
 	if not is_instance_valid(player_stats) or not is_instance_valid(weapon_manager):
 		push_error("CRITICAL ERROR (PlayerCharacter): PlayerStats or WeaponManager node missing!"); return
 
-	# Get reference to the global Game node. It might not be ready yet.
 	game_node_ref = get_tree().root.get_node_or_null("Game")
 
-	# Connect to the game node's 'weapon_blueprints_ready' signal to ensure
-	# weapon blueprints are loaded before attempting to equip the initial weapon.
 	if is_instance_valid(game_node_ref) and game_node_ref.has_signal("weapon_blueprints_ready"):
 		game_node_ref.weapon_blueprints_ready.connect(Callable(self, "_on_game_weapon_blueprints_ready"), CONNECT_ONE_SHOT)
 	else:
 		push_warning("PlayerCharacter: Game node or 'weapon_blueprints_ready' signal not found. Proceeding with default setup.")
-		_on_game_weapon_blueprints_ready() # Call directly for immediate setup
-	#if is_instance_valid(game_node_ref) and not game_node_ref.is_connected("enemy_was_killed", _on_enemy_was_killed):
-		#game_node_ref.enemy_was_killed.connect(_on_enemy_was_killed)
-	# Connect to experience collection area
+		_on_game_weapon_blueprints_ready()
+	if is_instance_valid(game_node_ref) and not game_node_ref.is_connected("enemy_was_killed", Callable(self, "_on_enemy_killed_by_attacker")):
+		game_node_ref.enemy_was_killed.connect(Callable(self, "_on_enemy_killed_by_attacker"))
+
+	CombatEvents.death_mark_triggered.connect(_on_death_mark_triggered)
+	CombatEvents.lingering_charge_triggered.connect(_on_lingering_charge_triggered)
+	
 	if experience_collector_area:
 		if not experience_collector_area.is_connected("area_entered", Callable(self, "_on_experience_collector_area_entered")):
 			experience_collector_area.area_entered.connect(Callable(self, "_on_experience_collector_area_entered"))
 	
-	# Initial experience calculation for level 1
 	experience_to_next_level = calculate_exp_for_next_level(current_level)
 	
-	# Connect to player_stats' 'stats_recalculated' signal.
-	# This signal will trigger when player stats change (e.g., from upgrades),
-	# allowing PlayerCharacter to update its derived properties like current_health.
+	_tactician_timer = Timer.new()
+	_tactician_timer.name = "TacticianTimer"
+	_tactician_timer.wait_time = 1.0
+	_tactician_timer.timeout.connect(_on_tactician_timer_timeout)
+	add_child(_tactician_timer)
+
+	_temp_health_decay_timer = Timer.new()
+	_temp_health_decay_timer.name = "TempHealthDecayTimer"
+	_temp_health_decay_timer.wait_time = 1.0
+	_temp_health_decay_timer.timeout.connect(_on_temp_health_decay_timeout)
+	add_child(_temp_health_decay_timer)
+
 	if is_instance_valid(player_stats):
 		if not player_stats.is_connected("stats_recalculated", Callable(self, "_on_player_stats_recalculated")):
 			player_stats.stats_recalculated.connect(Callable(self, "_on_player_stats_recalculated"))
 	else:
 		push_error("PlayerCharacter: PlayerStats node is invalid in _ready().")
-	# NEW: Connect to the global combat event bus.
+
 	if not CombatEvents.is_connected("status_effect_applied", Callable(self, "_on_status_effect_applied")):
 		CombatEvents.status_effect_applied.connect(_on_status_effect_applied)
 
@@ -136,6 +140,28 @@ func _on_status_effect_applied(owner: Node, effect_id: StringName, source: Node)
 		if player_stats.get_flag(PlayerStatKeys.Keys.PLAYER_HAS_CHAIN_BASH):
 			#print("DEBUG (Chain Bash): Player has Chain Bash, attempting to execute from ", stunned_enemy.name)
 			_execute_chain_bash_from_player(stunned_enemy)
+
+func _on_enemy_killed_by_attacker(attacker_node: Node, killed_enemy_node: Node):
+	# --- Soul Siphon Logic ---
+	# This check runs first and does not depend on the attacker.
+	if player_stats.get_flag(PlayerStatKeys.Keys.PLAYER_HAS_SOUL_SIPHON):
+		if CombatTracker.was_enemy_hit_by_weapon_within_seconds(&"warrior_scythe", killed_enemy_node, 0.5):
+			var chance = 0.10
+			if randf() < chance:
+				var base_heal = 3
+				var player_luck = player_stats.get_final_stat(PlayerStatKeys.Keys.LUCK)
+				var effective_luck = max(1, int(player_luck))
+				self.heal(float(base_heal * effective_luck))
+				print_debug("Soul Siphon Procced! Healed for ", float(base_heal * effective_luck))
+
+	# --- Rampage Logic ---
+	# Second, handle Rampage. This logic no longer checks who the attacker was.
+	# It triggers on ANY kill, as long as the player has the upgrade.
+	if player_stats.get_flag(PlayerStatKeys.Keys.PLAYER_HAS_RAMPAGE):
+		var rampage_buff_data = load("res://DataResources/StatusEffects/rampage_buff.tres") as StatusEffectData
+		if is_instance_valid(rampage_buff_data) and is_instance_valid(status_effect_component):
+			status_effect_component.apply_effect(rampage_buff_data, self)
+
 
 func _execute_chain_bash_from_player(stunned_enemy: BaseEnemy):
 	var search_radius = 70.0
@@ -176,6 +202,44 @@ func _deal_chain_bash_damage(target: BaseEnemy, damage: int, attack_stats: Dicti
 		#print("DEBUG (Chain Bash): Dealing ", damage, " damage to ", target.name, " after delay.")
 		# Use the attack_stats passed from the timer binding
 		target.take_damage(damage, self, attack_stats)
+
+# Finds a specified number of the nearest enemies and returns them in an array.
+func _find_nearest_enemies(p_num_to_find: int, p_from_position: Vector2 = Vector2.INF, p_exclude_list: Array = []) -> Array[Node2D]:
+	var enemies_in_scene = get_tree().get_nodes_in_group("enemies")
+	var valid_enemies = []
+	
+	var search_origin = p_from_position
+	if search_origin == Vector2.INF: search_origin = global_position
+	
+	if enemies_in_scene.is_empty(): return []
+	
+	# First, filter out invalid or excluded enemies and calculate distances
+	for enemy_node in enemies_in_scene:
+		if is_instance_valid(enemy_node) and not p_exclude_list.has(enemy_node) and not enemy_node.is_dead():
+			var dist_sq = search_origin.distance_squared_to(enemy_node.global_position)
+			valid_enemies.append({"node": enemy_node, "dist_sq": dist_sq})
+			
+	# Sort the enemies by distance (ascending)
+	valid_enemies.sort_custom(func(a, b): return a.dist_sq < b.dist_sq)
+	
+	# Get the final list of nodes to return
+	var nearest_enemies: Array[Node2D] = []
+	var count = min(p_num_to_find, valid_enemies.size())
+	for i in range(count):
+		nearest_enemies.append(valid_enemies[i].node)
+		
+	return nearest_enemies
+
+func _on_lingering_charge_triggered(p_position: Vector2, p_weapon_stats: Dictionary, p_source_player: Node, p_dying_enemy: Node):
+	# FIX: Use the dying enemy in the exclusion list.
+	var nearest_enemy = _find_nearest_enemy(p_position, [p_dying_enemy])
+	if is_instance_valid(nearest_enemy):
+		if is_instance_valid(nearest_enemy.status_effect_component):
+			var conduit_status = load("res://DataResources/StatusEffects/living_conduit_status.tres") as StatusEffectData
+			if is_instance_valid(conduit_status):
+				print_debug("  Applying fresh Living Conduit status.")
+				# Pass the original source player, not self.
+				nearest_enemy.status_effect_component.apply_effect(conduit_status, p_source_player, p_weapon_stats)
 
 # This function is called when 'game.gd' signals that weapon blueprints are ready.
 # It then proceeds with the initial player and weapon setup.
@@ -291,46 +355,30 @@ func _try_equip_initial_weapon():
 # This function is triggered by PlayerStats.gd whenever its stats are recalculated.
 # PlayerCharacter updates its own derived properties here.
 func _on_player_stats_recalculated(new_max_health_from_signal: float, new_movement_speed_from_signal: float):
-	# Renamed parameters to avoid shadowing, although using the provided signal args is preferred.
-	# The goal is to update current_health and current_pickup_magnet_radius.
-	
-	if not is_instance_valid(player_stats): return # Safety check
+	if not is_instance_valid(player_stats): return
 
-	# Retrieve the actual calculated max health and magnet range from PlayerStats.
-	# Using the current_ (cached) properties on player_stats is the most consistent approach
-	# as these are already updated by PlayerStats.recalculate_all_stats().
 	var new_max_health = player_stats.current_max_health
 	var new_magnet_range = player_stats.current_magnet_range
 	
-	# --- Health Scaling Logic ---
-	# Calculate health percentage based on the *old* max health to maintain relative health.
-	# We use _last_known_max_health which was correctly set during the *previous* recalculation or initialization.
 	var health_percentage = 1.0
-	if _last_known_max_health > 0: # Avoid division by zero if this is the very first initialization
+	if _last_known_max_health > 0:
 		health_percentage = current_health / _last_known_max_health
 	
-	# Apply the percentage to the new max health to determine the new current health.
 	current_health = clampf(new_max_health * health_percentage, 0.0, new_max_health)
 	
-	# Safety check: If max health is positive but current health became very small (e.g., due to float precision)
-	# and the player was not dead, ensure they have at least 1 HP.
 	if new_max_health > 0 and current_health < 0.01 and health_percentage > 0:
 		current_health = 1.0
 	
-	# Update the _last_known_max_health for the next recalculation.
 	_last_known_max_health = new_max_health
-	
-	# --- Magnet Range Update ---
+
+	if player_stats.get_flag(PlayerStatKeys.Keys.PLAYER_HAS_TACTICIAN) and _tactician_timer.is_stopped():
+		_tactician_timer.start()
+		
 	if current_pickup_magnet_radius != new_magnet_range:
 		current_pickup_magnet_radius = new_magnet_range
-		update_experience_collector_radius() # Call your method to update the actual Area2D radius
+		update_experience_collector_radius()
 
-	# --- Signal Emission for UI Updates ---
-	emit_signal("health_changed", current_health, new_max_health)
-
-	# The new_movement_speed_from_signal argument can be used here if PlayerCharacter
-	# needs to directly react to movement speed changes beyond just fetching it in _physics_process.
-	# For example, if you have a temporary speed buff visual effect.
+	emit_signal("health_changed", current_health, get_max_health_value())
 
 
 func _physics_process(delta: float):
@@ -415,60 +463,77 @@ func calculate_exp_for_next_level(player_curr_level: int) -> int:
 	return linear_part + int(exponential_part)
 	
 # This function is called when an enemy's attack hits the player.
-func take_damage(damage_amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}):
+# The logic here is corrected to ensure temporary health is used as a buffer first.
+func take_damage(damage_amount: float, attacker: Node2D = null, p_attack_stats: Dictionary = {}, _p_weapon_tags: Array[StringName] = []):
 	if is_invulnerable or is_dead_flag: return
 
-	# --- KNIGHT'S RESOLVE & DAMAGE REDUCTION LOGIC ---
-	# Get all relevant damage reduction stats from the PlayerStats node.
+	# --- Calculate Final Damage ---
+	var final_armor = player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR)
+	if player_stats.get_flag(PlayerStatKeys.Keys.PLAYER_HAS_TACTICIAN):
+		final_armor += _tactician_bonus_armor
+		_tactician_bonus_armor = 0
+		
 	var percent_reduction = player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_PERCENT_DAMAGE_REDUCTION)
 	var flat_reduction = player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_FLAT_DAMAGE_REDUCTION)
-	var armor = player_stats.get_final_stat(PlayerStatKeys.Keys.ARMOR)
 	var armor_pen = float(p_attack_stats.get(PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION], 0.0))
 
-	# --- DEBUGGING PRINTS ---
-	# These prints will show the entire calculation, making it clear if Knight's Resolve is working.
+	# --- INSERTED DEBUG BLOCK ---
 	print_debug("--- Player Taking Damage ---")
 	print_debug("Initial Incoming Damage: ", damage_amount)
 	print_debug("Player Stats | Percent Reduction: ", percent_reduction, " (From Knight's Resolve, etc.)")
 	print_debug("Player Stats | Flat Reduction: ", flat_reduction)
-	print_debug("Player Stats | Armor: ", armor)
+	print_debug("Player Stats | Armor: ", final_armor)
 	print_debug("Attacker Stats | Armor Penetration: ", armor_pen)
-	
-	# --- DAMAGE CALCULATION PIPELINE ---
-	# 1. Leverage (Dodge) Check
+	# --- END INSERTED DEBUG BLOCK ---
+
 	var dodge_chance = player_stats.get_final_stat(PlayerStatKeys.Keys.DODGE_CHANCE)
 	if randf() < dodge_chance:
 		print("DEBUG (Leverage): DODGE! Incoming damage of ", damage_amount, " was avoided.")
-		# Optional: spawn a "Dodge!" text effect here
-		return # Stop further processing
-	# 1. Apply flat reduction first.
-	var damage_after_flat_redux = max(0, damage_amount - flat_reduction)
-	
-	# 2. Calculate effective armor after penetration.
-	var effective_armor = max(0, armor - armor_pen)
-	var damage_after_armor = max(0, damage_after_flat_redux - effective_armor)
+		return
 
-	# 3. Apply percentage-based reduction last.
+	var damage_after_flat = maxf(0.0, damage_amount - flat_reduction)
+	var effective_armor = maxf(0.0, final_armor - armor_pen)
+	var damage_after_armor = maxf(0.0, damage_after_flat - effective_armor)
 	var final_damage = damage_after_armor * (1.0 - percent_reduction)
-	final_damage = max(0, final_damage) # Ensure damage never becomes negative.
 	
-	# --- FINAL DEBUG PRINT ---
-	print_debug("Final Calculated Damage to Player: ", final_damage)
-	print_debug("--------------------------")
+	# --- Apply Damage to Health Pools (Corrected Logic) ---
+	var remaining_damage = final_damage
+	
+	# 1. Absorb damage with temporary health first.
+	if _temp_max_health_bonus > 0:
+		var damage_to_temp_hp = min(_temp_max_health_bonus, remaining_damage)
+		_temp_max_health_bonus -= damage_to_temp_hp
+		remaining_damage -= damage_to_temp_hp
+		emit_signal("temp_health_changed", _temp_max_health_bonus) # NEW: Emit signal
+		print_debug("Champion's Resolve: Temp HP absorbed ", damage_to_temp_hp, " damage. Remaining temp HP: ", _temp_max_health_bonus)
 
-	current_health -= final_damage
+	# 2. Apply any leftover damage to the main health pool.
+	if remaining_damage > 0:
+		current_health -= remaining_damage
+		emit_signal("health_changed", current_health, get_max_health_value())
 	
-	emit_signal("health_changed", current_health, player_stats.get_final_stat(PlayerStatKeys.Keys.MAX_HEALTH))
-	
+	# --- Post-Damage Checks & Signal Emission ---
 	if is_instance_valid(attacker):
 		emit_signal("player_took_damage_from", attacker)
 		
 	if current_health <= 0:
-		die() # Assumes a _die() function exists
-
+		# Check for death-defying effects like Philosopher's Stone
+		var weapon_manager = get_node_or_null("WeaponManager")
+		if is_instance_valid(weapon_manager):
+			var weapon_entry_index = weapon_manager._get_weapon_entry_index_by_id(&"alchemist_experimental_materials")
+			if weapon_entry_index != -1:
+				var weapon_entry = weapon_manager.active_weapons[weapon_entry_index]
+				var controller = weapon_entry.get("persistent_instance")
+				if is_instance_valid(controller) and controller.is_philosophers_stone_ready():
+					controller.trigger_philosophers_stone_cooldown()
+					current_health = get_max_health_value()
+					emit_signal("health_changed", current_health, get_max_health_value())
+					return # Prevent death
+		
+		# If no death-defying effects, the player dies.
+		die()
 	#else:
 		#start_invulnerability() # Assumes a start_invulnerability() function exists
-
 # NEW: Function to handle Rimeheart logic.
 #func _on_enemy_was_killed(enemy_node: BaseEnemy, _killer_node: Node):
 	#if not is_instance_valid(enemy_node): return
@@ -503,7 +568,30 @@ func take_damage(damage_amount: float, attacker: Node2D = null, p_attack_stats: 
 							#if explosion.has_method("detonate"):
 								#explosion.detonate(explosion_damage, explosion_radius, self, {}, false)
 						#break # Only one orb needs to proc the explosion.
+func _on_tactician_timer_timeout():
+	if _tactician_bonus_armor < 9999:
+		_tactician_bonus_armor += 1
+		player_stats.recalculate_all_stats() # Update stats to reflect new armor
 
+func _on_temp_health_decay_timeout():
+	if _temp_max_health_bonus > 0:
+		_temp_max_health_bonus = max(0.0, _temp_max_health_bonus - 10.0)
+		emit_signal("temp_health_changed", _temp_max_health_bonus) # NEW: Emit signal
+		print_debug("Champion's Resolve: Decayed 10 temp HP. Remaining: ", _temp_max_health_bonus)
+	else:
+		_temp_health_decay_timer.stop()
+		print_debug("Champion's Resolve: Temp HP fully decayed. Timer stopped.")
+
+func add_temporary_max_health(amount: float):
+	var old_bonus = _temp_max_health_bonus
+	_temp_max_health_bonus = min(500.0, _temp_max_health_bonus + amount)
+	emit_signal("temp_health_changed", _temp_max_health_bonus) # NEW: Emit signal
+	print_debug("Champion's Resolve: Gained ", amount, " temp HP. Total temp HP: ", _temp_max_health_bonus)
+	
+	if _temp_health_decay_timer.is_stopped():
+		_temp_health_decay_timer.start()
+		print_debug("Champion's Resolve: Decay timer started.")
+	
 func die():
 	if is_dead_flag: return # Prevent double death
 	is_dead_flag = true
@@ -530,41 +618,58 @@ func apply_upgrade(upgrade_data_wrapper: Dictionary):
 				if is_instance_valid(weapon_manager) and weapon_manager.has_method("add_weapon"):
 					var success = weapon_manager.add_weapon(resource)
 					if success and not resource.class_tag_restrictions.is_empty():
-						increment_basic_class_level(resource.class_tag_restrictions[0])
-			else:
-				push_error("PlayerCharacter: 'new_weapon' upgrade_type received non-WeaponBlueprintData resource: ", resource)
+						if resource.class_tag_restrictions[0] is int:
+							increment_basic_class_level(resource.class_tag_restrictions[0])
 		
 		"weapon_upgrade":
 			if resource is WeaponUpgradeData:
 				var weapon_id_to_upgrade = upgrade_data_wrapper.get("weapon_id_to_upgrade", &"")
 				if weapon_id_to_upgrade != &"" and is_instance_valid(weapon_manager) and weapon_manager.has_method("apply_weapon_upgrade"):
-					# --- NEW: Grant class experience on upgrade ---
+					weapon_manager.apply_weapon_upgrade(StringName(weapon_id_to_upgrade), resource)
+					
 					var weapon_bp = game_node_ref.get_weapon_blueprint_by_id(weapon_id_to_upgrade)
 					if is_instance_valid(weapon_bp) and not weapon_bp.class_tag_restrictions.is_empty():
-						increment_basic_class_level(weapon_bp.class_tag_restrictions[0])
-					
-					weapon_manager.apply_weapon_upgrade(StringName(weapon_id_to_upgrade), resource)
-				else:
-					push_error("PlayerCharacter: 'weapon_upgrade' missing weapon_id_to_upgrade or invalid manager.")
-			else:
-				push_error("PlayerCharacter: 'weapon_upgrade' upgrade_type received non-WeaponUpgradeData resource: ", resource)
-		
+						if weapon_bp.class_tag_restrictions[0] is int:
+							increment_basic_class_level(weapon_bp.class_tag_restrictions[0])
+
 		"general_upgrade":
 			if resource is GeneralUpgradeCardData:
-				if is_instance_valid(player_stats) and resource.has_method("get_effects_to_apply"):
-					var effects_to_apply = resource.get_effects_to_apply()
-					for effect in effects_to_apply:
-						# ... (logic for applying general effects is the same)
-						pass
-			else:
-				push_error("PlayerCharacter: 'general_upgrade' upgrade_type received non-GeneralUpgradeCardData resource: ", resource)
+				# NEW: Add the ID of the chosen upgrade to our tracking list.
+				acquired_general_upgrade_ids.append(resource.id)
+				for effect in resource.effects:
+					if effect.target_scope == &"player_stats":
+						if effect is StatModificationEffectData:
+							player_stats.apply_stat_modification(effect)
+						elif effect is CustomFlagEffectData:
+							player_stats.apply_custom_flag(effect)
+
+		
+		"advanced_class_unlock":
+			if resource is PlayerClassTierData:
+				var class_tier_data = resource as PlayerClassTierData
+				if not acquired_advanced_classes.has(class_tier_data.class_id):
+					acquired_advanced_classes.append(class_tier_data.class_id)
+					print("Advanced Class Unlocked: ", class_tier_data.display_name)
+
+					# MODIFIED: Apply permanent stat bonuses using the new dedicated function.
+					for effect_data in class_tier_data.permanent_stat_bonuses:
+						if is_instance_valid(effect_data) and effect_data.target_scope == &"player_stats":
+							if effect_data is StatModificationEffectData:
+								# This now calls the new function in PlayerStats to directly modify base values.
+								player_stats.apply_permanent_base_stat_bonus(effect_data)
+							elif effect_data is CustomFlagEffectData:
+								player_stats.apply_custom_flag(effect_data)
+					
+					emit_signal("player_class_tier_upgraded", class_tier_data.class_id, [])
+				else:
+					push_warning("PlayerCharacter: Tried to unlock an already acquired advanced class: ", class_tier_data.class_id)
 		_:
 			push_error("PlayerCharacter: apply_upgrade received unknown upgrade type: '", upgrade_type, "'. Resource: ", resource)
 	
 	if is_instance_valid(player_stats) and player_stats.has_method("recalculate_all_stats"):
 		player_stats.recalculate_all_stats()
 
-# --- NEW FUNCTION for Class Progression ---
+# NEW: Function to increment the level count for a basic class.
 func increment_basic_class_level(class_enum: BasicClass):
 	if basic_class_levels.has(class_enum):
 		basic_class_levels[class_enum] += 1
@@ -600,25 +705,29 @@ func get_experience_to_next_level() -> int: return experience_to_next_level
 func get_current_level() -> int: return current_level
 func get_current_health_value() -> float: return current_health
 func get_max_health_value() -> float:
+	var base_max = 0.0
 	if is_instance_valid(player_stats):
-		return player_stats.current_max_health # Use the cached current_max_health
-	return 0.0
+		base_max = player_stats.current_max_health
+	return base_max # This now correctly returns only the permanent max health
 
 func get_ui_anchor_global_position() -> Vector2:
 	if is_instance_valid(ui_anchor): return ui_anchor.global_position
 	return self.global_position
 
-func _find_nearest_enemy(p_from_position: Vector2 = Vector2.INF) -> Node2D:
+func _find_nearest_enemy(p_from_position: Vector2 = Vector2.INF, p_exclude_list: Array = []) -> Node2D:
 	var enemies_in_scene = get_tree().get_nodes_in_group("enemies")
 	var nearest_enemy: Node2D = null; var min_dist_sq = INF
+
 	var search_origin = p_from_position
 	if search_origin == Vector2.INF: search_origin = global_position
 	if enemies_in_scene.is_empty(): return null
 	for enemy_node in enemies_in_scene:
-		if not is_instance_valid(enemy_node): continue
+		# FIX: Incorporate the exclude list into the check
+		if not is_instance_valid(enemy_node) or p_exclude_list.has(enemy_node): continue
 		var dist_sq = search_origin.distance_squared_to(enemy_node.global_position)
 		if dist_sq < min_dist_sq: min_dist_sq = dist_sq; nearest_enemy = enemy_node
 	return nearest_enemy
+
 
 func get_active_weapons_data_for_level_up() -> Array[Dictionary]:
 	if is_instance_valid(weapon_manager) and weapon_manager.has_method("get_active_weapons_data_for_level_up"):
@@ -644,3 +753,50 @@ func heal(amount: float):
 	current_health = clampf(current_health + amount, 0, actual_max_health)
 	emit_signal("health_changed", current_health, actual_max_health)
 	
+# FIX: Added the missing function that SwordCoilProjectile needs.
+func get_total_levels_for_class(class_enum_to_check: BasicClass) -> int:
+	if not is_instance_valid(weapon_manager): return 0
+	
+	var total_levels = 0
+	# Iterate through the definitive list of active weapons.
+	for weapon_data in weapon_manager.active_weapons:
+		# Access the loaded blueprint resource directly.
+		var blueprint = weapon_data.get("blueprint_resource") as WeaponBlueprintData
+		if is_instance_valid(blueprint):
+			# Check if the weapon's class tags include the one we're looking for.
+			if blueprint.class_tag_restrictions.has(class_enum_to_check):
+				total_levels += weapon_data.get("weapon_level", 0)
+				
+	return total_levels
+
+func _on_death_mark_triggered(enemy_position: Vector2, clone_stats: Dictionary):
+	if not is_instance_valid(self) or not is_instance_valid(player_stats): return
+
+	if is_instance_valid(SHADOW_CLONE_SCENE):
+		var clone = SHADOW_CLONE_SCENE.instantiate()
+		get_tree().current_scene.add_child(clone)
+		clone.global_position = enemy_position
+		
+		# The clone needs a direction to face. We'll have it face away from the player.
+		var direction = (enemy_position - self.global_position).normalized()
+		if direction == Vector2.ZERO:
+			direction = Vector2.RIGHT
+
+		if clone.has_method("initialize"):
+			clone.initialize(direction, clone_stats, player_stats)
+
+# NEW: Public debug functions to be called by the DebugPanel.
+
+# Sets the level of a specific basic class manually.
+func debug_set_basic_class_level(class_enum: BasicClass, level: int):
+	if basic_class_levels.has(class_enum):
+		basic_class_levels[class_enum] = max(0, level)
+	else:
+		push_warning("PlayerCharacter DEBUG: Attempted to set level for invalid class enum: ", class_enum)
+
+# Resets all class progression data to its initial state.
+func debug_reset_class_progression():
+	for key in basic_class_levels:
+		basic_class_levels[key] = 0
+	acquired_advanced_classes.clear()
+	print("PlayerCharacter DEBUG: Class progression has been reset.")

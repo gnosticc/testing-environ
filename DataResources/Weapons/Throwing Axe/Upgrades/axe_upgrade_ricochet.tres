@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://m5v35ktifagq"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_mtswg"]
+[ext_resource type="Resource" uid="uid://chdusomepn07x" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_ricochet.tres" id="2_b1i5v"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_xr67c"]
+
+[resource]
+script = ExtResource("2_xr67c")
+upgrade_id = &"axe_ricochet"
+title = "Axe Ricochet"
+description = "The axe is thrown with such force that it bounces from its target to another nearby foe."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_mtswg")]([ExtResource("2_b1i5v")])
+set_acquired_flag_on_weapon = &"axe_ricochet_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

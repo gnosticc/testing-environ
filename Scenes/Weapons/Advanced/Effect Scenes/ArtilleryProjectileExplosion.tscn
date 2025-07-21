@@ -1,0 +1,48 @@
+[gd_scene load_steps=8 format=3 uid="uid://bkx1as1gofbw1"]
+
+[ext_resource type="Script" uid="uid://c51hptnhwcelm" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/ArtilleryProjectileExplosion.gd" id="1_a7myi"]
+[ext_resource type="Texture2D" uid="uid://dgoru2cvwacj3" path="res://Assets/Pets and Summons/Mechamaster Pets/Rocket Turret Projectile Explosion Animation.png" id="1_fxfqv"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a7myi"]
+atlas = ExtResource("1_fxfqv")
+region = Rect2(600, 0, 300, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iph3p"]
+atlas = ExtResource("1_fxfqv")
+region = Rect2(0, 0, 300, 250)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5c3p3"]
+atlas = ExtResource("1_fxfqv")
+region = Rect2(300, 0, 300, 250)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_k32sl"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a7myi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iph3p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5c3p3")
+}],
+"loop": false,
+"name": &"explode",
+"speed": 9.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_fh0wv"]
+radius = 129.035
+
+[node name="ArtilleryProjectileExplosion" type="Area2D"]
+collision_layer = 256
+collision_mask = 136
+script = ExtResource("1_a7myi")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_k32sl")
+animation = &"explode"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_fh0wv")

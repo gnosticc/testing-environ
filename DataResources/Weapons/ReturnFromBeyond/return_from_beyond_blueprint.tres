@@ -1,0 +1,67 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://bbqtp5sw2jyn8"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_fda7g"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_1hq52"]
+[ext_resource type="Resource" uid="uid://bj1hsdn3b172n" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_arcane_potency.tres" id="2_nfl2t"]
+[ext_resource type="PackedScene" uid="uid://dby44xxultctg" path="res://Scenes/Weapons/Advanced/ReturnFromBeyondController.tscn" id="3_1hq52"]
+[ext_resource type="Resource" uid="uid://bit1ahc06c2br" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_echoing_demise.tres" id="3_qekbf"]
+[ext_resource type="Resource" uid="uid://b7vqgg7hctlmm" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_encroaching_darkness.tres" id="4_3y08s"]
+[ext_resource type="Resource" uid="uid://bl8nftt5hxlwh" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_lingering_presence.tres" id="5_xy8ey"]
+[ext_resource type="Resource" uid="uid://df0gn8cpfpkeg" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_phantom_reach.tres" id="6_4bl2h"]
+[ext_resource type="Resource" uid="uid://dynm48lqovkbk" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_soul_sustenance.tres" id="7_wt0uf"]
+[ext_resource type="Resource" uid="uid://bxaciu0n5k0r2" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_split_manifestation.tres" id="8_6ydxd"]
+[ext_resource type="Resource" uid="uid://brqjcgh6ebrpv" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_unstable_rift.tres" id="9_qkw6i"]
+[ext_resource type="Resource" uid="uid://ptl0fc8pf1j" path="res://DataResources/Weapons/ReturnFromBeyond/Upgrades/rfb_upgrade_volatile_essence.tres" id="10_uh2gl"]
+
+[resource]
+script = ExtResource("2_1hq52")
+id = &"summoner_return_from_beyond"
+title = "Return from Beyond"
+description = "Summons a temporary Ethereal Echo to fight for you."
+weapon_scene = ExtResource("3_1hq52")
+tags = Array[StringName]([&"pet", &"magical", &"controller", &"summoner weapon"])
+class_tag_restrictions = [&"summoner_advanced"]
+cooldown = 10.0
+max_level = 10
+base_lifetime = -1.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+initial_specific_stats = {
+"echo_duration": 5.0,
+"echo_movement_speed": 90.0,
+"echo_scale": 0.12,
+"echoing_demise_radius": 50.0,
+"eldritch_orb_cooldown": 3.3,
+"eldritch_orb_lifetime": 4.0,
+"eldritch_orb_pulse_interval": 0.25,
+"eldritch_orb_scale": 0.2,
+"eldritch_orb_velocity": 80.0,
+"eldritch_splinter_damage_percentage": 0.25,
+"eldritch_splinter_scale": 0.05,
+"has_echoing_demise": false,
+"has_encroaching_darkness": false,
+"has_phantom_reach": false,
+"has_soul_sustenance": false,
+"has_split_manifestation": false,
+"has_unstable_rift": false,
+"has_volatile_essence": false,
+"max_spawn_distance_from_player": 200.0,
+&"max_summons_of_type": 999,
+"phantom_reach_cooldown": 0.3,
+"phantom_reach_damage_percentage": 0.5,
+"phantom_reach_projectile_scale": 0.04,
+"phantom_reach_range": 700.0,
+"primary_attack_cooldown": 1.0,
+"primary_attack_damage_percentage": 0.8,
+"primary_attack_range": 200.0,
+"primary_projectile_scale": 0.04,
+"soul_sustenance_cooldown_reduction": 0.03,
+"unstable_rift_chance": 0.1,
+"volatile_essence_chance": 0.25,
+"volatile_essence_radius": 35.0,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_fda7g")]([ExtResource("2_nfl2t"), ExtResource("3_qekbf"), ExtResource("4_3y08s"), ExtResource("5_xy8ey"), ExtResource("6_4bl2h"), ExtResource("7_wt0uf"), ExtResource("8_6ydxd"), ExtResource("9_qkw6i"), ExtResource("10_uh2gl")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://b6ajktr3gblig"]
+
+[ext_resource type="Script" uid="uid://gofw1aotkqso" path="res://Scripts/DataResources/Weapons/Advanced/Effect Scripts/GaleWaveProjectile.gd" id="1_mbli1"]
+[ext_resource type="Texture2D" uid="uid://dhd0tp84amwst" path="res://Assets/Weapons/Advanced Weapons/Gale Wave Animation.png" id="2_b48h8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndnju"]
+atlas = ExtResource("2_b48h8")
+region = Rect2(0, 0, 170, 210)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_b48h8"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ndnju")
+}],
+"loop": false,
+"name": &"fly",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_b5lnk"]
+radius = 21.0
+height = 84.0
+
+[node name="GaleWaveProjectile" type="Area2D"]
+collision_layer = 4
+collision_mask = 136
+script = ExtResource("1_mbli1")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.235294, 0.4)
+sprite_frames = SubResource("SpriteFrames_b48h8")
+animation = &"fly"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_b5lnk")
+
+[node name="LifetimeTimer" type="Timer" parent="."]

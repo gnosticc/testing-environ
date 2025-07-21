@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PlayerClassTierData" load_steps=6 format=3 uid="uid://cb2gprrr4ga1x"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_3nbfn"]
+[ext_resource type="Script" uid="uid://cf2ayvh6xr25y" path="res://Scripts/DataResources/Classes/PlayerClassTierData.gd" id="2_25x3r"]
+[ext_resource type="Resource" uid="uid://dhbl3hxrolam7" path="res://Data/Classes/Effects/general_unlock_bonus_health.tres" id="2_n6v8c"]
+[ext_resource type="Resource" uid="uid://prm5rikppyij" path="res://Data/Classes/Effects/warrior_unlock_bonus_damage.tres" id="3_nuk6j"]
+[ext_resource type="Resource" uid="uid://dnh2nswm5k4mx" path="res://Data/Classes/Effects/rogue_unlock_crit_chance.tres" id="4_a1oy6"]
+
+[resource]
+script = ExtResource("2_25x3r")
+class_id = &"samurai_advanced"
+display_name = "Samurai"
+tier_level = 1
+sprite_override_path = ""
+permanent_stat_bonuses = Array[ExtResource("1_3nbfn")]([ExtResource("2_n6v8c"), ExtResource("3_nuk6j"), ExtResource("4_a1oy6")])
+unlocked_weapon_blueprint_ids = Array[StringName]([&"samurai_katana"])
+unlocked_abilities = Array[StringName]([])
+tier_description = "Achieve 10 total levels in Warrior and Rogue weapons to unlock the path of the Samurai. A master of the blade who focuses on precision and deadly combos. Unlocks the Katana weapon."
+metadata/_custom_type_script = "uid://cf2ayvh6xr25y"

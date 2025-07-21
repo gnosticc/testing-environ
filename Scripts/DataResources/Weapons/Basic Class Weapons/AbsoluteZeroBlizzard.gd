@@ -13,15 +13,17 @@ var _damage_per_tick: int
 var _slow_effect_data: StatusEffectData
 var _owner_player_stats: PlayerStats
 var _source_node: Node
+var _weapon_stats: Dictionary # <-- FIX: Declare variable here
 
 func _ready():
 	lifetime_timer.timeout.connect(queue_free)
 	damage_tick_timer.timeout.connect(_on_damage_tick)
 	body_entered.connect(_on_body_entered)
 
-func initialize(p_player_stats: PlayerStats, p_source_node: Node):
+func initialize(p_player_stats: PlayerStats, p_source_node: Node, p_weapon_stats: Dictionary):
 	_owner_player_stats = p_player_stats
 	_source_node = p_source_node
+	_weapon_stats = p_weapon_stats # <-- FIX: Assign to class variable
 	
 	_slow_effect_data = load("res://DataResources/StatusEffects/slow_status.tres")
 
@@ -34,8 +36,14 @@ func initialize(p_player_stats: PlayerStats, p_source_node: Node):
 	
 	var ft_blueprint = load("res://DataResources/Weapons/FrozenTerritory/wizard_frozen_territory_blueprint.tres") as WeaponBlueprintData
 	var ft_damage_percent = ft_blueprint.initial_specific_stats.get(&"weapon_damage_percentage", 1.0)
-	var base_orb_damage = _owner_player_stats.get_calculated_player_damage(ft_damage_percent, ft_blueprint.tags)
+	
+	# --- REFACTORED DAMAGE CALCULATION ---
+	var base_damage = _owner_player_stats.get_calculated_base_damage(ft_damage_percent)
+	var base_orb_damage = _owner_player_stats.apply_tag_damage_multipliers(base_damage, ft_blueprint.tags)
+	# --- END REFACTOR ---
+
 	_damage_per_tick = int(round(base_orb_damage * damage_mult))
+
 
 	lifetime_timer.wait_time = duration
 	lifetime_timer.start()
@@ -62,7 +70,10 @@ func _on_damage_tick():
 	var bodies = get_overlapping_bodies()
 	for body in bodies:
 		if body is BaseEnemy and is_instance_valid(body) and not body.is_dead():
-			body.take_damage(_damage_per_tick, _source_node)
+			var weapon_tags: Array[StringName] = []
+			if _weapon_stats.has("tags"):
+				weapon_tags = _weapon_stats.get("tags")
+			body.take_damage(_damage_per_tick, _source_node, {}, weapon_tags)
 
 func _on_body_entered(body: Node2D):
 	if body is BaseEnemy and is_instance_valid(body) and not body.is_dead():

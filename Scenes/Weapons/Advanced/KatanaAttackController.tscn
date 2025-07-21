@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://dqmjw55secd16"]
+
+[ext_resource type="Script" uid="uid://bihuh55m86kfr" path="res://Scripts/DataResources/Weapons/Advanced/KatanaAttackController.gd" id="1_42uf6"]
+[ext_resource type="PackedScene" uid="uid://x06jqvt17ifr" path="res://Scenes/Weapons/Advanced/KatanaAttack.tscn" id="2_ts4nw"]
+[ext_resource type="PackedScene" uid="uid://b6ajktr3gblig" path="res://Scenes/Weapons/Advanced/Effect Scenes/GaleWaveProjectile.tscn" id="3_orosk"]
+
+[node name="KatanaAttackController" type="Node2D"]
+script = ExtResource("1_42uf6")
+katana_attack_scene = ExtResource("2_ts4nw")
+gale_wave_scene = ExtResource("3_orosk")

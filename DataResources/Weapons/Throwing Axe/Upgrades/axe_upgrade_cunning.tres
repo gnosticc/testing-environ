@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponUpgradeData" load_steps=4 format=3 uid="uid://bxbqnd3e27ob0"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_ysr3b"]
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="2_0jncm"]
+[ext_resource type="Resource" uid="uid://end7l5y4opo5" path="res://DataResources/Weapons/Throwing Axe/Effects/axe_effect_cunning.tres" id="2_q3xkq"]
+
+[resource]
+script = ExtResource("2_0jncm")
+upgrade_id = &"axe_cunning"
+title = "Executioner's Cunning"
+description = "You learn to aim for the weak points, making your axe even more lethal to the wounded. Doubles the execute damage bonus to 10%."
+prerequisites_on_this_weapon = Array[StringName]([])
+weight = 100.0
+max_stacks = 1
+effects = Array[ExtResource("1_ysr3b")]([ExtResource("2_q3xkq")])
+set_acquired_flag_on_weapon = &"axe_cunning_acquired"
+metadata/_custom_type_script = "uid://brliif27uf0ym"

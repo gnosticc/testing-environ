@@ -1,0 +1,51 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://cgkyi2u5pcahs"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_debgb"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_ilxeb"]
+[ext_resource type="Resource" uid="uid://cj2ju53nt46hp" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_intensify_flames.tres" id="2_seo2x"]
+[ext_resource type="Resource" uid="uid://dodimo4d5hth7" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_violent_snap.tres" id="3_561oe"]
+[ext_resource type="PackedScene" uid="uid://dqp25i10ker1s" path="res://Scenes/Weapons/Advanced/ChromaticAberrationController.tscn" id="3_ilxeb"]
+[ext_resource type="Resource" uid="uid://bogsfn5c3bb2o" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_corrosive_sap.tres" id="4_kad77"]
+[ext_resource type="Resource" uid="uid://xqdw4amq3jdp" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_cinderbloom.tres" id="5_0w2c7"]
+[ext_resource type="Resource" uid="uid://ckme1mcr3twfi" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_shatterstorm.tres" id="6_3u4f0"]
+[ext_resource type="Resource" uid="uid://d00exbseder0d" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_viscous_splatter.tres" id="7_y6c4t"]
+[ext_resource type="Resource" uid="uid://c32vrh8y2bura" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_unstable_core.tres" id="8_qin54"]
+[ext_resource type="Resource" uid="uid://cf6jka4qgo85g" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_elemental_attunement.tres" id="9_2thwi"]
+[ext_resource type="Resource" uid="uid://c8vldmy1dh0r0" path="res://DataResources/Weapons/ChromaticAberration/Upgrades/ca_upgrade_chromatic_overload.tres" id="10_fih6w"]
+
+[resource]
+script = ExtResource("2_ilxeb")
+id = &"elementalist_chromatic_aberration"
+title = "Chromatic Aberration"
+description = "Fires an orb of unstable energy that detonates into a random elemental effect."
+weapon_scene = ExtResource("3_ilxeb")
+tags = Array[StringName]([&"magical", &"projectile", &"fire", &"ice", &"nature", &"aoe", &"elementalist weapon", &"controller"])
+class_tag_restrictions = [&"elementalist_advanced"]
+cooldown = 3.5
+max_level = 10
+base_lifetime = 2.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = false
+initial_specific_stats = {
+"cinderbloom_spawn_distance": 60.0,
+"fire_explosion_damage_percentage": 2.0,
+"fire_explosion_radius": 30.0,
+"ice_shard_count": 8,
+"ice_shard_damage_percentage": 0.5,
+"ice_shard_projectile_scale": 0.04,
+"ice_shard_speed": 400.0,
+"nature_pool_damage_percentage": 0.5,
+"nature_pool_duration": 3.0,
+"nature_pool_radius": 55.0,
+"orb_contact_damage_percentage": 1.2,
+"orb_lifetime": 2.0,
+"orb_projectile_scale": 0.08,
+"orb_projectile_speed": 200.0,
+"viscous_splatter_distance": 120.0,
+"viscous_splatter_min_distance": 60.0,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_debgb")]([ExtResource("2_seo2x"), ExtResource("3_561oe"), ExtResource("4_kad77"), ExtResource("5_0w2c7"), ExtResource("6_3u4f0"), ExtResource("7_y6c4t"), ExtResource("8_qin54"), ExtResource("9_2thwi"), ExtResource("10_fih6w")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

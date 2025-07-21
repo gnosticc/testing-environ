@@ -1,0 +1,55 @@
+[gd_resource type="Resource" script_class="WeaponBlueprintData" load_steps=13 format=3 uid="uid://0p4jycpa53di"]
+
+[ext_resource type="Script" uid="uid://brliif27uf0ym" path="res://Scripts/DataResources/Upgrades/WeaponUpgradeData.gd" id="1_bkldn"]
+[ext_resource type="Script" uid="uid://cdqn6sh04g5m2" path="res://Scripts/DataResources/Weapons/WeaponBlueprintData.gd" id="2_83n8x"]
+[ext_resource type="Resource" uid="uid://1qdt3ah8hta3" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_honed.tres" id="2_nfklw"]
+[ext_resource type="PackedScene" uid="uid://lkivhn2xd353" path="res://Scenes/Weapons/Advanced/ChakramController.tscn" id="3_83n8x"]
+[ext_resource type="Resource" uid="uid://bfwso8cjcy35d" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_heavier.tres" id="3_wfoix"]
+[ext_resource type="Resource" uid="uid://dhi41yk1d7sw7" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_companion.tres" id="4_v25id"]
+[ext_resource type="Resource" uid="uid://br0g1637av6vv" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_crescent_sweep.tres" id="5_8mwin"]
+[ext_resource type="Resource" uid="uid://dhl62ibhb25oy" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_frenzied.tres" id="6_nwod4"]
+[ext_resource type="Resource" uid="uid://bea02r1gyj7g7" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_thorn_nova.tres" id="7_l4htv"]
+[ext_resource type="Resource" uid="uid://bss6bg6se0svi" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_returning_burst.tres" id="8_rwdnt"]
+[ext_resource type="Resource" uid="uid://dpjnbgptmuuh2" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_sylvan_companion.tres" id="9_1kv8n"]
+[ext_resource type="Resource" uid="uid://bh2krufl2mhdj" path="res://DataResources/Weapons/SylvanChakram/Upgrades/chakram_upgrade_mirrored_strike.tres" id="10_anodb"]
+
+[resource]
+script = ExtResource("2_83n8x")
+id = &"warden_sylvan_chakram"
+title = "Sylvan Chakram"
+description = "A thrown chakram, druidic in nature, that returns to the wielder after drawning an arc."
+weapon_scene = ExtResource("3_83n8x")
+tags = Array[StringName]([&"projectile", &"physical", &"forest stalker weapon"])
+class_tag_restrictions = [&"forest_stalker_advanced"]
+cooldown = 2.0
+max_level = 10
+base_lifetime = 4.0
+spawn_as_child = false
+requires_direction = false
+targeting_type = &"none"
+tracks_shot_count = true
+weight = 50.0
+initial_specific_stats = {
+"companion_chakram_scale": 0.6,
+"companion_damage_percentage": 0.7,
+"companion_orbit_radius": 180.0,
+"companion_orbit_speed": 4.0,
+"has_companion_chakram": false,
+"has_mirrored_strike": false,
+"has_returning_burst": false,
+"has_sylvan_companion": false,
+"has_thorn_nova": false,
+"main_chakram_scale": 0.2,
+"main_damage_percentage": 1.1,
+"mirrored_strike_delay": 0.2,
+"pierce_count": 999,
+"projectile_speed": 450.0,
+"return_arc_angle": 90.0,
+"splinter_damage_percentage": 0.5,
+"splinter_scale": 0.15,
+"thorn_nova_splinter_count": 8,
+"throw_distance": 150.0,
+&"weapon_damage_percentage": 1.0
+}
+available_upgrades = Array[ExtResource("1_bkldn")]([ExtResource("2_nfklw"), ExtResource("3_wfoix"), ExtResource("4_v25id"), ExtResource("5_8mwin"), ExtResource("6_nwod4"), ExtResource("7_l4htv"), ExtResource("8_rwdnt"), ExtResource("9_1kv8n"), ExtResource("10_anodb")])
+metadata/_custom_type_script = "uid://cdqn6sh04g5m2"

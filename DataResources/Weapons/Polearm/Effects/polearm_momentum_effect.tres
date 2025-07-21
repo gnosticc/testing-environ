@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="CustomFlagEffectData" load_steps=2 format=3 uid="uid://dqnjqfuf7wa3y"]
+
+[ext_resource type="Script" uid="uid://dc316ihl7h1xg" path="res://Scripts/DataResources/Effects/CustomFlagEffectData.gd" id="1_fa8wu"]
+
+[resource]
+script = ExtResource("1_fa8wu")
+flag_key = &"has_momentum"
+flag_value = true
+effect_type_id = &"set_flag"
+target_scope = &"weapon_behavior"
+developer_note = ""
+metadata/_custom_type_script = "uid://dc316ihl7h1xg"
