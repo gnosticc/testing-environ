@@ -800,3 +800,34 @@ func debug_reset_class_progression():
 		basic_class_levels[key] = 0
 	acquired_advanced_classes.clear()
 	print("PlayerCharacter DEBUG: Class progression has been reset.")
+
+# Applies a general upgrade by wrapping it in the expected dictionary format
+# and calling the existing apply_upgrade function.
+func debug_add_general_upgrade(upgrade_data: GeneralUpgradeCardData):
+	if not is_instance_valid(upgrade_data):
+		push_error("PlayerCharacter DEBUG: Tried to add an invalid GeneralUpgradeCardData.")
+		return
+		
+	var upgrade_wrapper = {
+		"type": "general_upgrade",
+		"resource_data": upgrade_data
+	}
+	apply_upgrade(upgrade_wrapper)
+	print("PlayerCharacter DEBUG: Applied general upgrade '", upgrade_data.id, "'.")
+
+# Clears all acquired general upgrades and recalculates stats to remove their effects.
+func debug_reset_general_upgrades():
+	acquired_general_upgrade_ids.clear()
+	if is_instance_valid(player_stats):
+		# We need to re-initialize the player's stats from their class base
+		# to effectively remove all modifiers applied by the general upgrades.
+		var class_data = game_node_ref.get_player_class_data_by_id(_current_basic_class_string_id)
+		if is_instance_valid(class_data):
+			player_stats.initialize_base_stats(class_data)
+			# Re-apply any advanced class bonuses after the reset
+			for class_id in acquired_advanced_classes:
+				# This part assumes a function exists to get class tier data by id
+				# We will add this to game.gd if it doesn't exist.
+				pass # Placeholder for re-applying advanced class stats
+			player_stats.recalculate_all_stats()
+	print("PlayerCharacter DEBUG: All general upgrades have been reset.")

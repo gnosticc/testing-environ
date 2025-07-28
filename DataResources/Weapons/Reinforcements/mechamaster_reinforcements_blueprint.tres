@@ -19,7 +19,7 @@ id = &"mechamaster_reinforcements"
 title = "Reinforcements"
 description = "Deploys various temporary autonomous turrets to the battlefield."
 weapon_scene = ExtResource("3_nrrmk")
-tags = Array[StringName]([&"physical", &"summon", &"mechamaster weapon", &"controller", &"pet"])
+tags = Array[StringName]([&"physical", &"summon", &"mechamaster weapon", &"controller", &"pet", &"projectile"])
 class_tag_restrictions = [&"mechamaster_advanced"]
 cooldown = 0.0
 max_level = 10
@@ -28,6 +28,7 @@ spawn_as_child = true
 requires_direction = false
 targeting_type = &"none"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "aegis_attack_cooldown": 1.0,
 "aegis_damage_percent": 0.8,

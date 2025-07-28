@@ -28,6 +28,7 @@ spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "arrow_storm_waves": 3,
 "arrows_per_direction": 1,

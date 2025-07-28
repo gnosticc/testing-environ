@@ -14,6 +14,7 @@ const LEVEL_UP_SCREEN_SCENE = preload("res://Scenes/UI/NewLevelUpScreen.tscn")
 @onready var enemies_container: Node2D = $EnemiesContainer
 @onready var drops_container: Node2D = $DropsContainer
 @onready var boss_container: Node2D = $BossContainer
+@onready var nav_manager: DynamicNavigationManager = $DynamicNavigationManager
 var camera: Camera2D
 var game_ui_node: Node # Type hint for the GameUI node
 var game_over_screen_instance: CanvasLayer # Instance of the game over UI
@@ -39,8 +40,8 @@ var min_spawn_interval: float = 0.25
 var current_spawn_interval: float
 
 # --- NEW: Spawn Batch Size Scaling (Tunable) ---
-@export var base_enemies_per_batch: int = 3
-@export var max_enemies_per_batch: int = 30
+@export var base_enemies_per_batch: int = 4
+@export var max_enemies_per_batch: int = 60
 @export var dds_for_max_batch_size: float = 3000.0 # DDS at which the max batch size is reached
 
 # --- DDS & Difficulty Scaling (Tunable) ---
@@ -53,6 +54,7 @@ const ORIGINAL_DDS_SPAWN_RATE_FACTOR: float = 0.0020
 const ORIGINAL_HARDCORE_SPAWN_RATE_MULTIPLIER: float = 1.75
 
 # --- Enemy Definitions & Active Pool (Tunable) ---
+@export var elite_icon_library: EliteIconLibrary
 @export var enemy_data_files: Array[String] = [
 	"res://DataResources/Enemies/slime_green_data.tres",
 	"res://DataResources/Enemies/slime_blue_data.tres",
@@ -168,6 +170,7 @@ func _ready():
 	_load_all_class_progressions()
 	# Crucial: Emit this signal AFTER all blueprints are loaded.
 	emit_signal("weapon_blueprints_ready")
+	nav_manager.initial_bake_complete.connect(_on_initial_bake_complete)
 
 	current_spawn_interval = base_spawn_interval
 	camera = get_viewport().get_camera_2d()
@@ -203,7 +206,8 @@ func _ready():
 			enemy_spawn_timer.wait_time = current_spawn_interval
 			if not enemy_spawn_timer.is_connected("timeout", Callable(self, "_on_enemy_spawn_timer_timeout")):
 				enemy_spawn_timer.timeout.connect(Callable(self, "_on_enemy_spawn_timer_timeout"))
-			enemy_spawn_timer.start()
+			# FIX: DO NOT START THE TIMER HERE. It will be started by the _on_initial_bake_complete signal.
+			# enemy_spawn_timer.start()
 
 	# Get player reference and connect to player death and level up signals.
 	var players = get_tree().get_nodes_in_group("player_char_group")
@@ -222,6 +226,12 @@ func _ready():
 	culling_check_timer.one_shot = false
 	culling_check_timer.timeout.connect(Callable(self, "_on_culling_check_timer_timeout"))
 	add_child(culling_check_timer); culling_check_timer.start()
+
+# Add this new function to your script
+func _on_initial_bake_complete():
+	print_debug("Navigation is ready. Starting enemy spawners.")
+	# FIX: Use the correct timer variable name 'enemy_spawn_timer'.
+	enemy_spawn_timer.start()
 
 # NEW: Function to load all PlayerClassProgressionData resources.
 func _load_all_class_progressions():
@@ -254,69 +264,12 @@ func _load_all_general_upgrades():
 	for path in general_upgrade_card_paths:
 		var card_res = load(path) as GeneralUpgradeCardData
 		if is_instance_valid(card_res):
+# --- ADD THIS LINE FOR DEBUGGING ---
+			#print("Loading Upgrade Card: ", card_res.resource_path, " | Title: ", card_res.title)
+			# ------------------------------------
 			loaded_general_upgrades.append(card_res)
 		else:
 			push_error("game.gd: Failed to load GeneralUpgradeCardData from path: ", path)
-
-
-# Debug function to print details of all loaded weapon blueprints.
-#func _test_print_loaded_weapon_blueprints():
-	#print("--- Loaded Weapon Blueprints Test ---")
-	#if all_loaded_weapon_blueprints.is_empty():
-		#print("No weapon blueprints were loaded or found in 'weapon_blueprint_files' array.")
-		#return
-#
-	#for bp_data in all_loaded_weapon_blueprints:
-		#if not is_instance_valid(bp_data):
-			#print("  Found an invalid blueprint in the loaded list.")
-			#continue
-		#
-		#print("Weapon ID: '", bp_data.id, "', Title: '", bp_data.title, "'")
-		#var scene_path_str = "N/A"
-		#if is_instance_valid(bp_data.weapon_scene) and bp_data.weapon_scene.resource_path != "":
-			#scene_path_str = bp_data.weapon_scene.resource_path
-		#print("  Scene: ", scene_path_str)
-		#print("  Cooldown: ", bp_data.cooldown, ", Max Level: ", bp_data.max_level)
-		#print("  Initial Specific Stats: ", bp_data.initial_specific_stats)
-		#print("  Available Upgrades (%s):" % bp_data.available_upgrades.size())
-		#for upgrade_res_idx in range(bp_data.available_upgrades.size()):
-			#var upgrade_res = bp_data.available_upgrades[upgrade_res_idx]
-			#if not is_instance_valid(upgrade_res) or not upgrade_res is WeaponUpgradeData:
-				#print("    - Invalid upgrade resource found at index ", upgrade_res_idx, " in blueprint's available_upgrades array. Type: ", typeof(upgrade_res))
-				#continue
-			#
-			#var upg_data = upgrade_res as WeaponUpgradeData
-			#print("    - Upgrade [", upgrade_res_idx, "] ID: '", upg_data.upgrade_id, "', Title: '", upg_data.title, "'")
-			#print("      Effects (%s):" % upg_data.effects.size())
-			#for effect_res_idx in range(upg_data.effects.size()):
-				#var effect_res = upg_data.effects[effect_res_idx]
-				#if not is_instance_valid(effect_res):
-					#print("        Effect [", effect_res_idx, "]: Invalid resource.")
-					#continue
-				#print("        Effect [", effect_res_idx, "] TypeID: '", effect_res.effect_type_id, "' (Class: '", effect_res.get_class(),"')")
-				#
-				#if effect_res is StatModificationEffectData:
-					#var stat_mod = effect_res as StatModificationEffectData
-					## CORRECTED: Use get_value() from StatModificationEffectData
-					#var effect_val = stat_mod.get_value()
-					#print("          StatMod: Scope='", stat_mod.target_scope, "', Key='", stat_mod.stat_key, "', Type='", stat_mod.modification_type, "', Val=", effect_val)
-				#
-				#elif effect_res is CustomFlagEffectData:
-					#var flag_mod = effect_res as CustomFlagEffectData
-					#print("          FlagMod: Scope='", flag_mod.target_scope, "', Key='", flag_mod.flag_key, "', Val=", flag_mod.flag_value)
-				#
-				#elif effect_res is TriggerAbilityEffectData:
-					#var trigger_mod = effect_res as TriggerAbilityEffectData
-					#print("          TriggerAbility: Scope='", trigger_mod.target_scope, "', ID='", trigger_mod.ability_id, "', Params=", trigger_mod.ability_params)
-				#
-				#elif effect_res is StatusEffectApplicationData:
-					#var status_app_mod = effect_res as StatusEffectApplicationData
-					#print("          StatusApp: Scope='", status_app_mod.target_scope, "', Path='", status_app_mod.status_effect_resource_path, "', Chance=", status_app_mod.application_chance, ", DurationOvr=", status_app_mod.duration_override)
-				#
-				#else:
-					#print("          Unknown/Base EffectData: DevNote='", effect_res.developer_note, "'")
-		#print("---")
-
 
 func _physics_process(delta: float):
 	# If a boss or event is active, regular enemy spawning is paused.
@@ -592,6 +545,11 @@ func _spawn_actual_enemy(enemy_data: EnemyData, position: Vector2, force_elite_t
 		else:
 			push_warning("game.gd: Enemy '", enemy_data.display_name, "' is not elite but missing 'experience_to_drop' property.")
 
+func get_elite_icon(elite_type: StringName) -> Texture2D:
+	if is_instance_valid(elite_icon_library):
+		if elite_icon_library.elite_icons.has(elite_type):
+			return elite_icon_library.elite_icons[elite_type]
+	return null
 
 # --- NEW HELPER FUNCTION ---
 # Calculates how many enemies should be in a single spawn batch based on DDS.
@@ -657,6 +615,15 @@ func _on_culling_check_timer_timeout():
 
 # --- Debug & Getter Functions ---
 func get_loaded_enemy_definitions_for_debug() -> Array[EnemyData]: return loaded_enemy_definitions
+func get_enemy_data_by_id(p_id: StringName) -> EnemyData:
+	for data_file_path in enemy_data_files:
+		var data_resource = load(data_file_path) as EnemyData
+		if is_instance_valid(data_resource) and data_resource.id == p_id:
+			return data_resource
+	
+	push_warning("Could not find EnemyData with ID: " + str(p_id))
+	return null
+
 func get_enemy_data_by_id_for_debug(id: StringName) -> EnemyData:
 	for enemy_data_res in loaded_enemy_definitions:
 		if is_instance_valid(enemy_data_res) and enemy_data_res.id == id: return enemy_data_res
@@ -1123,3 +1090,14 @@ func debug_spawn_specific_enemy(enemy_id: StringName, elite_type_override: Strin
 		var spawn_position = _calculate_spawn_position_for_enemy(near_player)
 		_spawn_actual_enemy(enemy_data_to_spawn, spawn_position, elite_type_override)
 		#print("game.gd: Spawned enemy: ", enemy_data_to_spawn.display_name, " (Elite: ", elite_type_override, ") at ", spawn_position)
+
+# Returns the entire array of loaded general upgrade resources.
+func get_all_loaded_general_upgrades() -> Array[GeneralUpgradeCardData]:
+	return loaded_general_upgrades
+
+# Finds and returns a single general upgrade resource by its StringName ID.
+func get_general_upgrade_by_id(p_id: StringName) -> GeneralUpgradeCardData:
+	for upgrade in loaded_general_upgrades:
+		if is_instance_valid(upgrade) and upgrade.id == p_id:
+			return upgrade
+	return null # Return null if not found

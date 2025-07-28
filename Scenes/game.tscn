@@ -1,11 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://byb4yoall461x"]
+[gd_scene load_steps=13 format=3 uid="uid://byb4yoall461x"]
 
 [ext_resource type="PackedScene" uid="uid://bvachsijc2aea" path="res://Scenes/player.tscn" id="1_ebmjs"]
 [ext_resource type="Script" uid="uid://nokyxxlylqxb" path="res://Scripts/game.gd" id="1_wrm1d"]
+[ext_resource type="Resource" uid="uid://2qs8fsqsbikt" path="res://DataResources/Enemies/Elite Icon Library/EliteIconLibrary.tres" id="2_h4fw4"]
 [ext_resource type="PackedScene" uid="uid://ckiis257s4py4" path="res://Scenes/tilemap.tscn" id="2_qxrlw"]
 [ext_resource type="Texture2D" uid="uid://bho4t4mp3ai47" path="res://Assets/world_tileset.png" id="3_i6g32"]
 [ext_resource type="Texture2D" uid="uid://h5g3y1gbg8kj" path="res://Assets/roguelikeSheet_transparent.png" id="4_1l0tm"]
 [ext_resource type="PackedScene" uid="uid://bb1rig3rge632" path="res://Scenes/GameUI.tscn" id="4_3dryh"]
+[ext_resource type="Script" uid="uid://cjxucm8jkkyty" path="res://Scripts/Map/DynamicNavigationManager.gd" id="7_1l0tm"]
+[ext_resource type="Script" uid="uid://t1qi78515v0b" path="res://Scripts/Map/HordeFormationManager.gd" id="8_v158k"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_v158k"]
 texture = ExtResource("3_i6g32")
@@ -1914,7 +1917,9 @@ sources/1 = SubResource("TileSetAtlasSource_h4fw4")
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_wrm1d")
-general_upgrade_card_paths = Array[String](["res://DataResources/Upgrades/General/Global Stats/gen_might_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_5.tres"])
+elite_icon_library = ExtResource("2_h4fw4")
+enemy_data_files = Array[String](["res://DataResources/Enemies/slime_green_data.tres", "res://DataResources/Enemies/slime_blue_data.tres", "res://DataResources/Enemies/slime_red_data.tres", "res://DataResources/Enemies/slime_tall_light_blue_data.tres", "res://DataResources/Enemies/Woodland/fly_horn_red.tres"])
+general_upgrade_card_paths = Array[String](["res://DataResources/Upgrades/General/Global Stats/gen_archmage_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_archmage_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_archmage_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_archmage_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_archmage_5.tres", "res://DataResources/Upgrades/General/Global Stats/gen_brawler_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_brawler_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_brawler_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_brawler_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_brawler_5.tres", "res://DataResources/Upgrades/General/Global Stats/gen_focus_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_focus_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_focus_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_focus_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_focus_5.tres", "res://DataResources/Upgrades/General/Global Stats/gen_marksman_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_marksman_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_marksman_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_marksman_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_marksman_5.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_might_5.tres", "res://DataResources/Upgrades/General/Global Stats/gen_power_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_power_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_power_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_power_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_power_5.tres", "res://DataResources/Upgrades/General/Global Stats/gen_swiftness_1.tres", "res://DataResources/Upgrades/General/Global Stats/gen_swiftness_2.tres", "res://DataResources/Upgrades/General/Global Stats/gen_swiftness_3.tres", "res://DataResources/Upgrades/General/Global Stats/gen_swiftness_4.tres", "res://DataResources/Upgrades/General/Global Stats/gen_swiftness_5.tres"])
 class_progression_data_paths = Array[String](["res://Data/Classes/Progression/unlock_champion.tres", "res://Data/Classes/Progression/unlock_sentinel.tres", "res://Data/Classes/Progression/unlock_alchemist.tres", "res://Data/Classes/Progression/unlock_berserker.tres", "res://Data/Classes/Progression/unlock_elementalist.tres", "res://Data/Classes/Progression/unlock_forest_stalker.tres", "res://Data/Classes/Progression/unlock_illusionist.tres", "res://Data/Classes/Progression/unlock_magus.tres", "res://Data/Classes/Progression/unlock_mechamaster.tres", "res://Data/Classes/Progression/unlock_samurai.tres", "res://Data/Classes/Progression/unlock_shinobi.tres", "res://Data/Classes/Progression/unlock_spellsword.tres", "res://Data/Classes/Progression/unlock_spirit_master.tres", "res://Data/Classes/Progression/unlock_summoner.tres", "res://Data/Classes/Progression/unlock_warden.tres"])
 
 [node name="TileMapLayer" parent="." instance=ExtResource("2_qxrlw")]
@@ -1935,8 +1940,19 @@ z_index = 5
 [node name="BossContainer" type="Node2D" parent="."]
 position = Vector2(0, -1)
 
+[node name="EnemyAttacksContainer" type="Node2D" parent="."]
+z_index = 2
+
 [node name="EnemySpawnTimer" type="Timer" parent="."]
 wait_time = 2.0
-autostart = true
 
 [node name="GameUI" parent="." instance=ExtResource("4_3dryh")]
+
+[node name="DynamicNavigationManager" type="Node2D" parent="."]
+script = ExtResource("7_1l0tm")
+
+[node name="DynamicNavRegion" type="NavigationRegion2D" parent="DynamicNavigationManager"]
+
+[node name="HordeFormationManager" type="Node" parent="."]
+script = ExtResource("8_v158k")
+formation_radius = 5.0

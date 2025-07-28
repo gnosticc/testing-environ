@@ -10,10 +10,6 @@ extends Node
 var active_weapons: Array[Dictionary] = []
 var game_node_ref: Node
 
-# --- Scythe-Specific Mechanics ---
-var _whirlwind_timer: Timer
-var _whirlwind_queue: Array[Dictionary] = []
-
 # --- NEW: Summon Tracking ---
 # This dictionary will store active summon nodes.
 # The key is the weapon_id (e.g., &"conjurer_lesser_spirit"), and the value is an Array of the summon nodes.
@@ -26,11 +22,6 @@ signal weapon_upgraded(weapon_id: StringName, new_level: int)
 signal active_weapons_changed()
 
 func _ready():
-	_whirlwind_timer = Timer.new()
-	_whirlwind_timer.name = "WhirlwindSpinTimer"
-	_whirlwind_timer.one_shot = true
-	add_child(_whirlwind_timer)
-	_whirlwind_timer.timeout.connect(_on_whirlwind_spin_timer_timeout)
 	game_node_ref = get_tree().root.get_node_or_null("Game")
 
 # This function is called by weapon controllers (like WarhammerController)
@@ -155,8 +146,7 @@ func _on_attack_cooldown_finished(weapon_id: StringName):
 			riposte_multiplier = 3.0
 		weapon_entry.specific_stats["parry_riposte_bonus_active"] = true
 
-	var reaping_bonus = int(weapon_entry.specific_stats.get(&"reaping_momentum_accumulated_bonus", 0))
-	weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"] = 0
+	var reaping_bonus = 0
 	
 	# The _spawn_attack_instance function is now part of the default logic path
 	var primary_attack = _spawn_attack_instance(weapon_entry, reaping_bonus, true, riposte_multiplier)
@@ -182,34 +172,11 @@ func _on_attack_cooldown_finished(weapon_id: StringName):
 				if randf() < float(weapon_entry.specific_stats.get(&"blade_flurry_chance", 0.0)):
 					get_tree().create_timer(0.2).timeout.connect(_on_blade_flurry_timeout.bind(weapon_entry, riposte_multiplier, opposite_swing.global_transform))
 
-	if weapon_entry.specific_stats.get(&"has_whirlwind", false):
-		var number_of_spins = int(_calculate_final_weapon_stat(weapon_entry, &"whirlwind_count"))
-		if number_of_spins > 1:
-			var spin_delay = float(_calculate_final_weapon_stat(weapon_entry, &"whirlwind_delay"))
-			var spin_data = { "weapon_id": weapon_id, "spins_left": number_of_spins - 1, "delay": spin_delay, "reaping_bonus_to_apply": reaping_bonus }
-			_whirlwind_queue.append(spin_data)
-			if _whirlwind_timer.is_stopped():
-				_whirlwind_timer.wait_time = spin_data.delay
-				_whirlwind_timer.start()
-			
 	_restart_weapon_cooldown(weapon_entry)
 	
 func _on_blade_flurry_timeout(weapon_entry, riposte_multiplier, spawn_transform: Transform2D):
 	if is_instance_valid(self):
 		_spawn_attack_instance(weapon_entry, 0, false, riposte_multiplier, spawn_transform)
-
-func _on_whirlwind_spin_timer_timeout():
-	if _whirlwind_queue.is_empty(): return
-	var current_whirlwind = _whirlwind_queue.front()
-	var weapon_index = _get_weapon_entry_index_by_id(current_whirlwind.weapon_id)
-	if weapon_index != -1:
-		_spawn_attack_instance(active_weapons[weapon_index], current_whirlwind.reaping_bonus_to_apply, false)
-	current_whirlwind.spins_left -= 1
-	if current_whirlwind.spins_left <= 0: _whirlwind_queue.pop_front()
-	if not _whirlwind_queue.is_empty():
-		var next_whirlwind = _whirlwind_queue.front()
-		_whirlwind_timer.wait_time = next_whirlwind.delay
-		_whirlwind_timer.start()
 
 func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, is_initial_swing: bool = false, p_riposte_mult: float = 1.0, p_transform_override = null) -> Node2D:
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
@@ -283,7 +250,7 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, 
 		var player_proj_speed_mult = owner_player.player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER)
 		stats_to_pass[&"final_projectile_speed"] = base_proj_speed * weapon_proj_speed_mult * player_proj_speed_mult
 	
-	stats_to_pass[&"reaping_momentum_accumulated_bonus"] = p_reaping_bonus
+	#stats_to_pass[&"reaping_momentum_accumulated_bonus"] = p_reaping_bonus
 	if is_initial_swing:
 		weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"] = 0
 
@@ -292,8 +259,8 @@ func _spawn_attack_instance(weapon_entry: Dictionary, p_reaping_bonus: int = 0, 
 	
 	if weapon_instance.has_signal("attack_hit_enemy"):
 		weapon_instance.attack_hit_enemy.connect(_on_attack_hit_enemy.bind(weapon_entry.id), CONNECT_ONE_SHOT)
-	if weapon_instance.has_signal("reaping_momentum_hit"):
-		weapon_instance.reaping_momentum_hit.connect(_on_reaping_momentum_hit.bind(weapon_entry.id))
+	#if weapon_instance.has_signal("reaping_momentum_hit"):
+		#weapon_instance.reaping_momentum_hit.connect(_on_reaping_momentum_hit.bind(weapon_entry.id))
 
 	return weapon_instance
 
@@ -304,21 +271,7 @@ func _on_attack_hit_enemy(hit_count: int, weapon_id: StringName):
 		var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
 		if weapon_index != -1:
 			active_weapons[weapon_index].specific_stats["parry_riposte_bonus_active"] = false
-			
-func _on_reaping_momentum_hit(hit_count: int, weapon_id: StringName):
-	print_debug("Reaping Momentum: Signal received for weapon '", weapon_id, "' with hit_count: ", hit_count)
-	var weapon_index = _get_weapon_entry_index_by_id(weapon_id)
-	if weapon_index == -1:
-		print_debug("Reaping Momentum ERROR: Weapon ID not found in active weapons.")
-		return
-	var weapon_entry = active_weapons[weapon_index]
-	var dmg_per_hit = int(_calculate_final_weapon_stat(weapon_entry, &"reaping_momentum_damage_per_hit"))
-	print_debug("  - Damage per hit calculated: ", dmg_per_hit)
-	var current_bonus = weapon_entry.specific_stats.get(&"reaping_momentum_accumulated_bonus", 0)
-	print_debug("  - Current stored bonus before adding: ", current_bonus)
-	var new_bonus = current_bonus + (hit_count * dmg_per_hit)
-	weapon_entry.specific_stats[&"reaping_momentum_accumulated_bonus"] = new_bonus
-	print_debug("  - New bonus calculated and stored: ", new_bonus)
+
 
 func _spawn_persistent_summon(weapon_entry: Dictionary):
 	var blueprint_data = weapon_entry.blueprint_resource as WeaponBlueprintData
@@ -387,7 +340,6 @@ func _get_calculated_stats_for_instance(weapon_entry: Dictionary) -> Dictionary:
 	return calculated_stats
 
 
-# --- [The rest of the file is unchanged] ---
 func _restart_weapon_cooldown(weapon_entry: Dictionary):
 	var timer = weapon_entry.get("cooldown_timer") as Timer
 	if is_instance_valid(timer):
@@ -396,22 +348,36 @@ func _restart_weapon_cooldown(weapon_entry: Dictionary):
 
 func get_weapon_cooldown_value(weapon_entry: Dictionary) -> float:
 	var base_cooldown = _calculate_final_weapon_stat(weapon_entry, &"cooldown")
-	var attack_speed_mult = _calculate_final_weapon_stat(weapon_entry, &"attack_speed_multiplier")
+	var attack_speed_mult = _calculate_final_weapon_stat(weapon_entry, &"attack_speed_multiplier") # This is weapon-specific attack speed
 	
-	# FIX: Get the player_stats reference from the parent node.
 	var owner_player = get_parent() as PlayerCharacter
 	if not is_instance_valid(owner_player): return base_cooldown
 	var p_player_stats = owner_player.player_stats
 	
-	var global_attack_speed_mult = p_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	var final_cooldown = base_cooldown
 	
-	var final_cooldown = base_cooldown / (attack_speed_mult * global_attack_speed_mult)
+	# Check if the weapon is a summon/pet. If so, global attack speed stats should not affect its spawn rate.
+	var is_summon = weapon_entry.tags.has(&"summon") or weapon_entry.tags.has(&"pet")
+
+	if not is_summon:
+		# --- This logic now ONLY applies to non-summon weapons ---
+		var global_attack_speed_mult = p_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+		var total_speed_multiplier = attack_speed_mult * global_attack_speed_mult
+		
+		var global_cooldown_reduction_mult = p_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
+		
+		if total_speed_multiplier > 0.01:
+			final_cooldown /= total_speed_multiplier
+		
+		if global_cooldown_reduction_mult > 0.01:
+			final_cooldown *= global_cooldown_reduction_mult
+		# --- End of non-summon logic ---
 	
-	# NEW: Tag-Based Cooldown Logic
+	# Tag-Based Cooldown Logic (This is a percentage reduction, so it can apply to all)
 	if weapon_entry.tags.has(&"magical"):
 		final_cooldown *= (1.0 - p_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_MAGIC_COOLDOWN_REDUCTION))
 		
-	return maxf(0.05, final_cooldown) # Ensure cooldown doesn't drop below a minimum threshold.
+	return maxf(0.02, final_cooldown) # Ensure cooldown doesn't drop below a minimum threshold.
 
 
 func _calculate_final_weapon_stat(weapon_entry: Dictionary, stat_key: StringName) -> float:

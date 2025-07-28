@@ -50,9 +50,84 @@ extends Resource
 ## If the base sprite in the scene file faces left by default, check this.
 ## If it faces right (standard), leave unchecked. This affects flip_h logic.
 @export var sprite_faces_left_by_default: bool = false
-# ## Optional: If you want to specify a scale multiplier directly in data for this enemy type.
-# ## Vector2.ZERO could mean use the scale from the enemy's scene file.
-# @export var visual_scale_override: Vector2 = Vector2.ZERO
+## NEW: An array of tags that define unique behaviors for this enemy.
+## Logic in BaseEnemy.gd will check for these tags to trigger special actions.
+## Example tags: &"slime" (splits on death), &"rusher" (charges at player) or "uses_formation" for HordeFormationManager.
+@export var behavior_tags: Array[StringName] = []
+# --- Icon Overrides ---
+# An optional offset to apply to the EliteMarkersContainer for fine-tuning.
+@export var elite_icon_offset: Vector2 = Vector2.ZERO
+# An optional multiplier to adjust the size of elite icons for this specific enemy.
+@export var elite_icon_scale_multiplier: float = 1.0
+
+# --- Wave Movement Behavior &"wave"---
+@export_group("Wave Movement")
+@export var wave_amplitude: float = 50.0 # How wide the "S" curve is in pixels.
+@export var wave_frequency: float = 5.0 # How fast the enemy weaves back and forth.
+@export var wave_disable_range: float = 25.0 # At this range, the enemy stops weaving to make contact.
+
+# TAG LIST: "uses_formation", "hit_and_run"
+# --- HIT AND RUN BEHAVIOR ---
+@export_group("Hit and Run")
+# Multiplier applied to base speed when diving IN for an attack.
+@export var dive_speed_multiplier: float = 1.0 
+# Multiplier applied to base speed when retreating after an attack.
+@export var retreat_speed_multiplier: float = 1.5
+# Multiplier applied to base speed when circling (stalking) the player.
+@export var stalking_speed_multiplier: float = 1.0
+# The ideal distance to maintain from the player while stalking.
+@export var hover_distance: float = 150.0
+# The cooldown in seconds after a retreat before the next attack dive.
+@export var attack_cooldown: float = 2.0
+# How much to vary the retreat angle (in degrees). 0 means run straight back.
+@export var retreat_angle_variance: float = 20.0
+# The chance (0.0 to 1.0) to reverse circling direction each second.
+@export var stalk_reverse_direction_chance: float = 0.1
+
+# --- JUGGERNAUT BEHAVIOR ---
+@export_group("Juggernaut")
+# The distance within which the enemy chases normally.
+@export var normal_chase_range: float = 150.0
+# The distance beyond which the enemy will try to charge.
+@export var charge_trigger_range: float = 300.0
+# How long (in seconds) the enemy must be chasing before it can decide to charge.
+@export var charge_trigger_timer: float = 3.0
+# How long (in seconds) the enemy flashes/telegraphs its charge.
+@export var charge_telegraph_duration: float = 0.8
+# The speed multiplier applied during the charge.
+@export var charge_speed_multiplier: float = 5.0
+# The maximum distance the enemy will travel during a single charge.
+@export var charge_max_distance: float = 500.0
+# How long (in seconds) the enemy is stunned and vulnerable after a charge.
+@export var post_charge_stun_duration: float = 1.5
+# How strongly the charge corrects its course towards the player. 0 = no homing, ~1-5 = weak homing.
+@export var charge_homing_strength: float = 1.0
+
+# --- ON-DEATH BEHAVIORS ---
+@export_group("On-Death: Slime Split")
+@export var split_enemy_id: StringName = &""
+@export var split_count: int = 2
+@export var split_scale_multiplier: float = 0.75
+
+@export_group("On-Death: Creeper")
+@export var creeper_bullet_scene: PackedScene
+@export var creeper_bullet_count: int = 8
+@export var creeper_bullet_speed: float = 200.0
+@export var creeper_bullet_damage: float = 5.0
+@export var creeper_telegraph_duration: float = 2.0 # Time before bullets start firing.
+@export var creeper_fire_interval: float = 0.1 # Time between each sequential bullet.
+
+@export_group("On-Death: Berserker")
+@export var berserker_wave_radius: float = 200.0
+@export var berserker_buff_duration: float = 5.0
+@export var berserker_speed_multiplier: float = 1.5
+
+@export_group("On-Death: Link")
+@export var link_heal_projectile_scene: PackedScene
+@export var link_projectile_count: int = 1
+@export var link_search_radius: float = 400.0
+@export var link_heal_percent: float = 0.33 # 33% of the dead enemy's max health
+
 
 @export_group("Elite Properties")
 ## An array of StringNames representing the types of elite affixes this enemy can have.
@@ -62,6 +137,7 @@ extends Resource
 ## The minimum Dynamic Difficulty Score (DDS) required before this *specific enemy type*
 ## can start appearing as an elite version (even if general elite chance is met).
 @export var min_DDS_for_elites_to_appear: float = 50.0
+
 
 # --- Configurable Parameters for Specific Elite Types (if this enemy can have them) ---
 # These are only relevant if the corresponding tag is in elite_types_available and make_elite() uses them.
@@ -110,46 +186,47 @@ func _init():
 # This method runs when the resource is saved or modified in the editor,
 # providing warnings for common setup issues and data integrity.
 func _validate_property(property: Dictionary):
+	if Engine.is_editor_hint():
 	# Validate 'id'
-	if property.name == "id" and (property.get("value", &"") == &""):
-		push_warning("EnemyData: 'id' cannot be empty for resource: ", resource_path)
-	
-	# Validate 'scene_path'
-	if property.name == "scene_path" and (property.get("value", "") == ""):
-		push_warning("EnemyData: 'scene_path' cannot be empty for resource: ", resource_path)
-	elif property.name == "scene_path" and (property.get("value", "") != ""):
-		var path = property.get("value", "")
-		if not ResourceLoader.exists(path):
-			push_warning("EnemyData: Enemy scene path '", path, "' does not exist for resource: ", resource_path)
-		elif not path.ends_with(".tscn"):
-			push_warning("EnemyData: Enemy scene path '", path, "' does not end with '.tscn' for resource: ", resource_path)
+		if property.name == "id" and (property.get("value", &"") == &""):
+			push_warning("EnemyData: 'id' cannot be empty for resource: ", resource_path)
+		
+		# Validate 'scene_path'
+		if property.name == "scene_path" and (property.get("value", "") == ""):
+			push_warning("EnemyData: 'scene_path' cannot be empty for resource: ", resource_path)
+		elif property.name == "scene_path" and (property.get("value", "") != ""):
+			var path = property.get("value", "")
+			if not ResourceLoader.exists(path):
+				push_warning("EnemyData: Enemy scene path '", path, "' does not exist for resource: ", resource_path)
+			elif not path.ends_with(".tscn"):
+				push_warning("EnemyData: Enemy scene path '", path, "' does not end with '.tscn' for resource: ", resource_path)
 
-	# Validate 'exp_drop_scene_path'
-	if property.name == "exp_drop_scene_path" and (property.get("value", "") == ""):
-		push_warning("EnemyData: 'exp_drop_scene_path' cannot be empty for resource: ", resource_path)
-	elif property.name == "exp_drop_scene_path" and (property.get("value", "") != ""):
-		var path = property.get("value", "")
-		if not ResourceLoader.exists(path):
-			push_warning("EnemyData: EXP drop scene path '", path, "' does not exist for resource: ", resource_path)
-		elif not path.ends_with(".tscn"):
-			push_warning("EnemyData: EXP drop scene path '", path, "' does not end with '.tscn' for resource: ", resource_path)
+		# Validate 'exp_drop_scene_path'
+		if property.name == "exp_drop_scene_path" and (property.get("value", "") == ""):
+			push_warning("EnemyData: 'exp_drop_scene_path' cannot be empty for resource: ", resource_path)
+		elif property.name == "exp_drop_scene_path" and (property.get("value", "") != ""):
+			var path = property.get("value", "")
+			if not ResourceLoader.exists(path):
+				push_warning("EnemyData: EXP drop scene path '", path, "' does not exist for resource: ", resource_path)
+			elif not path.ends_with(".tscn"):
+				push_warning("EnemyData: EXP drop scene path '", path, "' does not end with '.tscn' for resource: ", resource_path)
 
-	# Validate 'elite_types_available'
-	if property.name == "elite_types_available":
-		var elite_types_array = property.get("value", [])
-		for i in range(elite_types_array.size()):
-			var tag = elite_types_array[i]
-			if not tag is StringName or tag == &"":
-				push_warning("EnemyData: Elite type tag at index ", i, " is empty or not a StringName for resource: ", resource_path)
-			# You could add further validation here to check against a global list of known elite types.
+		# Validate 'elite_types_available'
+		if property.name == "elite_types_available":
+			var elite_types_array = property.get("value", [])
+			for i in range(elite_types_array.size()):
+				var tag = elite_types_array[i]
+				if not tag is StringName or tag == &"":
+					push_warning("EnemyData: Elite type tag at index ", i, " is empty or not a StringName for resource: ", resource_path)
+				# You could add further validation here to check against a global list of known elite types.
 
-	# Validate Summoner config if summoner_minion_ids are used
-	if property.name == "summoner_minion_ids":
-		var minion_ids_array = property.get("value", [])
-		if not minion_ids_array.is_empty() and not elite_types_available.has(&"summoner"):
-			push_warning("EnemyData: 'summoner_minion_ids' configured but 'summoner' is not in 'elite_types_available' for resource: ", resource_path)
-		for i in range(minion_ids_array.size()):
-			var minion_id = minion_ids_array[i]
-			if not minion_id is StringName or minion_id == &"":
-				push_warning("EnemyData: Summoner minion ID at index ", i, " is empty or not a StringName for resource: ", resource_path)
-			# Further validation could ensure these minion_ids correspond to actual EnemyData resources.
+		# Validate Summoner config if summoner_minion_ids are used
+		if property.name == "summoner_minion_ids":
+			var minion_ids_array = property.get("value", [])
+			if not minion_ids_array.is_empty() and not elite_types_available.has(&"summoner"):
+				push_warning("EnemyData: 'summoner_minion_ids' configured but 'summoner' is not in 'elite_types_available' for resource: ", resource_path)
+			for i in range(minion_ids_array.size()):
+				var minion_id = minion_ids_array[i]
+				if not minion_id is StringName or minion_id == &"":
+					push_warning("EnemyData: Summoner minion ID at index ", i, " is empty or not a StringName for resource: ", resource_path)
+				# Further validation could ensure these minion_ids correspond to actual EnemyData resources.

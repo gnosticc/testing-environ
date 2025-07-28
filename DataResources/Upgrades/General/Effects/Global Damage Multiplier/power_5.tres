@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StatModificationEffectData" load_steps=2 format=3 uid="uid://bxgxwwo3bmqiu"]
+
+[ext_resource type="Script" uid="uid://cjbws8tjtb3m8" path="res://Scripts/DataResources/Effects/StatModificationEffectData.gd" id="1_6l4l8"]
+
+[resource]
+script = ExtResource("1_6l4l8")
+id = &""
+modification_type = &"flat_add"
+stat_key = &"numerical_damage"
+value_type = 0
+value_float = 0.0
+value_int = 5
+effect_type_id = &"stat_mod"
+target_scope = &"player_stats"
+developer_note = ""
+metadata/_custom_type_script = "uid://cjbws8tjtb3m8"

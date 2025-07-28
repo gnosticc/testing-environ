@@ -1,15 +1,16 @@
-[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=3 format=3 uid="uid://bsf4p068i3j5c"]
+[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=4 format=3 uid="uid://bsf4p068i3j5c"]
 
 [ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_jxjl5"]
 [ext_resource type="Script" uid="uid://c3gbs6gwsa23p" path="res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd" id="2_d7mlg"]
+[ext_resource type="Resource" uid="uid://bol0xnrsl4wxr" path="res://DataResources/Upgrades/General/Effects/Global Damage Multiplier/archmage_15.tres" id="2_o7i84"]
 
 [resource]
 script = ExtResource("2_d7mlg")
-id = &""
-title = "General Upgrade Title"
-description = "General upgrade description."
+id = &"gen_archmage_1"
+title = "Archmage I"
+description = "Increases damage of all Magical weapons by 15%."
 class_tag_filter = Array[int]([])
-effects = Array[ExtResource("1_jxjl5")]([])
+effects = Array[ExtResource("1_jxjl5")]([ExtResource("2_o7i84")])
 weight = 60.0
 max_stacks = 1
 prerequisites = Array[StringName]([])

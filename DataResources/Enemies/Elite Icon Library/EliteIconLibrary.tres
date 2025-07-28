@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EliteIconLibrary" load_steps=9 format=3 uid="uid://2qs8fsqsbikt"]
+
+[ext_resource type="Script" uid="uid://dx7qkassk5228" path="res://Scripts/Enemies/EliteIconLibrary.gd" id="1_0ssae"]
+[ext_resource type="Texture2D" uid="uid://b8ofo7vvd7wk5" path="res://Assets/UI/Icons/Elites/Brute.png" id="1_xool2"]
+[ext_resource type="Texture2D" uid="uid://cg7lcbjrbjntr" path="res://Assets/UI/Icons/Elites/Tank.png" id="2_abky1"]
+[ext_resource type="Texture2D" uid="uid://2rg1socddyjp" path="res://Assets/UI/Icons/Elites/Swift.png" id="3_yfmks"]
+[ext_resource type="Texture2D" uid="uid://cb34ck00m6sq7" path="res://Assets/UI/Icons/Elites/Immovable.png" id="4_qc3se"]
+[ext_resource type="Texture2D" uid="uid://ct22i5puk7wac" path="res://Assets/UI/Icons/Elites/Phaser.png" id="5_mp0xe"]
+[ext_resource type="Texture2D" uid="uid://b0lfp15u3ergk" path="res://Assets/UI/Icons/Elites/Summoner.png" id="6_lerr5"]
+[ext_resource type="Texture2D" uid="uid://1ilri4eq06fy" path="res://Assets/UI/Icons/Elites/Shaman.png" id="7_1iy3g"]
+
+[resource]
+script = ExtResource("1_0ssae")
+elite_icons = {
+&"brute": ExtResource("1_xool2"),
+&"immovable": ExtResource("4_qc3se"),
+&"phaser": ExtResource("5_mp0xe"),
+&"shaman": ExtResource("7_1iy3g"),
+&"summoner": ExtResource("6_lerr5"),
+&"swift": ExtResource("3_yfmks"),
+&"tank": ExtResource("2_abky1")
+}
+metadata/_custom_type_script = "uid://dx7qkassk5228"

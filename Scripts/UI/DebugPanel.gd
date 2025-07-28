@@ -99,6 +99,13 @@ var apply_class_levels_button: Button
 var force_level_up_button: Button
 var reset_class_progression_button: Button
 
+# NEW: UI Node References for the General Upgrades Tab
+var general_upgrades_tab_content: VBoxContainer
+var gen_upgrades_available_list: ItemList
+var gen_upgrades_acquired_list: ItemList
+var gen_upgrades_add_button: Button
+var gen_upgrades_reset_button: Button
+
 # Game Tuning Tab UI Elements
 var game_tuning_tab_content: VBoxContainer
 var gt_base_dds_tick_edit: LineEdit
@@ -308,6 +315,8 @@ func _full_panel_content_update():
 		_update_available_upgrades_display() # Update upgrades for selected active weapon
 		_populate_enemy_spawn_list() # Populate enemy type dropdown
 		_update_class_progression_display()
+		_update_general_upgrades_display()
+
 		
 		# Ensure correct initial selection for enemy spawner
 		if is_instance_valid(enemy_type_option_button) and enemy_type_option_button.item_count > 0:
@@ -431,6 +440,7 @@ func _setup_all_tabs():
 	_setup_info_tab()
 	_setup_player_stats_tab()
 	_setup_class_progression_tab()
+	_setup_general_upgrades_tab()
 	_setup_enemy_spawner_tab()
 	_setup_game_tuning_tab()
 	_setup_weapons_tab() # Ensure weapons tab is added last for consistency with other UIs
@@ -566,6 +576,140 @@ func _setup_player_stats_tab():
 	if is_instance_valid(tab_container):
 		tab_container.add_child(player_stats_tab_content)
 		tab_container.set_tab_title(tab_container.get_tab_count() - 1, "Player Stats")
+
+# Function to create and configure the General Upgrades tab.
+func _setup_general_upgrades_tab():
+	general_upgrades_tab_content = VBoxContainer.new()
+	general_upgrades_tab_content.name = "GeneralUpgradesTabContent"
+	
+	var hbox = HBoxContainer.new()
+	hbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	general_upgrades_tab_content.add_child(hbox)
+	
+	# Left side: Available Upgrades
+	var left_vbox = VBoxContainer.new()
+	left_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(left_vbox)
+	
+	var available_label = Label.new(); available_label.text = "Available Upgrades:"
+	left_vbox.add_child(available_label)
+	
+	gen_upgrades_available_list = ItemList.new()
+	gen_upgrades_available_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left_vbox.add_child(gen_upgrades_available_list)
+	
+	# Right side: Acquired Upgrades
+	var right_vbox = VBoxContainer.new()
+	right_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hbox.add_child(right_vbox)
+	
+	var acquired_label = Label.new(); acquired_label.text = "Acquired Upgrades:"
+	right_vbox.add_child(acquired_label)
+	
+	gen_upgrades_acquired_list = ItemList.new()
+	gen_upgrades_acquired_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_vbox.add_child(gen_upgrades_acquired_list)
+	
+	# Bottom buttons
+	var button_hbox = HBoxContainer.new()
+	button_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	general_upgrades_tab_content.add_child(button_hbox)
+	
+	gen_upgrades_add_button = Button.new(); gen_upgrades_add_button.text = "Add Selected Upgrade"
+	gen_upgrades_add_button.pressed.connect(_on_add_upgrade_button_pressed)
+	button_hbox.add_child(gen_upgrades_add_button)
+	
+	gen_upgrades_reset_button = Button.new(); gen_upgrades_reset_button.text = "Reset All Upgrades"
+	gen_upgrades_reset_button.pressed.connect(_on_reset_upgrades_button_pressed)
+	button_hbox.add_child(gen_upgrades_reset_button)
+
+	if is_instance_valid(tab_container):
+		tab_container.add_child(general_upgrades_tab_content)
+		tab_container.set_tab_title(tab_container.get_tab_count() - 1, "General Upgrades")
+
+# MODIFIED: This function now filters the "Available" list based on what the player has already acquired.
+func _update_general_upgrades_display():
+	if not is_instance_valid(game_node) or not is_instance_valid(player_node): return
+
+	# Populate Available Upgrades list
+	if is_instance_valid(gen_upgrades_available_list):
+		# Storing the text of the selected item is more robust than storing the index
+		var selected_text = ""
+		var selected_indices = gen_upgrades_available_list.get_selected_items()
+		if not selected_indices.is_empty():
+			selected_text = gen_upgrades_available_list.get_item_text(selected_indices[0])
+
+		gen_upgrades_available_list.clear()
+		var all_upgrades = game_node.get_all_loaded_general_upgrades()
+		var player_acquired_upgrades = player_node.acquired_general_upgrade_ids
+		var new_selection_index = -1
+
+		for i in range(all_upgrades.size()):
+			var upgrade = all_upgrades[i]
+			if is_instance_valid(upgrade):
+				# --- FILTERING LOGIC ---
+				var times_acquired = player_acquired_upgrades.count(upgrade.id)
+				if times_acquired >= upgrade.max_stacks:
+					continue # Skip this upgrade, player has the max stacks.
+				# --- END FILTERING LOGIC ---
+				
+				var item_text = upgrade.title + " (" + str(upgrade.id) + ")"
+				gen_upgrades_available_list.add_item(item_text)
+				
+				# Check if this was the previously selected item to re-select it
+				if item_text == selected_text:
+					new_selection_index = gen_upgrades_available_list.get_item_count() - 1
+
+		if new_selection_index != -1:
+			gen_upgrades_available_list.select(new_selection_index)
+	
+	# Populate Acquired Upgrades list
+	if is_instance_valid(gen_upgrades_acquired_list):
+		gen_upgrades_acquired_list.clear()
+		if player_node.acquired_general_upgrade_ids.is_empty():
+			gen_upgrades_acquired_list.add_item("None")
+		else:
+			# Use a dictionary to show stacks for upgrades that can be taken multiple times
+			var stacked_upgrades = {}
+			for upgrade_id in player_node.acquired_general_upgrade_ids:
+				stacked_upgrades[upgrade_id] = stacked_upgrades.get(upgrade_id, 0) + 1
+			
+			for upgrade_id in stacked_upgrades:
+				var count = stacked_upgrades[upgrade_id]
+				var text = str(upgrade_id)
+				if count > 1:
+					text += " (x" + str(count) + ")"
+				gen_upgrades_acquired_list.add_item(text)
+
+
+# Handler for the "Add Selected Upgrade" button.
+func _on_add_upgrade_button_pressed():
+	if not is_instance_valid(game_node) or not is_instance_valid(player_node): return
+	if not is_instance_valid(gen_upgrades_available_list): return
+	
+	var selected_indices = gen_upgrades_available_list.get_selected_items()
+	if selected_indices.is_empty(): return
+	
+	var selected_index = selected_indices[0]
+	# We need to find the actual resource, which is tricky now that the list is filtered.
+	# We'll get the ID from the text and find the resource in the master list.
+	var item_text = gen_upgrades_available_list.get_item_text(selected_index)
+	var id_string = item_text.substr(item_text.find("(") + 1, item_text.find(")") - item_text.find("(") - 1)
+	var upgrade_id = StringName(id_string)
+	
+	var upgrade_to_add = game_node.get_general_upgrade_by_id(upgrade_id)
+
+	if is_instance_valid(upgrade_to_add) and player_node.has_method("debug_add_general_upgrade"):
+		player_node.debug_add_general_upgrade(upgrade_to_add)
+		call_deferred("_update_general_upgrades_display")
+
+# Handler for the "Reset All Upgrades" button.
+func _on_reset_upgrades_button_pressed():
+	if is_instance_valid(player_node) and player_node.has_method("debug_reset_general_upgrades"):
+		player_node.debug_reset_general_upgrades()
+		call_deferred("_update_general_upgrades_display")
+
+
 
 # NEW: Function to create and configure the Class Progression tab.
 func _setup_class_progression_tab():

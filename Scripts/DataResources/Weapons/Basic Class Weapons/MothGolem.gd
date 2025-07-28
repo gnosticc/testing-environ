@@ -106,7 +106,6 @@ func update_stats(new_stats: Dictionary = {}):
 	# FIX: Correctly read the follow_distance from the stats.
 	follow_distance = float(specific_weapon_stats.get(&"follow_distance", 150.0))
 	attack_range = float(specific_weapon_stats.get(&"attack_range", 30.0))
-	attack_cooldown = float(specific_weapon_stats.get(&"attack_cooldown", 1.8))
 	golem_crit_chance = float(specific_weapon_stats.get(&"crit_chance", 0.0))
 	var base_visual_scale = float(specific_weapon_stats.get(&"base_visual_scale", 1.0))
 	var scale_increase_per_level = float(specific_weapon_stats.get(&"scale_increase_per_level", 0.0))
@@ -137,13 +136,21 @@ func update_stats(new_stats: Dictionary = {}):
 	var final_damage = _owner_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
 	damage = int(round(maxf(1.0, final_damage)))
 	
-	var final_cooldown = attack_cooldown
+	var base_cooldown = float(specific_weapon_stats.get(&"attack_cooldown", 1.8))
+	var final_cooldown = base_cooldown
 	
 	if is_instance_valid(status_effect_component):
 		var fury_cooldown_mult = status_effect_component.get_product_of_multiplicative_modifiers(&"attack_cooldown")
 		final_cooldown *= fury_cooldown_mult
+	
+	var global_attack_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	var global_cooldown_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
+	
+	if global_attack_speed_mult > 0.01:
+		final_cooldown /= global_attack_speed_mult
+	if global_cooldown_mult > 0.01:
+		final_cooldown *= global_cooldown_mult
 		
-	final_cooldown /= _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
 	attack_cooldown_timer.wait_time = maxf(0.1, final_cooldown)
 	
 	var has_caustic_aura = specific_weapon_stats.get(&"has_caustic_aura", false)

@@ -47,6 +47,14 @@ animations = [{
 "texture": SubResource("AtlasTexture_bulha")
 }],
 "loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bulha")
+}],
+"loop": false,
 "name": &"idle",
 "speed": 5.0
 }, {
@@ -71,23 +79,22 @@ animations = [{
 "speed": 8.0
 }]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_tlpub"]
-radius = 83.3333
+[sub_resource type="CircleShape2D" id="CircleShape2D_wp0q5"]
+radius = 66.6667
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_dttn4"]
 radius = 50.0
 
-[node name="slime_blue" instance=ExtResource("1_wp0q5")]
+[node name="BaseEnemy" instance=ExtResource("1_wp0q5")]
 scale = Vector2(0.18, 0.18)
 script = ExtResource("2_wp0q5")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_rfp5d")
-animation = &"walk"
 autoplay = "walk"
 
 [node name="CollisionShape2D" parent="." index="1"]
-shape = SubResource("CircleShape2D_tlpub")
+shape = SubResource("CircleShape2D_wp0q5")
 
 [node name="CollisionShape2D" parent="DamageArea" index="0"]
 shape = SubResource("CircleShape2D_dttn4")
@@ -99,5 +106,5 @@ offset_right = 9.0
 offset_bottom = -85.0
 scale = Vector2(1.8, 1.8)
 
-[node name="CollisionShape2D" parent="SeparationDetector" index="0"]
-position = Vector2(7.62939e-06, 0)
+[node name="NavigationAgent2D" parent="." index="8"]
+radius = 15.0

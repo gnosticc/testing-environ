@@ -8,7 +8,7 @@
 script = ExtResource("3_jls6h")
 id = &"gen_focus_2"
 title = "Focus II"
-description = "Reduces the cooldown of all weapons by 5%."
+description = "Reduces the cooldown of all weapons and pet's attacks by 5%."
 class_tag_filter = Array[int]([])
 effects = Array[ExtResource("1_q1cyq")]([ExtResource("2_68wmv")])
 weight = 60.0

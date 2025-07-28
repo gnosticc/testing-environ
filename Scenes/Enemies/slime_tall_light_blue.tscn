@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://dbxmf5av5r4dy"]
+[gd_scene load_steps=13 format=3 uid="uid://dbxmf5av5r4dy"]
 
 [ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_xha8g"]
 [ext_resource type="Script" uid="uid://doxx0lbfyivsm" path="res://Scripts/Enemies/slime_tall_light_blue.gd" id="2_vpvde"]
@@ -39,6 +39,14 @@ animations = [{
 "texture": SubResource("AtlasTexture_tqmco")
 }],
 "loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tqmco")
+}],
+"loop": false,
 "name": &"idle",
 "speed": 5.0
 }, {
@@ -64,13 +72,14 @@ radius = 65.0
 radius = 30.0
 height = 80.0
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_pd3n3"]
+
 [node name="BaseEnemy" instance=ExtResource("1_xha8g")]
 scale = Vector2(0.22, 0.22)
 script = ExtResource("2_vpvde")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_37anh")
-animation = &"walk"
 autoplay = "walk"
 
 [node name="CollisionShape2D" parent="." index="1"]
@@ -84,3 +93,13 @@ offset_left = -32.6667
 offset_top = -76.6667
 offset_right = 40.3333
 offset_bottom = -59.6667
+
+[node name="NavigationAgent2D" parent="." index="8"]
+radius = 12.0
+
+[node name="ChargeCast" type="ShapeCast2D" parent="." index="11"]
+position = Vector2(0, 1.90735e-06)
+scale = Vector2(3.18182, 2.81819)
+shape = SubResource("CapsuleShape2D_pd3n3")
+target_position = Vector2(0, 0)
+collision_mask = 130

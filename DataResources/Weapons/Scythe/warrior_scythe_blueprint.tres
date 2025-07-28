@@ -30,6 +30,7 @@ spawn_as_child = true
 requires_direction = true
 targeting_type = &"mouse_direction"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 &"area_scale": 1.0,
 &"base_attack_duration": 0.5,

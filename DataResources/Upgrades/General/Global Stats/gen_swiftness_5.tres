@@ -13,5 +13,5 @@ class_tag_filter = Array[int]([])
 effects = Array[ExtResource("1_02afv")]([ExtResource("2_3jveq")])
 weight = 60.0
 max_stacks = 1
-prerequisites = Array[StringName]([&"gen_swiftness_5"])
+prerequisites = Array[StringName]([&"gen_swiftness_4"])
 metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

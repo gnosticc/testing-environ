@@ -1,20 +1,40 @@
 # File: res://Scripts/Weapons/Advanced/Turrets/SentryTurret.gd
+# This script defines the specific behavior for the Sentry Turret.
+# It inherits from BaseTurret and provides its unique cooldown and projectile.
+# REVISED: Now overrides all base stat functions to be fully data-driven from the blueprint.
+
 class_name SentryTurret
 extends BaseTurret
 
-func initialize(p_stats: Dictionary, p_player_stats: PlayerStats):
-	super.initialize(p_stats, p_player_stats)
-	
-	var visual_scale = float(specific_stats.get("sentry_visual_scale", 0.8))
-	animated_sprite.scale = Vector2.ONE * visual_scale
-	
-	var radius = float(specific_stats.get("sentry_targeting_range", 250.0))
-	var shape = targeting_range.get_node("CollisionShape2D") as CollisionShape2D
-	if shape and shape.shape is CircleShape2D:
-		shape.shape.radius = radius
-
-func _get_base_lifetime() -> float:
-	return float(specific_stats.get("sentry_lifetime", 8.0))
+# --- Overridden Virtual Methods ---
 
 func _get_base_attack_cooldown() -> float:
-	return float(specific_stats.get("sentry_attack_cooldown", 0.5))
+	# Read the unique cooldown for this turret from the stats dictionary.
+	return float(specific_stats.get("sentry_attack_cooldown", 0.8))
+
+func _get_base_lifetime() -> float:
+	# Read the unique lifetime for this turret from the stats dictionary.
+	return float(specific_stats.get("sentry_lifetime", 8.0))
+
+func _get_base_targeting_range() -> float:
+	# Read the unique targeting range for this turret from the stats dictionary.
+	return float(specific_stats.get("sentry_targeting_range", 150.0))
+
+func _get_base_visual_scale() -> float:
+	# Read the unique visual scale for this turret from the stats dictionary.
+	return float(specific_stats.get("sentry_visual_scale", 1.0))
+
+func _spawn_projectile():
+	# This function contains the logic that was previously in the base class.
+	# It loads and initializes the specific projectile for the Sentry Turret.
+	var projectile_scene = load("res://Scenes/Weapons/Advanced/Effect Scenes/SentryProjectile.tscn")
+	if not is_instance_valid(projectile_scene):
+		return
+
+	var projectile = projectile_scene.instantiate()
+	get_tree().current_scene.add_child(projectile)
+	
+	projectile.global_position = projectile_spawn_point.global_position
+
+	if projectile.has_method("initialize"):
+		projectile.initialize(current_target, specific_stats, owner_player_stats)

@@ -57,11 +57,12 @@ func _update_timer(timer: Timer, cooldown_key: String, is_active: bool):
 	
 	if is_active:
 		var base_cooldown = float(_specific_stats.get(cooldown_key, 5.0))
-		# Apply weapon-specific and then global cooldown reduction.
+		# Apply weapon-specific cooldown reduction from upgrades like "Mobile Emplacements".
 		var weapon_cdr = float(_specific_stats.get("turret_deployment_cdr", 0.0))
-		var global_cdr = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
 		
-		var final_cooldown = base_cooldown * (1.0 - weapon_cdr) * (1.0 - global_cdr)
+		# REMOVED: The line fetching global_cooldown_reduction_mult has been removed.
+		# The final_cooldown calculation now only uses the weapon-specific modifier.
+		var final_cooldown = base_cooldown * (1.0 - weapon_cdr)
 		timer.wait_time = max(0.1, final_cooldown)
 		
 		if timer.is_stopped():

@@ -43,6 +43,14 @@ animations = [{
 "texture": SubResource("AtlasTexture_co3oa")
 }],
 "loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_co3oa")
+}],
+"loop": false,
 "name": &"idle",
 "speed": 5.0
 }, {
@@ -64,9 +72,8 @@ animations = [{
 "speed": 8.0
 }]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4rivg"]
-radius = 46.1538
-height = 123.077
+[sub_resource type="CircleShape2D" id="CircleShape2D_tlpub"]
+radius = 50.2494
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xkgff"]
 radius = 23.0769
@@ -78,14 +85,10 @@ script = ExtResource("2_tlpub")
 
 [node name="AnimatedSprite2D" parent="." index="0"]
 sprite_frames = SubResource("SpriteFrames_047j0")
-animation = &"walk"
 autoplay = "walk"
-frame_progress = 0.040788
 
 [node name="CollisionShape2D" parent="." index="1"]
-position = Vector2(0, 15.3846)
-rotation = 1.57079
-shape = SubResource("CapsuleShape2D_4rivg")
+shape = SubResource("CircleShape2D_tlpub")
 
 [node name="CollisionShape2D" parent="DamageArea" index="0"]
 position = Vector2(-7.69231, 15.3846)
@@ -95,6 +98,3 @@ shape = SubResource("CapsuleShape2D_xkgff")
 [node name="HealthBar" parent="." index="4"]
 offset_top = -44.0
 offset_bottom = -27.0
-
-[node name="CollisionShape2D" parent="SeparationDetector" index="0"]
-position = Vector2(7.69231, 15.3846)

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="GeneralUpgradeCardData" load_steps=4 format=3 uid="uid://6oet5xq5ft3u"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_8cj7o"]
+[ext_resource type="Script" uid="uid://c3gbs6gwsa23p" path="res://Scripts/DataResources/Upgrades/GeneralUpgradeCardData.gd" id="2_akfvv"]
+[ext_resource type="Resource" uid="uid://bxgxwwo3bmqiu" path="res://DataResources/Upgrades/General/Effects/Global Damage Multiplier/power_5.tres" id="2_l75d7"]
+
+[resource]
+script = ExtResource("2_akfvv")
+id = &"gen_power_1"
+title = "Power I"
+description = "Increases base damage by 5."
+class_tag_filter = Array[int]([])
+effects = Array[ExtResource("1_8cj7o")]([ExtResource("2_l75d7")])
+weight = 60.0
+max_stacks = 1
+prerequisites = Array[StringName]([])
+metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

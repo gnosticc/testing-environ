@@ -22,6 +22,7 @@ DebugPanelGlobal="*res://Scenes/UI/DebugPanel.tscn"
 PlayerStatKeys="*res://Scripts/Singletons/player_stat_keys.gd"
 CombatTracker="*res://Scripts/Singletons/CombatTracker.gd"
 CombatEvents="*res://Scripts/Singletons/CombatEvents.gd"
+EnemyBehaviorHandler="*res://Scripts/Singletons/EnemyBehaviorHandler.gd"
 
 [dotnet]
 

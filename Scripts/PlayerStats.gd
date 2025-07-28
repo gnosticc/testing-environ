@@ -49,6 +49,8 @@ var current_global_summon_count_add: int = 0
 var current_global_summon_cooldown_reduction_percent: float = 0.0
 var current_enemy_debuff_resistance_reduction: float = 0.0
 var current_dodge_chance: float = 0.0
+var current_global_cooldown_reduction_mult: float = 1.0
+
 
 # Add other 'current_' stats here as needed, based on your PlayerStatKeys.Keys
 # For Tag-Specific Multipliers (these are read directly from get_final_stat_by_string, not cached here)
@@ -179,6 +181,7 @@ func initialize_base_stats_with_raw_dict(raw_stats_dict: Dictionary):
 		if key_string in [
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DAMAGE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER],
+			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.AOE_AREA_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SIZE_MULTIPLIER],
 			PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER],
@@ -537,6 +540,8 @@ func recalculate_all_stats():
 	current_global_summon_cooldown_reduction_percent = get_final_stat(PlayerStatKeys.Keys.GLOBAL_SUMMON_COOLDOWN_REDUCTION_PERCENT)
 	current_enemy_debuff_resistance_reduction = get_final_stat(PlayerStatKeys.Keys.ENEMY_DEBUFF_RESISTANCE_REDUCTION)
 	current_dodge_chance = get_final_stat(PlayerStatKeys.Keys.DODGE_CHANCE)
+	current_global_cooldown_reduction_mult = get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
+
 	# Add more 'current_' stat updates here for any other relevant keys
 	current_melee_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.MELEE_DAMAGE_MULTIPLIER)
 	current_projectile_damage_multiplier = get_final_stat(PlayerStatKeys.Keys.PROJECTILE_DAMAGE_MULTIPLIER)

@@ -50,33 +50,61 @@ func initialize(p_owner: PlayerCharacter, p_stats: Dictionary):
 	if is_instance_valid(_game_node) and _game_node.has_signal("enemy_was_killed"):
 		_game_node.enemy_was_killed.connect(_on_any_enemy_killed)
 
+	# NEW: Connect to the stats_recalculated signal.
+	if _owner_player_stats and not _owner_player_stats.is_connected("stats_recalculated", update_stats):
+		_owner_player_stats.stats_recalculated.connect(update_stats)
+		
 	update_stats(p_stats)
 	
 func _notification(what):
 	if what == NOTIFICATION_PREDELETE:
 		if is_instance_valid(_game_node) and _game_node.is_connected("enemy_was_killed", _on_any_enemy_killed):
 			_game_node.enemy_was_killed.disconnect(_on_any_enemy_killed)
+		# NEW: Disconnect from the signal on deletion to prevent memory leaks.
+		if is_instance_valid(_owner_player_stats) and _owner_player_stats.is_connected("stats_recalculated", update_stats):
+			_owner_player_stats.stats_recalculated.disconnect(update_stats)
 
-func update_stats(new_stats: Dictionary):
-	_specific_stats = new_stats
+func update_stats(p_arg1 = {}, _p_arg2 = 0.0):
+	if p_arg1 is Dictionary and not p_arg1.is_empty():
+		_specific_stats = p_arg1.duplicate(true)
+	if not is_instance_valid(_owner_player_stats): return
 	
-	lifetime_timer.wait_time = float(_specific_stats.get("echo_duration", 5.0))
-	primary_attack_timer.wait_time = float(_specific_stats.get("primary_attack_cooldown", 1.2))
+	# --- NEW: COOLDOWN CALCULATION BLOCK ---
+	var global_attack_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	var global_cooldown_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
 	
+	# Safety check for multipliers
+	if global_attack_speed_mult <= 0.01: global_attack_speed_mult = 1.0
+	if global_cooldown_mult <= 0.01: global_cooldown_mult = 1.0
+	
+	# Apply cooldown logic to each attack timer
+	var primary_base_cooldown = float(_specific_stats.get("primary_attack_cooldown", 1.2))
+	var primary_final_cooldown = (primary_base_cooldown / global_attack_speed_mult) * global_cooldown_mult
+	primary_attack_timer.wait_time = maxf(0.1, primary_final_cooldown)
+
 	if _specific_stats.get("has_phantom_reach", false):
-		phantom_reach_timer.wait_time = float(_specific_stats.get("phantom_reach_cooldown", 0.4))
+		var phantom_base_cooldown = float(_specific_stats.get("phantom_reach_cooldown", 0.4))
+		var phantom_final_cooldown = (phantom_base_cooldown / global_attack_speed_mult) * global_cooldown_mult
+		phantom_reach_timer.wait_time = maxf(0.1, phantom_final_cooldown)
 		if phantom_reach_timer.is_stopped(): phantom_reach_timer.start()
 	else:
 		phantom_reach_timer.stop()
 		
 	if _specific_stats.get("has_encroaching_darkness", false):
-		encroaching_darkness_timer.wait_time = float(_specific_stats.get("eldritch_orb_cooldown", 2.0))
+		var eldritch_base_cooldown = float(_specific_stats.get("eldritch_orb_cooldown", 2.0))
+		var eldritch_final_cooldown = (eldritch_base_cooldown / global_attack_speed_mult) * global_cooldown_mult
+		encroaching_darkness_timer.wait_time = maxf(0.1, eldritch_final_cooldown)
 		if encroaching_darkness_timer.is_stopped(): encroaching_darkness_timer.start()
 	else:
 		encroaching_darkness_timer.stop()
+	# --- END OF NEW BLOCK ---
 		
-	if lifetime_timer.is_stopped(): lifetime_timer.start()
-	if primary_attack_timer.is_stopped(): primary_attack_timer.start()
+	if lifetime_timer.is_stopped(): 
+		lifetime_timer.wait_time = float(_specific_stats.get("echo_duration", 5.0))
+		lifetime_timer.start()
+		
+	if primary_attack_timer.is_stopped(): 
+		primary_attack_timer.start()
 	
 	var base_scale = float(_specific_stats.get("echo_scale", 1.0))
 	self.scale = Vector2.ONE * base_scale

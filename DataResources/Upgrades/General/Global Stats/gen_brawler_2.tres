@@ -6,12 +6,12 @@
 
 [resource]
 script = ExtResource("3_0me4c")
-id = &"gen_brawler_1"
-title = "Brawler I"
+id = &"gen_brawler_2"
+title = "Brawler II"
 description = "Increases damage of all Melee weapons by 25%."
 class_tag_filter = Array[int]([])
 effects = Array[ExtResource("1_p0kpv")]([ExtResource("2_1dmdg")])
 weight = 60.0
 max_stacks = 1
-prerequisites = Array[StringName]([])
+prerequisites = Array[StringName]([&"gen_brawler_1"])
 metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

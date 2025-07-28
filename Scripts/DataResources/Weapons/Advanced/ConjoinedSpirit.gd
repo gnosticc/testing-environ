@@ -52,7 +52,11 @@ func initialize(p_owner: PlayerCharacter, p_stats: Dictionary, _start_angle: flo
 	water_ball_attack_timer.timeout.connect(_fire_water_ball)
 	permafrost_storm_timer.timeout.connect(_execute_permafrost_storm)
 	contact_damage_area.body_entered.connect(_on_contact_damage_body_entered)
-	
+
+	# NEW: Connect to the stats_recalculated signal to receive updates.
+	if _owner_player_stats and not _owner_player_stats.is_connected("stats_recalculated", update_stats):
+		_owner_player_stats.stats_recalculated.connect(update_stats)
+
 	# FIX: Set attack timers to be repeating, not one-shot.
 	ice_shard_attack_timer.one_shot = false
 	water_ball_attack_timer.one_shot = false
@@ -62,26 +66,40 @@ func initialize(p_owner: PlayerCharacter, p_stats: Dictionary, _start_angle: flo
 	update_stats(p_stats)
 	_enter_roaming_state()
 
+# NEW: Added this function to disconnect the signal when the summon is destroyed, preventing memory leaks.
 func _notification(what):
 	# Disconnect signals on deletion to prevent memory leaks.
 	if what == NOTIFICATION_PREDELETE:
 		if is_instance_valid(_owner_player_stats) and _owner_player_stats.is_connected("stats_recalculated", update_stats):
 			_owner_player_stats.stats_recalculated.disconnect(update_stats)
 
-func update_stats(new_stats: Dictionary = {}):
-	if not new_stats.is_empty():
-		_specific_stats = new_stats
-	
+# MODIFIED: The function signature was changed to accept the (unused) arguments from the signal.
+func update_stats(p_arg1 = {}, _p_arg2 = 0.0):
+	if p_arg1 is Dictionary and not p_arg1.is_empty():
+		_specific_stats = p_arg1.duplicate(true)
+	if not is_instance_valid(_owner_player_stats): return
+
 	# Update timer durations based on current stats
 	roaming_timer.wait_time = float(_specific_stats.get("roaming_duration", 10.0))
 	attunement_timer.wait_time = float(_specific_stats.get("attunement_duration", 4.0))
 	
-	var ice_cooldown = float(_specific_stats.get("ice_shard_cooldown", 0.5))
-	var water_cooldown = float(_specific_stats.get("water_ball_cooldown", 1.5))
-	var player_atk_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	# NEW: This entire block was added to calculate the final cooldowns for both attacks.
+	var global_attack_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	var global_cooldown_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
 	
-	ice_shard_attack_timer.wait_time = max(0.1, ice_cooldown / player_atk_speed_mult)
-	water_ball_attack_timer.wait_time = max(0.1, water_cooldown / player_atk_speed_mult)
+	# Safety check for multipliers
+	if global_attack_speed_mult <= 0.01: global_attack_speed_mult = 1.0
+	if global_cooldown_mult <= 0.01: global_cooldown_mult = 1.0
+
+	var ice_base_cooldown = float(_specific_stats.get("ice_shard_cooldown", 0.5))
+	var water_base_cooldown = float(_specific_stats.get("water_ball_cooldown", 1.5))
+	
+	var final_ice_cooldown = (ice_base_cooldown / global_attack_speed_mult) * global_cooldown_mult
+	var final_water_cooldown = (water_base_cooldown / global_attack_speed_mult) * global_cooldown_mult
+	
+	ice_shard_attack_timer.wait_time = max(0.1, final_ice_cooldown)
+	water_ball_attack_timer.wait_time = max(0.1, final_water_cooldown)
+	# --- END OF NEW BLOCK ---
 	
 	permafrost_storm_timer.wait_time = float(_specific_stats.get("permafrost_storm_interval", 3.0))
 

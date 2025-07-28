@@ -6,12 +6,12 @@
 
 [resource]
 script = ExtResource("3_03bqi")
-id = &"gen_archmage_1"
-title = "Archmage I"
+id = &"gen_archmage_2"
+title = "Archmage II"
 description = "Increases damage of all Magical weapons by 15%."
 class_tag_filter = Array[int]([])
 effects = Array[ExtResource("1_t4vcu")]([ExtResource("2_sx8do")])
 weight = 60.0
 max_stacks = 1
-prerequisites = Array[StringName]([])
+prerequisites = Array[StringName]([&"gen_archmage_1"])
 metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

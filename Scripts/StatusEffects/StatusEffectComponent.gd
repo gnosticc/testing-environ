@@ -14,6 +14,18 @@ var _additive_modifiers: Dictionary = {}
 var _multiplicative_modifiers: Dictionary = {}
 var _active_flags: Dictionary = {}
 
+# NEW: Timestamp for Catalytic Reaction cooldown
+var _last_catalytic_proc_timestamp: float = 0.0
+
+
+# NEW: Function to enforce a 1-second cooldown on catalytic reactions for this specific enemy instance.
+func can_trigger_catalytic_reaction() -> bool:
+	var current_time_ms = Time.get_ticks_msec()
+	if current_time_ms - _last_catalytic_proc_timestamp > 1000.0: # 1000ms = 1 second
+		_last_catalytic_proc_timestamp = current_time_ms
+		return true
+	return false
+	
 func apply_effect(
 		effect_data: StatusEffectData,
 		source_node: Node = null,
@@ -221,7 +233,7 @@ func _on_effect_expired(effect_unique_id: StringName):
 				
 				if weapon_stats.get(&"has_lingering_charge", false):
 					if owner is BaseEnemy:
-						CombatEvents.emit_signal("lingering_charge_triggered", owner.global_position, weapon_stats, effect_entry.source)
+						CombatEvents.emit_signal("lingering_charge_triggered", owner.global_position, weapon_stats, effect_entry.source, owner)
 			# --- End Centralized Logic ---
 
 			# Standard cleanup

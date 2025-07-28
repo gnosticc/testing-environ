@@ -6,12 +6,12 @@
 
 [resource]
 script = ExtResource("3_thyie")
-id = &"gen_marksman_1"
-title = "Marksman I"
+id = &"gen_marksman_2"
+title = "Marksman II"
 description = "Increases damage of all Projectile weapons by 15%."
 class_tag_filter = Array[int]([])
 effects = Array[ExtResource("1_x64xt")]([ExtResource("2_5xjf4")])
 weight = 60.0
 max_stacks = 1
-prerequisites = Array[StringName]([])
+prerequisites = Array[StringName]([&"gen_marksman_1"])
 metadata/_custom_type_script = "uid://c3gbs6gwsa23p"

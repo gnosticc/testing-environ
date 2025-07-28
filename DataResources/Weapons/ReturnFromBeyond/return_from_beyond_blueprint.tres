@@ -19,7 +19,7 @@ id = &"summoner_return_from_beyond"
 title = "Return from Beyond"
 description = "Summons a temporary Ethereal Echo to fight for you."
 weapon_scene = ExtResource("3_1hq52")
-tags = Array[StringName]([&"pet", &"magical", &"controller", &"summoner weapon"])
+tags = Array[StringName]([&"pet", &"magical", &"controller", &"summoner weapon", &"projectile"])
 class_tag_restrictions = [&"summoner_advanced"]
 cooldown = 10.0
 max_level = 10
@@ -28,6 +28,7 @@ spawn_as_child = false
 requires_direction = false
 targeting_type = &"none"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "echo_duration": 5.0,
 "echo_movement_speed": 90.0,

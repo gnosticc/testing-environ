@@ -25,6 +25,7 @@ class_name PlayerClassData
 @export_range(1, 500) var base_numerical_damage: int = 10 # Player's core damage value
 @export_range(0.5, 5.0, 0.01) var base_global_damage_multiplier: float = 1.0 # Player's global damage multiplier
 @export_range(0.1, 5.0, 0.01) var base_attack_speed_multiplier: float = 1.0
+@export_range(0.1, 5.0, 0.01) var base_global_cooldown_reduction_mult: float = 1.0
 @export_range(0, 100) var base_armor: int = 0
 @export_range(0.0, 100.0, 0.1) var base_armor_penetration: float = 0.0 # Player's base armor penetration
 
@@ -75,6 +76,7 @@ func get_base_stats_as_standardized_dict() -> Dictionary:
 	stats_dict[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.NUMERICAL_DAMAGE]] = base_numerical_damage
 	stats_dict[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_DAMAGE_MULTIPLIER]] = base_global_damage_multiplier
 	stats_dict[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER]] = base_attack_speed_multiplier
+	stats_dict[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT]] = base_global_cooldown_reduction_mult
 	stats_dict[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR]] = base_armor
 	stats_dict[PlayerStatKeys.KEY_NAMES[PlayerStatKeys.Keys.ARMOR_PENETRATION]] = base_armor_penetration
 

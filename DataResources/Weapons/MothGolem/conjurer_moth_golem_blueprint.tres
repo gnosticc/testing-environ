@@ -28,9 +28,10 @@ spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "attack_area_scale": 1.0,
-"attack_cooldown": 1.8,
+"attack_cooldown": 1.0,
 "attack_range": 1.0,
 "base_visual_scale": 1.0,
 "caustic_aura_damage_percent": 0.5,

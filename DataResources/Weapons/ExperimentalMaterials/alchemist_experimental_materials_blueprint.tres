@@ -19,7 +19,7 @@ id = &"alchemist_experimental_materials"
 title = "Experimental Materials"
 description = "Hurls vials of reagent that Soak enemies. Subsequent physical attacks on \"Soaked\" enemies trigger a highly damaging DoT while magical attacks on Soaked enemies trigger powerful catalytic explosions. These effects remove the Soaked status. Soaked enemies lose Soaked status over time."
 weapon_scene = ExtResource("3_0vhih")
-tags = Array[StringName]([&"aoe", &"chemical", &"alchemist weapon", &"controller", &"magical"])
+tags = Array[StringName]([&"aoe", &"chemical", &"alchemist weapon", &"controller"])
 class_tag_restrictions = [&"alchemist_advanced"]
 cooldown = 1.5
 max_level = 10
@@ -28,6 +28,7 @@ spawn_as_child = true
 requires_direction = false
 targeting_type = &"none"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "chemtrail_damage_percent": 1.5,
 "chemtrail_segment_duration": 2.0,

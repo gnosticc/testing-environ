@@ -1,5 +1,8 @@
 # --- enemy_slime_green.gd ---
 # File Path: H:\Game Creation\testing-environ\Scripts\enemy_slime_green.gd
+# VERSION 2.2: This script is now simplified. It relies entirely on the
+# BaseEnemy.gd script to handle all logic, including signal connections.
+
 extends BaseEnemy
 
 func _ready():

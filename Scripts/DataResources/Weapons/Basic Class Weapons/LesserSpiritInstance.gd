@@ -36,26 +36,57 @@ func initialize(p_owner: PlayerCharacter, p_stats: Dictionary, start_angle: floa
 		_attack_cooldown_timer.name = "AttackTimer"
 		add_child(_attack_cooldown_timer)
 		_attack_cooldown_timer.timeout.connect(_on_attack_cooldown_timeout)
-	
+
+	# NEW: Connect to the stats_recalculated signal.
+	# This ensures the summon updates its stats whenever the player's stats change.
+	if _owner_player_stats and not _owner_player_stats.is_connected("stats_recalculated", update_stats):
+		_owner_player_stats.stats_recalculated.connect(update_stats)
+
 	update_stats()
 	current_angle = start_angle
 	if _attack_cooldown_timer.is_stopped():
 		_attack_cooldown_timer.start()
 
-func update_stats(new_stats: Dictionary = {}):
-	if not new_stats.is_empty():
-		specific_weapon_stats = new_stats.duplicate(true)
+# NEW: Add a notification function to disconnect the signal on deletion.
+# This is crucial to prevent memory leaks when the summon is removed from the scene.
+func _notification(what):
+	if what == NOTIFICATION_PREDELETE:
+		if is_instance_valid(_owner_player_stats) and _owner_player_stats.is_connected("stats_recalculated", update_stats):
+			_owner_player_stats.stats_recalculated.disconnect(update_stats)
+
+# MODIFIED: This function now accepts optional arguments from the stats_recalculated signal.
+func update_stats(p_arg1 = {}, _p_arg2 = 0.0):
+	# This function is now called by the stats_recalculated signal (with floats)
+	# AND directly by the WeaponManager (with a Dictionary).
+	# We only update specific_weapon_stats if a dictionary is passed.
+	if p_arg1 is Dictionary and not p_arg1.is_empty():
+		specific_weapon_stats = p_arg1.duplicate(true)
+		
 	if not is_instance_valid(_owner_player_stats): return
 
 	orbit_radius = float(specific_weapon_stats.get(&"orbit_radius", 60.0))
 	var rotation_duration = float(specific_weapon_stats.get(&"rotation_duration", 4.0))
 	if rotation_duration > 0: rotation_speed = TAU / rotation_duration
 	
-	attack_cooldown = float(specific_weapon_stats.get(&"attack_cooldown", 2.0))
 	attack_range = float(specific_weapon_stats.get(&"attack_range", 180.0))
+
+	# --- CORRECTED COOLDOWN LOGIC ---
+	# 1. Always start with the base cooldown value from the weapon's stats.
+	var base_cooldown = float(specific_weapon_stats.get(&"attack_cooldown", 2.0))
 	
-	var final_cooldown = attack_cooldown / _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	# 2. Get the player's global multipliers.
+	var global_attack_speed_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.ATTACK_SPEED_MULTIPLIER)
+	var global_cooldown_mult = _owner_player_stats.get_final_stat(PlayerStatKeys.Keys.GLOBAL_COOLDOWN_REDUCTION_MULT)
+	
+	# 3. Calculate the final cooldown by applying the multipliers.
+	var final_cooldown = base_cooldown
+	if global_attack_speed_mult > 0.01:
+		final_cooldown /= global_attack_speed_mult
+	if global_cooldown_mult > 0.01:
+		final_cooldown *= global_cooldown_mult
+		
 	_attack_cooldown_timer.wait_time = maxf(0.1, final_cooldown)
+	# --- END OF CORRECTION ---
 
 	var base_scale_x = float(specific_weapon_stats.get(&"inherent_visual_scale_x", 0.08))
 	var base_scale_y = float(specific_weapon_stats.get(&"inherent_visual_scale_y", 0.08))
@@ -85,12 +116,22 @@ func _on_attack_cooldown_timeout():
 		_fire_at_target(target)
 
 func _fire_ethereal_barrage(target: Node2D):
+	if not is_instance_valid(target): return
+	var target_id = target.get_instance_id()
 	# This timer-based approach prevents the 'Cannot convert argument' error.
 	# The 'target' reference is only used when the timer is created. The firing
 	# function will then check if the target is still valid when it executes.
-	get_tree().create_timer(0.0).timeout.connect(_fire_at_target.bind(target))
-	get_tree().create_timer(0.05).timeout.connect(_fire_at_target.bind(target))
-	get_tree().create_timer(0.1).timeout.connect(_fire_at_target.bind(target))
+	# Bind the instance ID instead of the node itself to prevent errors if the target is destroyed.
+	get_tree().create_timer(0.0).timeout.connect(_fire_at_target_by_id.bind(target_id))
+	get_tree().create_timer(0.05).timeout.connect(_fire_at_target_by_id.bind(target_id))
+	get_tree().create_timer(0.1).timeout.connect(_fire_at_target_by_id.bind(target_id))
+
+# NEW: This function safely retrieves the target from its ID before firing.
+func _fire_at_target_by_id(target_id: int):
+	var target = instance_from_id(target_id) as Node2D
+	# The original _fire_at_target function already handles invalid targets,
+	# so we can just call it directly.
+	_fire_at_target(target)
 
 func _fire_at_target(target: Node2D):
 	# CORE FIX: Check if the target is still valid before firing.

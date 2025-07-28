@@ -7,7 +7,7 @@
 [resource]
 script = ExtResource("3_ekwf8")
 upgrade_id = &"rfb_spell_siphon"
-title = "Spell Siphon"
+title = "Soul Sustenance"
 description = "Each time any of the Echo's Primary Projectiles hit an enemy, the main cooldown of 'Return from Beyond' is reduced by 0.05s."
 prerequisites_on_this_weapon = Array[StringName]([])
 weight = 100.0

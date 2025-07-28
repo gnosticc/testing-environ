@@ -33,7 +33,9 @@ func initialize(p_target: BaseEnemy, p_stats: Dictionary, p_player_stats: Player
 	speed = float(p_stats.get("sentry_projectile_speed", 400.0)) * p_player_stats.get_final_stat(PlayerStatKeys.Keys.PROJECTILE_SPEED_MULTIPLIER)
 	
 	var damage_percent = float(p_stats.get("sentry_damage_percent", 0.8)) * float(p_stats.get("turret_damage_mult", 1.0))
-	var weapon_tags: Array[StringName] = p_stats.get("tags", [])
+	var weapon_tags: Array[StringName] = []
+	if p_stats.has("tags"):
+		weapon_tags = p_stats.get("tags")
 	var base_damage = p_player_stats.get_calculated_base_damage(damage_percent)
 	var final_damage = p_player_stats.apply_tag_damage_multipliers(base_damage, weapon_tags)
 	damage = int(final_damage)

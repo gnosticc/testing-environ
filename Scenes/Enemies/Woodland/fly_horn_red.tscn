@@ -1,0 +1,86 @@
+[gd_scene load_steps=9 format=3 uid="uid://ce2yotm7pnsm7"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_y3sor"]
+[ext_resource type="Texture2D" uid="uid://by6fltxhy1odr" path="res://Assets/Enemy Animations/Woodland/Fly Horn Red Animation.png" id="2_ixidi"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yubhj"]
+atlas = ExtResource("2_ixidi")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g3spw"]
+atlas = ExtResource("2_ixidi")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fbodq"]
+atlas = ExtResource("2_ixidi")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mfip1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yubhj")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yubhj")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yubhj")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yubhj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g3spw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fbodq")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tmbeh"]
+radius = 7.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_lb86f"]
+radius = 5.0
+
+[node name="BaseEnemy" instance=ExtResource("1_y3sor")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_mfip1")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, -2)
+shape = SubResource("CircleShape2D_tmbeh")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, -2)
+shape = SubResource("CircleShape2D_lb86f")
+
+[node name="HealthBar" parent="." index="4"]
+visible = true
+offset_left = -8.0
+offset_top = -14.0
+offset_right = 9.0
+offset_bottom = -11.0

@@ -1,0 +1,71 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://djk5hnbslfl36"]
+
+[ext_resource type="Script" uid="uid://bne1xvfyu24jb" path="res://Scripts/DataResources/EnemyData.gd" id="1_lb6ir"]
+[ext_resource type="PackedScene" uid="uid://d0186rwva3ww5" path="res://Scenes/Enemies/Projectiles and Weapons/CreeperBullet.tscn" id="1_s1m1q"]
+
+[resource]
+script = ExtResource("1_lb6ir")
+id = &"fly_horn_red"
+display_name = "Red Horn Fly"
+scene_path = "uid://ce2yotm7pnsm7"
+min_DDS_to_spawn = 60.0
+max_DDS_to_spawn = 300.0
+spawn_weight = 100.0
+ideal_active_pool_slot_cost = 1
+base_health = 90
+base_contact_damage = 8
+base_speed = 55.0
+base_armor = 0
+base_exp_drop = 12
+exp_drop_scene_path = "uid://dcvcwoxeugnko"
+sprite_modulate_color = Color(1, 1, 1, 1)
+sprite_faces_left_by_default = false
+behavior_tags = Array[StringName]([&"creeper", &"wave"])
+elite_icon_offset = Vector2(0, 0)
+elite_icon_scale_multiplier = 1.0
+wave_amplitude = 70.0
+wave_frequency = 5.0
+wave_disable_range = 80.0
+dive_speed_multiplier = 1.0
+retreat_speed_multiplier = 1.5
+stalking_speed_multiplier = 1.0
+hover_distance = 150.0
+attack_cooldown = 2.0
+retreat_angle_variance = 20.0
+stalk_reverse_direction_chance = 0.1
+normal_chase_range = 150.0
+charge_trigger_range = 300.0
+charge_trigger_timer = 3.0
+charge_telegraph_duration = 0.8
+charge_speed_multiplier = 5.0
+charge_max_distance = 500.0
+post_charge_stun_duration = 1.5
+charge_homing_strength = 1.0
+split_enemy_id = &""
+split_count = 2
+split_scale_multiplier = 0.75
+creeper_bullet_scene = ExtResource("1_s1m1q")
+creeper_bullet_count = 8
+creeper_bullet_speed = 200.0
+creeper_bullet_damage = 5.0
+creeper_telegraph_duration = 2.0
+creeper_fire_interval = 0.2
+berserker_wave_radius = 200.0
+berserker_buff_duration = 5.0
+berserker_speed_multiplier = 1.5
+link_heal_percent = 0.33
+elite_types_available = Array[StringName]([])
+min_DDS_for_elites_to_appear = 50.0
+phaser_cooldown = 5.0
+phaser_teleport_distance = 150.0
+summoner_interval = 1.0
+summoner_max_active_minions = 3
+summoner_minion_ids = Array[StringName]([])
+shaman_heal_radius = 120.0
+shaman_heal_percent = 0.1
+shaman_heal_interval = 1.0
+time_warp_radius = 180.0
+time_warp_slow_percent = 0.25
+time_warp_linger_duration = 2.0
+threat_value_when_culled = 1
+metadata/_custom_type_script = "uid://bne1xvfyu24jb"

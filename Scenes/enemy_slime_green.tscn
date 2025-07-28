@@ -1,8 +1,11 @@
-[gd_scene load_steps=14 format=3 uid="uid://ogopd76rmwey"]
+[gd_scene load_steps=16 format=3 uid="uid://ogopd76rmwey"]
 
 [ext_resource type="Script" uid="uid://bdukvx62op55g" path="res://Scripts/enemy_slime_green.gd" id="1_me57i"]
 [ext_resource type="Texture2D" uid="uid://b3o4twrxd3yi6" path="res://Assets/Green Slime Enemy Sheet 1 alpha layer.png" id="1_vs6ub"]
 [ext_resource type="Script" uid="uid://beexf6tvvofb5" path="res://Scripts/StatusEffects/StatusEffectComponent.gd" id="3_syyvh"]
+[ext_resource type="Script" uid="uid://pvu78uycb4rf" path="res://Scripts/Enemies/HitAndRunBehavior.gd" id="4_5ook2"]
+[ext_resource type="Script" uid="uid://bb4gofnd2upq4" path="res://Scripts/Enemies/JuggernautBehavior.gd" id="5_1bb7e"]
+[ext_resource type="Script" uid="uid://bwu2r4br4y50x" path="res://Scripts/Enemies/OnDeathBehaviorHandler.gd" id="6_gn4o1"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5ook2"]
 atlas = ExtResource("1_vs6ub")
@@ -28,6 +31,14 @@ animations = [{
 }],
 "loop": false,
 "name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1bb7e")
+}],
+"loop": false,
+"name": &"death",
 "speed": 5.0
 }, {
 "frames": [{
@@ -70,20 +81,16 @@ radius = 54.9614
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5ook2"]
 bg_color = Color(0.855745, 0.0366383, 0.247622, 1)
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_syyvh"]
-radius = 10.5409
-
 [node name="enemy_slime_green" type="CharacterBody2D" groups=["enemies"]]
 scale = Vector2(0.3, 0.3)
 collision_layer = 8
-collision_mask = 136
+collision_mask = 128
 script = ExtResource("1_me57i")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 scale = Vector2(0.3, 0.3)
 sprite_frames = SubResource("SpriteFrames_gn4o1")
-animation = &"attack"
-autoplay = "walk"
+animation = &"walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-1.19209e-07, 0)
@@ -113,14 +120,6 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_5ook2")
 show_percentage = false
 metadata/_edit_use_anchors_ = true
 
-[node name="SeparationDetector" type="Area2D" parent="."]
-collision_layer = 0
-collision_mask = 8
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="SeparationDetector"]
-position = Vector2(1.04904e-05, 0)
-shape = SubResource("CircleShape2D_syyvh")
-
 [node name="SlowEffectTimer" type="Timer" parent="."]
 one_shot = true
 
@@ -129,3 +128,18 @@ one_shot = true
 
 [node name="StatusEffectComponent" type="Node" parent="."]
 script = ExtResource("3_syyvh")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
+avoidance_enabled = true
+radius = 8.0
+
+[node name="HitAndRunBehavior" type="Node" parent="."]
+script = ExtResource("4_5ook2")
+
+[node name="JuggernautBehavior" type="Node" parent="."]
+script = ExtResource("5_1bb7e")
+
+[node name="EliteMarkersContainer" type="Node2D" parent="."]
+
+[node name="OnDeathBehaviorHandler" type="Node" parent="."]
+script = ExtResource("6_gn4o1")

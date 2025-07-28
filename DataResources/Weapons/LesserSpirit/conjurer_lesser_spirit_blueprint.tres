@@ -28,6 +28,7 @@ spawn_as_child = false
 requires_direction = false
 targeting_type = "none"
 tracks_shot_count = false
+weight = 50.0
 initial_specific_stats = {
 "attack_cooldown": 0.8,
 "attack_range": 120.0,
