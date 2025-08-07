@@ -1,0 +1,91 @@
+[gd_scene load_steps=10 format=3 uid="uid://bssq8jouf2iw5"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_rd2ku"]
+[ext_resource type="Texture2D" uid="uid://2ejh0342qm74" path="res://Assets/Enemy Animations/Woodland/Minotaur Animation.png" id="2_retf4"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mgf7m"]
+atlas = ExtResource("2_retf4")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hpuw6"]
+atlas = ExtResource("2_retf4")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0mwbo"]
+atlas = ExtResource("2_retf4")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v18sg"]
+atlas = ExtResource("2_retf4")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_l6j6n"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mgf7m")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mgf7m")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mgf7m")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hpuw6")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0mwbo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v18sg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mgf7m")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_rd2ku"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_retf4"]
+radius = 7.0
+
+[node name="BaseEnemy" instance=ExtResource("1_rd2ku")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.125, 0.125)
+sprite_frames = SubResource("SpriteFrames_l6j6n")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_rd2ku")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_retf4")
+
+[node name="HealthBar" parent="." index="4"]
+visible = true
+offset_left = -6.0
+offset_top = -8.0
+offset_right = 6.0
+offset_bottom = -6.0

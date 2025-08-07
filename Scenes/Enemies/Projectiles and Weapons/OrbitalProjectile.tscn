@@ -1,0 +1,64 @@
+[gd_scene load_steps=10 format=3 uid="uid://bbs5nkwywlv7y"]
+
+[ext_resource type="Script" uid="uid://5wiin0qbwavy" path="res://Scripts/Enemies/Projectiles and Weapons/OrbitalProjectile.gd" id="1_wqakk"]
+[ext_resource type="Texture2D" uid="uid://bhoq6aoxo3i4g" path="res://Assets/Enemy Animations/Projectiles/Orbital Projectile Animation.png" id="2_cmafp"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wykv2"]
+atlas = ExtResource("2_cmafp")
+region = Rect2(0, 0, 85, 85)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4ujmg"]
+atlas = ExtResource("2_cmafp")
+region = Rect2(85, 0, 85, 85)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1a5j5"]
+atlas = ExtResource("2_cmafp")
+region = Rect2(170, 0, 85, 85)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3b6fd"]
+atlas = ExtResource("2_cmafp")
+region = Rect2(255, 0, 85, 85)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4jfq5"]
+atlas = ExtResource("2_cmafp")
+region = Rect2(340, 0, 85, 85)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_20vtx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wykv2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4ujmg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1a5j5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3b6fd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4jfq5")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_g0up3"]
+radius = 4.0
+
+[node name="OrbitalProjectile" type="Area2D"]
+collision_layer = 16
+collision_mask = 130
+script = ExtResource("1_wqakk")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(0.15, 0.15)
+sprite_frames = SubResource("SpriteFrames_20vtx")
+autoplay = "default"
+frame_progress = 0.716504
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_g0up3")

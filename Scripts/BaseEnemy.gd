@@ -36,6 +36,7 @@ var _behavior_override_active: bool = false
 @onready var health_bar: ProgressBar = $HealthBar
 @onready var navigation_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var elite_markers_container: Node2D = $EliteMarkersContainer
+var status_icon_display: StatusIconDisplay 
 var status_effect_component: StatusEffectComponent = null
 var _attack_anim_timer: Timer
 var _dynamic_nav_manager: DynamicNavigationManager
@@ -43,6 +44,8 @@ var _hit_and_run_component: HitAndRunBehavior
 var _juggernaut_component: JuggernautBehavior
 var _on_death_component: OnDeathBehaviorHandler
 var _wave_movement_component: WaveMovementBehavior # New component reference
+var _ranged_behavior_component: RangedBehavior
+var _orbital_behavior_component: OrbitalBehavior
 
 # --- Formation Logic ---
 var horde_manager: HordeFormationManager
@@ -98,8 +101,19 @@ func _ready():
 	_juggernaut_component = get_node_or_null("JuggernautBehavior")
 	_on_death_component = get_node_or_null("OnDeathBehaviorHandler")
 	_wave_movement_component = get_node_or_null("WaveMovementBehavior")
+	_ranged_behavior_component = get_node_or_null("RangedBehavior")
+	_orbital_behavior_component = get_node_or_null("OrbitalBehavior")
 	# --- END COMPONENT CHECKS ---
 
+	status_icon_display = get_node_or_null("StatusIconDisplay") as StatusIconDisplay
+	if is_instance_valid(status_icon_display):
+		if status_icon_display.has_method("initialize"):
+			status_icon_display.initialize(self)
+		else:
+			push_warning("BaseEnemy '", name, "': StatusIconDisplay is missing its initialize() method.")
+	else:
+		push_warning("BaseEnemy '", name, "': StatusIconDisplay node not found. Status icons will not appear.")
+		
 	horde_manager = get_tree().root.get_node_or_null("Game/HordeFormationManager")
 	if not is_instance_valid(horde_manager):
 		push_warning("BaseEnemy: HordeFormationManager not found. Enemies will clump.")
@@ -161,6 +175,10 @@ func initialize_from_data(data: EnemyData):
 		_on_death_component.initialize(self)
 	if is_instance_valid(_wave_movement_component):
 		_wave_movement_component.initialize(self)
+	if is_instance_valid(_ranged_behavior_component):
+		_ranged_behavior_component.initialize(self)
+	if is_instance_valid(_orbital_behavior_component):
+		_orbital_behavior_component.initialize(self)
 	# --- End Initialize ---
 	
 	_is_data_initialized = true
@@ -174,13 +192,17 @@ func _adjust_ui_positions():
 		var frame_texture = animated_sprite.sprite_frames.get_frame_texture(&"walk", 0)
 		if not frame_texture:
 			frame_texture = animated_sprite.sprite_frames.get_frame_texture(&"idle", 0)
-		
 		if frame_texture and is_instance_valid(elite_markers_container):
 			var sprite_height = frame_texture.get_height()
 			var final_visual_scale_y = scale.y * animated_sprite.scale.y
 			elite_markers_container.position.y = - (sprite_height / 2.0) * final_visual_scale_y - 5
 			elite_markers_container.position.x = enemy_data_resource.elite_icon_offset.x
 			elite_markers_container.position.y += enemy_data_resource.elite_icon_offset.y
+	var status_icon_anchor = get_node_or_null("StatusIconAnchor")
+	if is_instance_valid(status_icon_display) and is_instance_valid(status_icon_anchor):
+		# The StatusIconDisplay is a child of BaseEnemy, so we set its local position
+		# to match the local position of the anchor point.
+		status_icon_display.position = status_icon_anchor.position
 
 # ... (_on_initial_bake_complete, _try_start_chasing, _start_chasing are unchanged) ...
 func _on_initial_bake_complete():
@@ -230,26 +252,33 @@ func _physics_process(delta: float):
 			_state_transition_logic()
 		
 		State.CHASING:
-			if is_instance_valid(player_node) and is_instance_valid(navigation_agent):
-				var target_position = player_node.global_position
-				
-				# Juggernauts don't use the formation
-				if is_instance_valid(horde_manager) and assigned_slot_index != -1 and not behavior_tags.has(&"juggernaut"):
-					target_position += horde_manager.get_slot_offset(assigned_slot_index)
-				
-				navigation_agent.target_position = target_position
-				
-				if not navigation_agent.is_navigation_finished():
-					var next_pos = navigation_agent.get_next_path_position()
-					var move_direction = global_position.direction_to(next_pos)
-					velocity = move_direction * move_speed
+			# --- NEW: Delegate to RangedBehavior if applicable ---
+			if is_instance_valid(_ranged_behavior_component) and behavior_tags.has(&"ranged"):
+				velocity = _ranged_behavior_component.process_behavior(velocity, delta)
+			elif is_instance_valid(_orbital_behavior_component) and behavior_tags.has(&"orbital"):
+				velocity = _orbital_behavior_component.process_behavior(velocity, delta)
+			# --- ELSE: Use existing melee/pathfinding logic ---
+			else:
+				if is_instance_valid(player_node) and is_instance_valid(navigation_agent):
+					var target_position = player_node.global_position
 					
-			if is_instance_valid(_wave_movement_component) and behavior_tags.has(&"wave"):
-				velocity = _wave_movement_component.get_modified_velocity(delta, velocity)
+					# Juggernauts don't use the formation
+					if is_instance_valid(horde_manager) and assigned_slot_index != -1 and not behavior_tags.has(&"juggernaut"):
+						target_position += horde_manager.get_slot_offset(assigned_slot_index)
+					
+					navigation_agent.target_position = target_position
+					
+					if not navigation_agent.is_navigation_finished():
+						var next_pos = navigation_agent.get_next_path_position()
+						var move_direction = global_position.direction_to(next_pos)
+						velocity = move_direction * move_speed
+						
+				if is_instance_valid(_wave_movement_component) and behavior_tags.has(&"wave"):
+					velocity = _wave_movement_component.get_modified_velocity(delta, velocity)
 
-			# Check for Juggernaut charge conditions
-			if is_instance_valid(_juggernaut_component) and behavior_tags.has(&"juggernaut"):
-				_juggernaut_component.check_charge_conditions()
+				# Check for Juggernaut charge conditions
+				if is_instance_valid(_juggernaut_component) and behavior_tags.has(&"juggernaut"):
+					_juggernaut_component.check_charge_conditions()
 			
 			_state_transition_logic()
 
@@ -388,10 +417,13 @@ func _die(killer_node: Node = null):
 	
 	_change_state(State.DEATH)
 	
-	# --- SOLUTION: Defer the call to the component ---
+	var on_death_effect_duration = 0.0
 	if is_instance_valid(_on_death_component):
-		_on_death_component.call_deferred("execute_on_death_effects")
-	# --- END SOLUTION ---
+		on_death_effect_duration = _on_death_component.execute_on_death_effects()
+	
+	# If no long-running effect is happening, play the death animation now.
+	if on_death_effect_duration == 0.0:
+		_change_state(State.DEATH)
 	
 	if is_instance_valid(status_effect_component) and status_effect_component.has_status_effect(&"death_mark"):
 		var effect_entry = status_effect_component.active_effects.get("death_mark")
@@ -439,7 +471,44 @@ func _die(killer_node: Node = null):
 		var da_col_shape = damage_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		if is_instance_valid(da_col_shape): da_col_shape.call_deferred("set_disabled", true)
 		damage_area.call_deferred("set_monitoring", false)
-	get_tree().create_timer(1.0).timeout.connect(queue_free)
+	
+	# --- SOLUTION: Use the calculated duration to delay destruction ---
+	var death_anim_duration = 1.0 # Assuming death animation is 1 second
+	var total_delay = death_anim_duration + on_death_effect_duration
+	get_tree().create_timer(total_delay).timeout.connect(queue_free)
+	# --- END SOLUTION ---
+
+# NEW: Public function for OnDeathBehaviorHandler to trigger telegraph visuals
+func play_on_death_telegraph(duration: float):
+	if not is_instance_valid(animated_sprite): return
+	
+	animated_sprite.stop()
+	
+	var original_scale = animated_sprite.scale
+	
+	var tween = create_tween().set_loops(int(duration / 0.4))
+	
+	# --- SOLUTION: Corrected Godot 4 Tweening without 'chain()' or 'as_parallel()' ---
+	# In Godot 4, you create sequences by calling tween_property one after another.
+	# You create parallel animations by setting the final argument of the second
+	# tween_property to true, or by calling .as_parallel() on the tweener itself.
+	
+	# First half of the pulse (0.2 seconds)
+	tween.tween_property(animated_sprite, "modulate", Color(1.0, 0.5, 0.5), 0.2)
+	tween.parallel().tween_property(animated_sprite, "scale", original_scale * 1.2, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	
+	# Second half of the pulse (next 0.2 seconds)
+	tween.tween_property(animated_sprite, "modulate", _final_base_modulate_color, 0.2)
+	tween.parallel().tween_property(animated_sprite, "scale", original_scale, 0.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	# --- END SOLUTION ---
+
+	tween.finished.connect(
+		func():
+			if is_instance_valid(self) and is_instance_valid(animated_sprite):
+				animated_sprite.modulate = _final_base_modulate_color
+				animated_sprite.scale = original_scale
+				_change_state(State.DEATH)
+	)
 
 func _on_attack_anim_timer_timeout():
 	emit_signal("attack_animation_completed")
@@ -552,6 +621,10 @@ func update_health_bar():
 		health_bar.max_value = maxf(1.0, max_health)
 		health_bar.value = current_health
 		health_bar.visible = (current_health < max_health and current_health > 0)
+func heal(heal_amount: float):
+	if is_dead_flag: return
+	current_health = minf(max_health, current_health + heal_amount)
+	update_health_bar()
 func make_elite(p_elite_type: StringName, p_elite_DDS_contribution: float = 0.0, p_base_data_for_elite: EnemyData = null):
 	is_elite = true
 	elite_type_tag = p_elite_type

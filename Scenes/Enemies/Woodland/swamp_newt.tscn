@@ -1,0 +1,90 @@
+[gd_scene load_steps=9 format=3 uid="uid://dlyiu43amctac"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_v4s8e"]
+[ext_resource type="Texture2D" uid="uid://b6alvrp6r2isu" path="res://Assets/Enemy Animations/Woodland/Swamp Newt Animation.png" id="2_0ekbs"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bxj37"]
+atlas = ExtResource("2_0ekbs")
+region = Rect2(0, 0, 215, 90)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_435tx"]
+atlas = ExtResource("2_0ekbs")
+region = Rect2(215, 0, 215, 90)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g2bpi"]
+atlas = ExtResource("2_0ekbs")
+region = Rect2(430, 0, 215, 90)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_axyga"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bxj37")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bxj37")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bxj37")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bxj37")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_435tx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g2bpi")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_58cs0"]
+radius = 4.0
+height = 22.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ukii0"]
+radius = 2.0
+height = 20.0
+
+[node name="BaseEnemy" instance=ExtResource("1_v4s8e")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_axyga")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_58cs0")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_ukii0")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -8.0
+offset_top = -6.0
+offset_right = 8.0
+offset_bottom = -4.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-8, -6)

@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://d4i5n60q7avvn"]
+
+[ext_resource type="Script" uid="uid://b6264wke8olgb" path="res://Scripts/DataResources/Effects/StatusEffectVisual.gd" id="1_3d7ph"]
+[ext_resource type="Texture2D" uid="uid://2rg1socddyjp" path="res://Assets/UI/Icons/Elites/Swift.png" id="1_xrcnn"]
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_3d7ph")
+
+[node name="HasteEffectIcon" type="Sprite2D" parent="."]
+scale = Vector2(0.04, 0.05)
+texture = ExtResource("1_xrcnn")

@@ -36,9 +36,9 @@ var current_experience: int = 0
 var experience_to_next_level: int = 10
 var current_level: int = 1
 
-const LINEAR_FACTOR_PER_LEVEL: int = 10
+const LINEAR_FACTOR_PER_LEVEL: int = 40
 const BASE_FOR_EXPONENTIAL_PART: int = 10
-const EXPONENTIAL_SCALING_FACTOR: float = 1.4
+const EXPONENTIAL_SCALING_FACTOR: float = 1.25
 
 # --- Class Progression Tracking ---
 enum BasicClass {
@@ -67,6 +67,9 @@ var _tactician_bonus_armor: int = 0
 var _tactician_timer: Timer
 var _temp_max_health_bonus: float = 0.0
 var _temp_health_decay_timer: Timer
+
+var knockback_velocity: Vector2 = Vector2.ZERO
+var external_forces: Vector2 = Vector2.ZERO
 
 const SHADOW_CLONE_SCENE = preload("res://Scenes/Weapons/Advanced/Summons/ShadowClone.tscn")
 
@@ -405,9 +408,16 @@ func _physics_process(delta: float):
 		velocity = Vector2.ZERO
 		if animated_sprite and animated_sprite.animation != &"idle":
 			animated_sprite.play(&"idle")
-	
+
+	# Add any external forces (like from the gravity well) to the velocity
+	if external_forces.length_squared() > 0:
+		velocity += external_forces
+		
 	move_and_slide()
-	
+
+	# Reset external forces each frame so they don't accumulate indefinitely
+	external_forces = Vector2.ZERO
+
 	# --- REVISED: Health Regeneration ---
 	if is_instance_valid(player_stats):
 		var current_max_hp = player_stats.current_max_health
@@ -784,6 +794,12 @@ func _on_death_mark_triggered(enemy_position: Vector2, clone_stats: Dictionary):
 
 		if clone.has_method("initialize"):
 			clone.initialize(direction, clone_stats, player_stats)
+
+func get_current_velocity() -> Vector2:
+	return velocity
+
+func apply_external_force(force: Vector2):
+	external_forces += force
 
 # NEW: Public debug functions to be called by the DebugPanel.
 

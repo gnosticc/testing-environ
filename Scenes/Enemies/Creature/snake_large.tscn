@@ -1,0 +1,85 @@
+[gd_scene load_steps=9 format=3 uid="uid://bue2kddk8x8xd"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_s8pvj"]
+[ext_resource type="Texture2D" uid="uid://b05epiocdyftb" path="res://Assets/Enemy Animations/Creature/Snake Large Animation.png" id="2_hrl5h"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8vcni"]
+atlas = ExtResource("2_hrl5h")
+region = Rect2(0, 0, 256, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1hcve"]
+atlas = ExtResource("2_hrl5h")
+region = Rect2(256, 0, 256, 192)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6dmaq"]
+atlas = ExtResource("2_hrl5h")
+region = Rect2(512, 0, 256, 192)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_udyey"]
+animations = [{
+"frames": [],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8vcni")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1hcve")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6dmaq")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_s8pvj"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hrl5h"]
+radius = 8.0
+height = 24.0
+
+[node name="BaseEnemy" instance=ExtResource("1_s8pvj")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.18, 0.18)
+sprite_frames = SubResource("SpriteFrames_udyey")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.46118
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(-7, 1)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_s8pvj")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(-8, 2)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_hrl5h")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -19.0
+offset_top = -13.0
+offset_right = 2.0
+offset_bottom = -11.0
+
+[node name="StatusIconDisplay" parent="." index="12"]
+position = Vector2(0, 1)
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-19, -13)

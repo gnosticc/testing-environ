@@ -1,0 +1,84 @@
+[gd_scene load_steps=10 format=3 uid="uid://cb7g2er2dar74"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_s3scy"]
+[ext_resource type="Texture2D" uid="uid://c02hcn31kyofa" path="res://Assets/Enemy Animations/Arcane/Warlock Mob Animation.png" id="2_r3qna"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fqisc"]
+atlas = ExtResource("2_r3qna")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ktu4j"]
+atlas = ExtResource("2_r3qna")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_28hs6"]
+atlas = ExtResource("2_r3qna")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0twp1"]
+atlas = ExtResource("2_r3qna")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fp4gb"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fqisc")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ktu4j")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_28hs6")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0twp1")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_v3c7i"]
+radius = 15.1327
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pj0ra"]
+radius = 7.61577
+
+[node name="BaseEnemy" instance=ExtResource("1_s3scy")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.25, 0.25)
+sprite_frames = SubResource("SpriteFrames_fp4gb")
+animation = &"attack"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_v3c7i")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_pj0ra")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -12.0
+offset_top = -16.0
+offset_right = 12.0
+offset_bottom = -13.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-12, -16)

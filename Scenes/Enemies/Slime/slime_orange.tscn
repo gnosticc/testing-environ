@@ -1,0 +1,99 @@
+[gd_scene load_steps=11 format=3 uid="uid://bd15c6wl5arnw"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_ff6sa"]
+[ext_resource type="Texture2D" uid="uid://bp7qdejgyq21d" path="res://Assets/Enemy Animations/Slime/Orange Slime Animation.png" id="2_wt5g2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ffgou"]
+atlas = ExtResource("2_wt5g2")
+region = Rect2(1000, 0, 250, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7hk2l"]
+atlas = ExtResource("2_wt5g2")
+region = Rect2(0, 0, 250, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gt7gr"]
+atlas = ExtResource("2_wt5g2")
+region = Rect2(250, 0, 250, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yik2w"]
+atlas = ExtResource("2_wt5g2")
+region = Rect2(500, 0, 250, 175)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p57hw"]
+atlas = ExtResource("2_wt5g2")
+region = Rect2(750, 0, 250, 175)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_n81cw"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ffgou")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7hk2l")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7hk2l")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7hk2l")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gt7gr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yik2w")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p57hw")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2eaia"]
+radius = 16.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_rbppv"]
+radius = 13.0
+
+[node name="BaseEnemy" instance=ExtResource("1_ff6sa")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_n81cw")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(1, 5)
+shape = SubResource("CircleShape2D_2eaia")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(2, 4)
+shape = SubResource("CircleShape2D_rbppv")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -16.0
+offset_top = -13.0
+offset_right = 16.0
+offset_bottom = -9.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-16, -13)

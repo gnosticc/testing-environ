@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://c0mpob7w3y863"]
+
+[ext_resource type="Texture2D" uid="uid://bis5quouhq4ap" path="res://Assets/Enemy Animations/Projectiles/Red Bullet Animation.png" id="1_0pifm"]
+[ext_resource type="Script" uid="uid://ek0icmtl3wft" path="res://Scripts/Enemies/Projectiles and Weapons/RangedProjectile.gd" id="1_id8t6"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_id8t6"]
+radius = 4.0
+
+[node name="RangedProjectile" type="Area2D"]
+script = ExtResource("1_id8t6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_id8t6")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.06, 0.06)
+texture = ExtResource("1_0pifm")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+rect = Rect2(-4, -4, 8, 8)

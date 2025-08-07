@@ -1,0 +1,78 @@
+[gd_scene load_steps=8 format=3 uid="uid://4bkipl4q4dhu"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_ydivv"]
+[ext_resource type="Texture2D" uid="uid://nf5xwph8ofvy" path="res://Assets/Enemy Animations/Demon/Red Imp Small Animation.png" id="2_v6jln"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j0plj"]
+atlas = ExtResource("2_v6jln")
+region = Rect2(205, 0, 205, 280)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rmb1t"]
+atlas = ExtResource("2_v6jln")
+region = Rect2(0, 0, 205, 280)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_psult"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j0plj")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j0plj")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j0plj")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rmb1t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_j0plj")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 4.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pflmk"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_otwaa"]
+radius = 7.0
+
+[node name="BaseEnemy" instance=ExtResource("1_ydivv")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.07, 0.07)
+sprite_frames = SubResource("SpriteFrames_psult")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_pflmk")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_otwaa")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -8.0
+offset_top = -14.0
+offset_right = 8.0
+offset_bottom = -11.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-8, -15)

@@ -1,0 +1,76 @@
+[gd_scene load_steps=8 format=3 uid="uid://c18i7joysm8ux"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_ssa0h"]
+[ext_resource type="Texture2D" uid="uid://ce47jlddbx6nr" path="res://Assets/Enemy Animations/Demon/Demon General Animation.png" id="2_tprj8"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e0qll"]
+atlas = ExtResource("2_tprj8")
+region = Rect2(0, 0, 450, 500)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3yjuj"]
+atlas = ExtResource("2_tprj8")
+region = Rect2(450, 0, 450, 500)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_536pv"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e0qll")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yjuj")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yjuj")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3yjuj")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_s1vcn"]
+radius = 17.2627
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_a6vx0"]
+radius = 11.0454
+
+[node name="BaseEnemy" instance=ExtResource("1_ssa0h")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_536pv")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_s1vcn")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_a6vx0")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -13.0
+offset_top = -15.0
+offset_right = 13.0
+offset_bottom = -13.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-13, -15)

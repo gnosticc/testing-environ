@@ -68,3 +68,4 @@ debug_panel_toggle={
 2d_physics/layer_8="world_obstacles"
 2d_physics/layer_9="player_summons_projectiles"
 2d_physics/layer_10="pets"
+2d_physics/layer_11="hazards"

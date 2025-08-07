@@ -1,0 +1,80 @@
+[gd_scene load_steps=8 format=3 uid="uid://d1pxlfx1liicj"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_hpqtt"]
+[ext_resource type="Texture2D" uid="uid://dk24rdi18jgtl" path="res://Assets/Enemy Animations/Demon/Disfigured Imp Animation.png" id="2_ox51f"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_veqs2"]
+atlas = ExtResource("2_ox51f")
+region = Rect2(300, 0, 300, 365)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0yyey"]
+atlas = ExtResource("2_ox51f")
+region = Rect2(0, 0, 300, 365)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7vjgs"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_veqs2")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_veqs2")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_veqs2")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0yyey")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_veqs2")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_afc0u"]
+radius = 18.4391
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_c0sfd"]
+radius = 16.0
+
+[node name="BaseEnemy" instance=ExtResource("1_hpqtt")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.1, 0.1)
+sprite_frames = SubResource("SpriteFrames_7vjgs")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_afc0u")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, 2)
+shape = SubResource("CircleShape2D_c0sfd")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -17.0
+offset_top = -19.0
+offset_right = 17.0
+offset_bottom = -15.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-17, -20)

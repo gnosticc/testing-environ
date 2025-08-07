@@ -1,0 +1,87 @@
+[gd_scene load_steps=9 format=3 uid="uid://bce6v04noa6jc"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_pq8od"]
+[ext_resource type="Texture2D" uid="uid://camgibt7skl04" path="res://Assets/Enemy Animations/Plant/Cactus Potted Animation.png" id="2_x2i5d"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_idc6k"]
+atlas = ExtResource("2_x2i5d")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_accnx"]
+atlas = ExtResource("2_x2i5d")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e1lak"]
+atlas = ExtResource("2_x2i5d")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_1o2q0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idc6k")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_accnx")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_accnx")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_accnx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_idc6k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e1lak")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mgdf2"]
+radius = 9.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_h4g60"]
+radius = 7.07107
+
+[node name="BaseEnemy" instance=ExtResource("1_pq8od")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_1o2q0")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_mgdf2")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_h4g60")
+
+[node name="HealthBar" parent="." index="4"]
+visible = true
+offset_left = -9.0
+offset_top = -13.0
+offset_right = 9.0
+offset_bottom = -10.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-9, -14)

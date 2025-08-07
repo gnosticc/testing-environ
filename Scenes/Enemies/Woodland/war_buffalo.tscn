@@ -1,0 +1,89 @@
+[gd_scene load_steps=9 format=3 uid="uid://dwjglystlgicp"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_e23q0"]
+[ext_resource type="Texture2D" uid="uid://dqpottquunuww" path="res://Assets/Enemy Animations/Woodland/War Buffalo Animation.png" id="2_nh17r"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c8njl"]
+atlas = ExtResource("2_nh17r")
+region = Rect2(360, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b8d1b"]
+atlas = ExtResource("2_nh17r")
+region = Rect2(0, 0, 360, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2bngn"]
+atlas = ExtResource("2_nh17r")
+region = Rect2(720, 0, 360, 350)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_qcs84"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c8njl")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b8d1b")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b8d1b")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b8d1b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c8njl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2bngn")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_2tk65"]
+radius = 15.8114
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_666of"]
+radius = 12.0416
+
+[node name="BaseEnemy" instance=ExtResource("1_e23q0")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.09, 0.09)
+sprite_frames = SubResource("SpriteFrames_qcs84")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.734338
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(1, 2)
+shape = SubResource("CircleShape2D_2tk65")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(1, 2)
+shape = SubResource("CircleShape2D_666of")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -13.0
+offset_top = -15.0
+offset_right = 15.0
+offset_bottom = -12.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-13, -15)

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="StatusEffectData" load_steps=5 format=3 uid="uid://c0hkk483xwgwx"]
+
+[ext_resource type="Script" uid="uid://bxsmlw0kr7b6" path="res://Scripts/DataResources/Effects/EffectData.gd" id="1_in2oo"]
+[ext_resource type="Resource" uid="uid://3d2173t2bx4x" path="res://DataResources/StatusEffects/Enemy Buffs/berserk_buff_effect.tres" id="2_3l33g"]
+[ext_resource type="Script" uid="uid://5du86wr4q1bj" path="res://Scripts/DataResources/StatusEffects/StatusEffectData.gd" id="2_ft3x6"]
+[ext_resource type="Texture2D" uid="uid://2rg1socddyjp" path="res://Assets/UI/Icons/Elites/Swift.png" id="3_3l33g"]
+
+[resource]
+script = ExtResource("2_ft3x6")
+id = &"berserk_buff"
+display_name = "Berserker"
+icon = ExtResource("3_3l33g")
+duration = 1.0
+is_stackable = false
+max_stacks = 1
+refresh_duration_on_reapply = true
+has_effect_on_expire = false
+unique_id = &"berserk_speed_buff"
+tick_interval = 0.0
+tick_on_application = false
+effects_while_active = Array[ExtResource("1_in2oo")]([ExtResource("2_3l33g")])
+next_status_effect_on_expire = &""
+visual_anchor_point = 0
+visual_scale_multiplier = 1.0
+metadata/_custom_type_script = "uid://5du86wr4q1bj"

@@ -35,6 +35,11 @@ enum VisualAnchor {
 # NEW: This flag allows an effect to trigger a one-shot event upon expiration.
 @export var has_effect_on_expire: bool = false
 
+# This is used to check if an effect should override another (e.g., a stronger
+# "berserk" buff replacing a weaker one). Effects that should override each other
+# must share the same unique_id.
+@export var unique_id: StringName = &""
+
 @export_group("Tick-Based Effects (for DoTs, HoTs, etc.)")
 ## Interval in seconds for tick-based effects.
 @export var tick_interval: float = 0.0

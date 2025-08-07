@@ -1,0 +1,89 @@
+[gd_scene load_steps=9 format=3 uid="uid://bdjjbv48ndma4"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_jpvmd"]
+[ext_resource type="Texture2D" uid="uid://cpdmrhwiqfdce" path="res://Assets/Enemy Animations/Arcane/Stray Water Elemental Animation.png" id="2_x5mji"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1klid"]
+atlas = ExtResource("2_x5mji")
+region = Rect2(325, 0, 325, 450)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8p78q"]
+atlas = ExtResource("2_x5mji")
+region = Rect2(650, 0, 325, 450)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b5ngy"]
+atlas = ExtResource("2_x5mji")
+region = Rect2(0, 0, 325, 450)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_wxwjx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1klid")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8p78q")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8p78q")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8p78q")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b5ngy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1klid")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_aivws"]
+radius = 7.0
+height = 20.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_mtfi0"]
+radius = 4.0
+height = 14.0
+
+[node name="BaseEnemy" instance=ExtResource("1_jpvmd")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.045, 0.045)
+sprite_frames = SubResource("SpriteFrames_wxwjx")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.19838
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CapsuleShape2D_aivws")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CapsuleShape2D_mtfi0")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -6.0
+offset_top = -10.0
+offset_right = 6.0
+offset_bottom = -8.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-6, -10)

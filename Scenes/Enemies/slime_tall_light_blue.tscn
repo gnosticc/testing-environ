@@ -89,6 +89,7 @@ shape = SubResource("CircleShape2D_6ok8a")
 shape = SubResource("CapsuleShape2D_jnhlo")
 
 [node name="HealthBar" parent="." index="4"]
+visible = true
 offset_left = -32.6667
 offset_top = -76.6667
 offset_right = 40.3333
@@ -103,3 +104,6 @@ scale = Vector2(3.18182, 2.81819)
 shape = SubResource("CapsuleShape2D_pd3n3")
 target_position = Vector2(0, 0)
 collision_mask = 130
+
+[node name="StatusIconAnchor" parent="." index="14"]
+position = Vector2(-31.8182, -77.2727)

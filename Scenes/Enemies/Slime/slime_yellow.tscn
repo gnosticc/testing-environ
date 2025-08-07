@@ -1,0 +1,96 @@
+[gd_scene load_steps=10 format=3 uid="uid://ccon5u8rotv35"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_b2rj5"]
+[ext_resource type="Texture2D" uid="uid://mw57h531ds33" path="res://Assets/Enemy Animations/Slime/Yellow Slime Animation.png" id="2_dxcux"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kh4bg"]
+atlas = ExtResource("2_dxcux")
+region = Rect2(600, 0, 200, 135)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3o1wj"]
+atlas = ExtResource("2_dxcux")
+region = Rect2(400, 0, 200, 135)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e6iaw"]
+atlas = ExtResource("2_dxcux")
+region = Rect2(0, 0, 200, 135)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xf0qb"]
+atlas = ExtResource("2_dxcux")
+region = Rect2(200, 0, 200, 135)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_uualf"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kh4bg")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3o1wj")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e6iaw")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e6iaw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xf0qb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_3o1wj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kh4bg")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_santo"]
+radius = 14.0
+height = 35.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_f5ddu"]
+radius = 14.0357
+
+[node name="BaseEnemy" instance=ExtResource("1_b2rj5")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_uualf")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(-0.5, 0)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_santo")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CircleShape2D_f5ddu")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -14.0
+offset_top = -16.0
+offset_right = 14.0
+offset_bottom = -14.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-14, -16)

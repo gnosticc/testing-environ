@@ -1,0 +1,88 @@
+[gd_scene load_steps=9 format=3 uid="uid://b1xedtv3sr75"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_6gf2n"]
+[ext_resource type="Texture2D" uid="uid://d1dfrqlqn1mht" path="res://Assets/Enemy Animations/Arcane/Arcane Floating Construct Animation.png" id="2_q35k7"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_upe3k"]
+atlas = ExtResource("2_q35k7")
+region = Rect2(260, 0, 130, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f1dms"]
+atlas = ExtResource("2_q35k7")
+region = Rect2(0, 0, 130, 150)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w28e4"]
+atlas = ExtResource("2_q35k7")
+region = Rect2(130, 0, 130, 150)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_cgjp2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_upe3k")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_upe3k")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f1dms")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f1dms")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w28e4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_upe3k")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bnswo"]
+radius = 12.0416
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_huseb"]
+
+[node name="BaseEnemy" instance=ExtResource("1_6gf2n")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_cgjp2")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.687283
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 2)
+shape = SubResource("CircleShape2D_bnswo")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, 2)
+shape = SubResource("CircleShape2D_huseb")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -12.0
+offset_top = -17.0
+offset_right = 12.0
+offset_bottom = -14.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-12, -18)

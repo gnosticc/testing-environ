@@ -1,0 +1,98 @@
+[gd_scene load_steps=10 format=3 uid="uid://ftl4ad7osvwu"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_meh4m"]
+[ext_resource type="Texture2D" uid="uid://48yhon3wfr3a" path="res://Assets/Enemy Animations/Undead/Skeleton Knight Large Animation.png" id="2_gkikl"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qhban"]
+atlas = ExtResource("2_gkikl")
+region = Rect2(500, 0, 500, 725)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_negcn"]
+atlas = ExtResource("2_gkikl")
+region = Rect2(0, 0, 500, 725)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pqpb0"]
+atlas = ExtResource("2_gkikl")
+region = Rect2(1000, 0, 500, 725)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tf2v4"]
+atlas = ExtResource("2_gkikl")
+region = Rect2(1500, 0, 500, 725)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nulf6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhban")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhban")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhban")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_negcn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qhban")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pqpb0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tf2v4")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_w7d0j"]
+radius = 11.0
+height = 42.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cf8jk"]
+radius = 9.0
+height = 40.0
+
+[node name="BaseEnemy" instance=ExtResource("1_meh4m")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.065, 0.065)
+sprite_frames = SubResource("SpriteFrames_nulf6")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.968191
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 3)
+shape = SubResource("CapsuleShape2D_w7d0j")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, 3)
+shape = SubResource("CapsuleShape2D_cf8jk")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -10.0
+offset_top = -19.0
+offset_right = 10.0
+offset_bottom = -17.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-10, -19)

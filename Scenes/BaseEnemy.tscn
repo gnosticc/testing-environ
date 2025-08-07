@@ -1,11 +1,14 @@
-[gd_scene load_steps=10 format=3 uid="uid://dxa4b1piqkc7i"]
+[gd_scene load_steps=13 format=3 uid="uid://dxa4b1piqkc7i"]
 
 [ext_resource type="Script" uid="uid://d3jpya6xyhtsw" path="res://Scripts/BaseEnemy.gd" id="1_qu00n"]
 [ext_resource type="Script" uid="uid://beexf6tvvofb5" path="res://Scripts/StatusEffects/StatusEffectComponent.gd" id="2_6epgf"]
 [ext_resource type="Script" uid="uid://pvu78uycb4rf" path="res://Scripts/Enemies/HitAndRunBehavior.gd" id="3_7iixi"]
 [ext_resource type="Script" uid="uid://bb4gofnd2upq4" path="res://Scripts/Enemies/JuggernautBehavior.gd" id="4_vogiu"]
+[ext_resource type="Script" uid="uid://ct84oimlqtcbi" path="res://Scripts/UI/StatusIconDisplay.gd" id="5_dbpgw"]
 [ext_resource type="Script" uid="uid://bwu2r4br4y50x" path="res://Scripts/Enemies/OnDeathBehaviorHandler.gd" id="5_w7a7f"]
 [ext_resource type="Script" uid="uid://dy4gmkitsh3rm" path="res://Scripts/Enemies/WaveMovementBehavior.gd" id="6_mq0h7"]
+[ext_resource type="Script" uid="uid://c8kmd872dkj5x" path="res://Scripts/Enemies/RangedBehavior.gd" id="8_j3pjd"]
+[ext_resource type="Script" uid="uid://cq02y8lng8hhd" path="res://Scripts/Enemies/OrbitalBehavior.gd" id="9_eo3k5"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_qu00n"]
 animations = [{
@@ -85,10 +88,22 @@ script = ExtResource("4_vogiu")
 
 [node name="EliteMarkersContainer" type="Node2D" parent="."]
 
+[node name="StatusIconDisplay" type="Node2D" parent="."]
+script = ExtResource("5_dbpgw")
+icon_size = 8.0
+
+[node name="StatusIconAnchor" type="Marker2D" parent="."]
+
 [node name="OnDeathBehaviorHandler" type="Node" parent="."]
 script = ExtResource("5_w7a7f")
 
 [node name="WaveMovementBehavior" type="Node" parent="."]
 script = ExtResource("6_mq0h7")
+
+[node name="RangedBehavior" type="Node" parent="."]
+script = ExtResource("8_j3pjd")
+
+[node name="OrbitalBehavior" type="Node" parent="."]
+script = ExtResource("9_eo3k5")
 
 [connection signal="timeout" from="SlowEffectTimer" to="." method="_on_slow_effect_timer_timeout"]

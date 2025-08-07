@@ -1,0 +1,81 @@
+[gd_scene load_steps=8 format=3 uid="uid://crho1vskmmtxt"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_shfmo"]
+[ext_resource type="Texture2D" uid="uid://bap8c0t1u62u3" path="res://Assets/Enemy Animations/Undead/Skeleton Greater Animation.png" id="2_j4oul"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8mwj7"]
+atlas = ExtResource("2_j4oul")
+region = Rect2(360, 0, 360, 380)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s44ae"]
+atlas = ExtResource("2_j4oul")
+region = Rect2(0, 0, 360, 380)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_fhpmx"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8mwj7")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s44ae")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s44ae")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s44ae")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8mwj7")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 3.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_shfmo"]
+radius = 11.0
+height = 32.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_j4oul"]
+radius = 8.0
+height = 24.0
+
+[node name="BaseEnemy" instance=ExtResource("1_shfmo")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.085, 0.085)
+sprite_frames = SubResource("SpriteFrames_fhpmx")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CapsuleShape2D_shfmo")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CapsuleShape2D_j4oul")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -9.0
+offset_top = -17.0
+offset_right = 9.0
+offset_bottom = -15.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-9, -17)

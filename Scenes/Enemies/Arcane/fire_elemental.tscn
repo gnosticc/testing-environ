@@ -1,0 +1,96 @@
+[gd_scene load_steps=10 format=3 uid="uid://bmrwcr0ugamyk"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_4g6w6"]
+[ext_resource type="Texture2D" uid="uid://dwubiwnlrqv5c" path="res://Assets/Enemy Animations/Arcane/Stray Fire Elemental Animation.png" id="2_25q53"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cu7de"]
+atlas = ExtResource("2_25q53")
+region = Rect2(975, 0, 325, 725)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5v7ct"]
+atlas = ExtResource("2_25q53")
+region = Rect2(0, 0, 325, 725)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_118yh"]
+atlas = ExtResource("2_25q53")
+region = Rect2(325, 0, 325, 725)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xrup4"]
+atlas = ExtResource("2_25q53")
+region = Rect2(650, 0, 325, 725)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mk66o"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cu7de")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5v7ct")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5v7ct")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5v7ct")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_118yh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xrup4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cu7de")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hnwk1"]
+radius = 7.0
+height = 26.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_v2oye"]
+radius = 5.0
+height = 20.0
+
+[node name="BaseEnemy" instance=ExtResource("1_4g6w6")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.04, 0.04)
+sprite_frames = SubResource("SpriteFrames_mk66o")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.982835
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CapsuleShape2D_hnwk1")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CapsuleShape2D_v2oye")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -7.0
+offset_top = -13.0
+offset_right = 7.0
+offset_bottom = -11.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-7, -13)

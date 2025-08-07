@@ -1,0 +1,85 @@
+[gd_scene load_steps=13 format=3 uid="uid://b43ppqjpr0tpe"]
+
+[ext_resource type="Script" uid="uid://bderacnwo7efa" path="res://Scripts/Enemies/Projectiles and Weapons/GravityWell.gd" id="1_i8lpw"]
+[ext_resource type="Texture2D" uid="uid://dbqohjvkmj2ry" path="res://Assets/Enemy Animations/Projectiles/Gravity Well Animation.png" id="2_hwt3v"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8snpq"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(0, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7ntys"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(350, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ayejd"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(700, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k4p6f"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(1050, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dkxdb"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(1400, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b5vxp"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(1750, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nnlv7"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(2100, 0, 350, 350)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lb4uj"]
+atlas = ExtResource("2_hwt3v")
+region = Rect2(2450, 0, 350, 350)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nicf1"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8snpq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7ntys")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ayejd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k4p6f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dkxdb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b5vxp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nnlv7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lb4uj")
+}],
+"loop": true,
+"name": &"active",
+"speed": 12.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_0stqb"]
+radius = 294.027
+
+[node name="GravityWell" type="Area2D"]
+collision_layer = 1024
+collision_mask = 2
+script = ExtResource("1_i8lpw")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+modulate = Color(0.1036, 0.031311, 0.148438, 1)
+sprite_frames = SubResource("SpriteFrames_nicf1")
+animation = &"active"
+autoplay = "active"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_0stqb")

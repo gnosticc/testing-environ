@@ -1,0 +1,97 @@
+[gd_scene load_steps=10 format=3 uid="uid://dwoot8kmlw5g1"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_08eci"]
+[ext_resource type="Texture2D" uid="uid://bdtv3w7grj5mu" path="res://Assets/Enemy Animations/Creature/Stone Golem Animation.png" id="2_snctm"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gnhxs"]
+atlas = ExtResource("2_snctm")
+region = Rect2(175, 0, 175, 190)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mrbf2"]
+atlas = ExtResource("2_snctm")
+region = Rect2(0, 0, 175, 190)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxtp0"]
+atlas = ExtResource("2_snctm")
+region = Rect2(350, 0, 175, 190)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_opf0a"]
+atlas = ExtResource("2_snctm")
+region = Rect2(525, 0, 175, 190)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_217o2"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gnhxs")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gnhxs")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gnhxs")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mrbf2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gnhxs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxtp0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_opf0a")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_dxgsd"]
+radius = 14.1421
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_s0tif"]
+
+[node name="BaseEnemy" instance=ExtResource("1_08eci")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.15, 0.15)
+sprite_frames = SubResource("SpriteFrames_217o2")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 1)
+shape = SubResource("CircleShape2D_dxgsd")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, 1)
+shape = SubResource("CircleShape2D_s0tif")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -10.0
+offset_top = -15.0
+offset_right = 10.0
+offset_bottom = -13.0
+
+[node name="StatusIconDisplay" parent="." index="12"]
+position = Vector2(0, 1)
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-10, -15)

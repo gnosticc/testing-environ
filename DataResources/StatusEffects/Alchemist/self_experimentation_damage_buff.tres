@@ -13,6 +13,7 @@ is_stackable = false
 max_stacks = 1
 refresh_duration_on_reapply = true
 has_effect_on_expire = false
+unique_id = &""
 tick_interval = 0.0
 tick_on_application = false
 effects_while_active = Array[ExtResource("1_ohuji")]([ExtResource("2_5fjr5")])

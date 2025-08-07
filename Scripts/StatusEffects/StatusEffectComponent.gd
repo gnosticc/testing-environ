@@ -37,6 +37,25 @@ func apply_effect(
 	if not is_instance_valid(effect_data) or effect_data.id == &"":
 		push_error("StatusEffectComponent: Invalid StatusEffectData provided."); return
 
+	if effect_data.unique_id != &"":
+		for key in active_effects:
+			var existing_effect = active_effects[key]
+			if is_instance_valid(existing_effect.data) and existing_effect.data.unique_id == effect_data.unique_id:
+				# An effect of the same unique type already exists.
+				var existing_magnitude = _get_effect_magnitude(existing_effect)
+				var new_magnitude = _get_effect_magnitude({"data": effect_data, "potency_override": potency_override})
+				
+				if new_magnitude > existing_magnitude:
+					# The new effect is stronger, so remove the old one before applying the new one.
+					remove_effect_by_unique_id(key)
+				else:
+					# The existing effect is stronger or equal, just refresh its duration and return.
+					if effect_data.refresh_duration_on_reapply and is_instance_valid(existing_effect.duration_timer):
+						var final_duration = duration_override if duration_override >= 0.0 else effect_data.duration
+						existing_effect.duration_timer.wait_time = final_duration
+						existing_effect.duration_timer.start()
+					return # Do not proceed to apply the weaker effect.
+					
 	var base_id = effect_data.id
 	var final_effect_key = base_id
 	var is_newly_applied = false
@@ -127,25 +146,26 @@ func apply_effect(
 				new_effect_entry.tick_timer = tick_timer
 				
 		active_effects[final_effect_key] = new_effect_entry
-		
+
 		if is_instance_valid(effect_data.visual_effect_scene):
 			var owner_node = get_parent()
 			if is_instance_valid(owner_node):
 				var visual_instance = effect_data.visual_effect_scene.instantiate()
 				if visual_instance.has_method("initialize"):
 					visual_instance.initialize(
-						owner_node, 
-						final_duration, 
-						effect_data.visual_anchor_point, 
+						owner_node,
+						final_duration,
+						effect_data.visual_anchor_point,
 						effect_data.visual_scale_multiplier
 					)
 				else:
 					owner_node.add_child(visual_instance)
+				# Store the reference in our dictionary entry.
+				new_effect_entry.visual_instance = visual_instance
 	
 	if is_newly_applied:
 		CombatEvents.emit_signal("status_effect_applied", get_parent(), effect_data.id, source_node)
-
-
+		
 	_recalculate_and_apply_stat_modifiers()
 	var owner_node_for_signal = get_parent()
 	if is_instance_valid(owner_node_for_signal): 
@@ -163,10 +183,11 @@ func remove_effect_by_unique_id(effect_unique_id: StringName):
 		active_effects.erase(effect_unique_id)
 		
 		if effect_entry:
-			# Clean up any timers associated with the removed effect
-			if is_instance_valid(effect_entry.duration_timer): 
+			if effect_entry.has("visual_instance") and is_instance_valid(effect_entry.get("visual_instance")):
+				effect_entry.get("visual_instance").queue_free()
+			if is_instance_valid(effect_entry.duration_timer):
 				effect_entry.duration_timer.queue_free()
-			if is_instance_valid(effect_entry.tick_timer): 
+			if is_instance_valid(effect_entry.tick_timer):
 				effect_entry.tick_timer.queue_free()
 			
 			# Recalculate stats now that the effect is gone
@@ -220,6 +241,9 @@ func _on_effect_expired(effect_unique_id: StringName):
 		active_effects.erase(effect_unique_id)
 		
 		if effect_entry:
+			if effect_entry.has("visual_instance") and is_instance_valid(effect_entry.get("visual_instance")):
+				effect_entry.get("visual_instance").queue_free()
+
 			var weapon_stats = effect_entry.weapon_stats
 			var status_data = effect_entry.data as StatusEffectData
 			var owner = get_parent()
@@ -253,6 +277,24 @@ func _on_effect_expired(effect_unique_id: StringName):
 					var next_effect_data = load(next_effect_path) as StatusEffectData
 					if is_instance_valid(next_effect_data):
 						apply_effect(next_effect_data, effect_entry.source, effect_entry.weapon_stats)
+
+func _get_effect_magnitude(effect_entry: Dictionary) -> float:
+	var magnitude = 0.0
+	var data = effect_entry.data as StatusEffectData
+	if not is_instance_valid(data): return 0.0
+	
+	for effect in data.effects_while_active:
+		if effect is StatModificationEffectData:
+			var stat_mod = effect as StatModificationEffectData
+			# For simplicity, we'll just sum the values. A more complex system
+			# might weigh different modification types differently.
+			magnitude += abs(stat_mod.get_value())
+	
+	var potency_override = effect_entry.get("potency_override", -1.0)
+	if potency_override != -1.0:
+		magnitude *= potency_override
+		
+	return magnitude
 
 # --- NEW FUNCTION to handle owner's death ---
 func _on_owner_death():

@@ -1,0 +1,89 @@
+[gd_scene load_steps=9 format=3 uid="uid://dxs0y8ve24t2t"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_op51w"]
+[ext_resource type="Texture2D" uid="uid://c6k3d4ujnphak" path="res://Assets/Enemy Animations/Demon/Sloth Demon Animation.png" id="2_6yvm2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7qpae"]
+atlas = ExtResource("2_6yvm2")
+region = Rect2(800, 0, 400, 430)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_olt86"]
+atlas = ExtResource("2_6yvm2")
+region = Rect2(0, 0, 400, 430)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_htjey"]
+atlas = ExtResource("2_6yvm2")
+region = Rect2(400, 0, 400, 430)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0ow2h"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qpae")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qpae")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qpae")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_olt86")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_htjey")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7qpae")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ejcwl"]
+radius = 9.0
+height = 26.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ooo2e"]
+radius = 6.0
+height = 16.0
+
+[node name="BaseEnemy" instance=ExtResource("1_op51w")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.05, 0.05)
+sprite_frames = SubResource("SpriteFrames_0ow2h")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CapsuleShape2D_ejcwl")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CapsuleShape2D_ooo2e")
+
+[node name="HealthBar" parent="." index="4"]
+visible = true
+offset_left = -8.0
+offset_top = -13.0
+offset_right = 8.0
+offset_bottom = -11.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-8, -13)

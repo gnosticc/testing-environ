@@ -1,0 +1,92 @@
+[gd_scene load_steps=9 format=3 uid="uid://5go78nbrtvxe"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_gcbg5"]
+[ext_resource type="Texture2D" uid="uid://20dfl5iy0310" path="res://Assets/Enemy Animations/Creature/Purple Dinosaur Animation.png" id="2_bh2bu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a4la1"]
+atlas = ExtResource("2_bh2bu")
+region = Rect2(0, 0, 250, 170)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_udpse"]
+atlas = ExtResource("2_bh2bu")
+region = Rect2(250, 0, 250, 170)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mi3t6"]
+atlas = ExtResource("2_bh2bu")
+region = Rect2(500, 0, 250, 170)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_0jbro"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4la1")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4la1")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4la1")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a4la1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_udpse")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mi3t6")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_gcbg5"]
+radius = 6.0
+height = 20.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_bh2bu"]
+radius = 5.0
+height = 14.0
+
+[node name="BaseEnemy" instance=ExtResource("1_gcbg5")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_0jbro")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, 1)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_gcbg5")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(0, 1)
+rotation = 1.57079
+shape = SubResource("CapsuleShape2D_bh2bu")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -7.0
+offset_top = -6.0
+offset_right = 7.0
+offset_bottom = -4.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-7, -6)

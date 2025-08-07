@@ -1,0 +1,88 @@
+[gd_scene load_steps=9 format=3 uid="uid://cy4upo3qut5ci"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_lfggp"]
+[ext_resource type="Texture2D" uid="uid://duordl102ctgt" path="res://Assets/Enemy Animations/Plant/Carnivorous Plant Animation.png" id="2_ha67m"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_76kr8"]
+atlas = ExtResource("2_ha67m")
+region = Rect2(250, 0, 250, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qdxiw"]
+atlas = ExtResource("2_ha67m")
+region = Rect2(500, 0, 250, 400)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i81pr"]
+atlas = ExtResource("2_ha67m")
+region = Rect2(0, 0, 250, 400)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_m5xni"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_76kr8")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qdxiw")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qdxiw")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_i81pr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_76kr8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qdxiw")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_b7tr1"]
+radius = 9.0
+height = 32.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_0luax"]
+radius = 7.0
+height = 26.0
+
+[node name="BaseEnemy" instance=ExtResource("1_lfggp")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.08, 0.08)
+sprite_frames = SubResource("SpriteFrames_m5xni")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CapsuleShape2D_b7tr1")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+shape = SubResource("CapsuleShape2D_0luax")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -7.0
+offset_top = -17.0
+offset_right = 7.0
+offset_bottom = -15.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-7, -17)

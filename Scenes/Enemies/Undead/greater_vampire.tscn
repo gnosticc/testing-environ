@@ -1,0 +1,89 @@
+[gd_scene load_steps=9 format=3 uid="uid://bejidpuqwi8j"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_itsyx"]
+[ext_resource type="Texture2D" uid="uid://boda8etovgit3" path="res://Assets/Enemy Animations/Undead/Greater Vampire Animation.png" id="2_3377e"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xvecg"]
+atlas = ExtResource("2_3377e")
+region = Rect2(1250, 0, 625, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1snbs"]
+atlas = ExtResource("2_3377e")
+region = Rect2(625, 0, 625, 440)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0i34s"]
+atlas = ExtResource("2_3377e")
+region = Rect2(0, 0, 625, 440)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_6ll5q"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xvecg")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1snbs")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1snbs")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0i34s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1snbs")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xvecg")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_rmc4h"]
+radius = 11.0454
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ksifn"]
+radius = 9.0
+
+[node name="BaseEnemy" instance=ExtResource("1_itsyx")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.05, 0.05)
+sprite_frames = SubResource("SpriteFrames_6ll5q")
+animation = &"walk"
+autoplay = "walk"
+frame_progress = 0.663888
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(2, 0)
+shape = SubResource("CircleShape2D_rmc4h")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(2, 0)
+shape = SubResource("CircleShape2D_ksifn")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -8.0
+offset_top = -10.0
+offset_right = 14.0
+offset_bottom = -8.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-8, -10)

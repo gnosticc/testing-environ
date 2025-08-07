@@ -1,0 +1,90 @@
+[gd_scene load_steps=9 format=3 uid="uid://b0ui3l7beqnpv"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_tcsqw"]
+[ext_resource type="Texture2D" uid="uid://blpa8dtw3i0x" path="res://Assets/Enemy Animations/Creature/Spider Green Spotted Animation.png" id="2_fudjh"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7eofp"]
+atlas = ExtResource("2_fudjh")
+region = Rect2(256, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xbs6y"]
+atlas = ExtResource("2_fudjh")
+region = Rect2(0, 0, 256, 256)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2wxky"]
+atlas = ExtResource("2_fudjh")
+region = Rect2(512, 0, 256, 256)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_a22ux"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7eofp")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7eofp")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7eofp")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xbs6y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2wxky")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7eofp")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_s8vpd"]
+radius = 13.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_l1hmj"]
+radius = 11.0
+
+[node name="BaseEnemy" instance=ExtResource("1_tcsqw")]
+position = Vector2(0, 1)
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.16, 0.16)
+sprite_frames = SubResource("SpriteFrames_a22ux")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(-1, 1)
+shape = SubResource("CircleShape2D_s8vpd")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(-1, 1)
+shape = SubResource("CircleShape2D_l1hmj")
+
+[node name="HealthBar" parent="." index="4"]
+visible = true
+offset_left = -13.0
+offset_top = -15.0
+offset_right = 11.0
+offset_bottom = -11.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-13, -15)

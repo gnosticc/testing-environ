@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://ogopd76rmwey"]
+[gd_scene load_steps=17 format=3 uid="uid://ogopd76rmwey"]
 
 [ext_resource type="Script" uid="uid://bdukvx62op55g" path="res://Scripts/enemy_slime_green.gd" id="1_me57i"]
 [ext_resource type="Texture2D" uid="uid://b3o4twrxd3yi6" path="res://Assets/Green Slime Enemy Sheet 1 alpha layer.png" id="1_vs6ub"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://pvu78uycb4rf" path="res://Scripts/Enemies/HitAndRunBehavior.gd" id="4_5ook2"]
 [ext_resource type="Script" uid="uid://bb4gofnd2upq4" path="res://Scripts/Enemies/JuggernautBehavior.gd" id="5_1bb7e"]
 [ext_resource type="Script" uid="uid://bwu2r4br4y50x" path="res://Scripts/Enemies/OnDeathBehaviorHandler.gd" id="6_gn4o1"]
+[ext_resource type="Script" uid="uid://ct84oimlqtcbi" path="res://Scripts/UI/StatusIconDisplay.gd" id="7_f37s5"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_5ook2"]
 atlas = ExtResource("1_vs6ub")
@@ -143,3 +144,9 @@ script = ExtResource("5_1bb7e")
 
 [node name="OnDeathBehaviorHandler" type="Node" parent="."]
 script = ExtResource("6_gn4o1")
+
+[node name="StatusIconDisplay" type="Node2D" parent="."]
+script = ExtResource("7_f37s5")
+
+[node name="StatusIconAnchor" type="Marker2D" parent="."]
+position = Vector2(-36.6667, -43.3334)

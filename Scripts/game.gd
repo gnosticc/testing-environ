@@ -41,7 +41,7 @@ var current_spawn_interval: float
 
 # --- NEW: Spawn Batch Size Scaling (Tunable) ---
 @export var base_enemies_per_batch: int = 4
-@export var max_enemies_per_batch: int = 60
+@export var max_enemies_per_batch: int = 80
 @export var dds_for_max_batch_size: float = 3000.0 # DDS at which the max batch size is reached
 
 # --- DDS & Difficulty Scaling (Tunable) ---
@@ -323,28 +323,28 @@ func _update_target_on_screen_enemies():
 		target_on_screen_enemies = debug_target_enemies_value
 		return
 
-	var time_elapsed_minutes = 0.0
-	if is_instance_valid(game_ui_node) and game_ui_node.has_method("get_elapsed_seconds"):
-		time_elapsed_minutes = float(game_ui_node.get_elapsed_seconds()) / 60.0
+	#var time_elapsed_minutes = 0.0
+	#if is_instance_valid(game_ui_node) and game_ui_node.has_method("get_elapsed_seconds"):
+		#time_elapsed_minutes = float(game_ui_node.get_elapsed_seconds()) / 60.0
 
 	var calculated_target: int
 	
 	# Initial "Training Wheels" Phase (First 3 minutes)
 	# Smoothly scales the enemy cap from 10 to 30 over the first 3 minutes.
-	if time_elapsed_minutes < 3.0:
-		calculated_target = int(lerpf(10.0, 30.0, time_elapsed_minutes / 3.0))
-	else:
+	#if time_elapsed_minutes < 3.0:
+		#calculated_target = int(lerpf(10.0, 30.0, time_elapsed_minutes / 3.0))
+	#else:
 		# Main Game Phase (DDS-based scaling)
 		# Smoothly scales the enemy cap from 30 up to 400 as DDS goes from 0 to 4000.
-		var start_enemies = 30.0
-		var end_enemies = 400.0
-		var start_dds = 0.0
-		var end_dds = 4000.0
+	var start_enemies = 30.0
+	var end_enemies = 800.0
+	var start_dds = 0.0
+	var end_dds = 2000.0
 		
 		# Remap the current DDS value from the DDS range to the enemy count range.
 		# The clamp ensures we don't go below the minimum or above the maximum.
-		calculated_target = int(remap(current_dds, start_dds, end_dds, start_enemies, end_enemies))
-		calculated_target = clamp(calculated_target, int(start_enemies), int(end_enemies))
+	calculated_target = int(remap(current_dds, start_dds, end_dds, start_enemies, end_enemies))
+	calculated_target = clamp(calculated_target, int(start_enemies), int(end_enemies))
 
 	# Apply the hardcore phase multiplier
 	if is_currently_hardcore_phase:

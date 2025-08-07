@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://bhsu4co0gmrpx" path="res://Assets/Enemy Animations/Projectiles/Healing Link Projectile Animation.png" id="2_k4bdc"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_y76hx"]
-radius = 7.0
+radius = 5.0
 
 [node name="LinkHealProjectile" type="Area2D"]
 collision_layer = 0
@@ -15,8 +15,8 @@ script = ExtResource("1_s416m")
 shape = SubResource("CircleShape2D_y76hx")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.15, 0.15)
+scale = Vector2(0.1, 0.1)
 texture = ExtResource("2_k4bdc")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
-rect = Rect2(-8, -8, 15, 16)
+rect = Rect2(-5, -5, 10, 10)

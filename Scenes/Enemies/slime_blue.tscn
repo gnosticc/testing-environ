@@ -108,3 +108,6 @@ scale = Vector2(1.8, 1.8)
 
 [node name="NavigationAgent2D" parent="." index="8"]
 radius = 15.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-83.3334, -111.111)

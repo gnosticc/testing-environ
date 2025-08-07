@@ -1,0 +1,101 @@
+[gd_scene load_steps=11 format=3 uid="uid://b20ri6o2n4auh"]
+
+[ext_resource type="PackedScene" uid="uid://dxa4b1piqkc7i" path="res://Scenes/BaseEnemy.tscn" id="1_w6h1o"]
+[ext_resource type="Texture2D" uid="uid://7bk5u87pom0u" path="res://Assets/Enemy Animations/Undead/Undead Plant Animation.png" id="2_ony1y"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_57032"]
+atlas = ExtResource("2_ony1y")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f3o0d"]
+atlas = ExtResource("2_ony1y")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jb8nf"]
+atlas = ExtResource("2_ony1y")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qcvf8"]
+atlas = ExtResource("2_ony1y")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wefc3"]
+atlas = ExtResource("2_ony1y")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_vjwaj"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_57032")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f3o0d")
+}],
+"loop": false,
+"name": &"death",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f3o0d")
+}],
+"loop": false,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jb8nf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f3o0d")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qcvf8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_57032")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wefc3")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_08f7u"]
+radius = 8.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1j2t7"]
+radius = 6.0
+
+[node name="BaseEnemy" instance=ExtResource("1_w6h1o")]
+
+[node name="AnimatedSprite2D" parent="." index="0"]
+scale = Vector2(0.2, 0.2)
+sprite_frames = SubResource("SpriteFrames_vjwaj")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="CollisionShape2D" parent="." index="1"]
+shape = SubResource("CircleShape2D_08f7u")
+
+[node name="CollisionShape2D" parent="DamageArea" index="0"]
+position = Vector2(1, 1)
+shape = SubResource("CircleShape2D_1j2t7")
+
+[node name="HealthBar" parent="." index="4"]
+offset_left = -6.0
+offset_top = -8.0
+offset_right = 6.0
+offset_bottom = -6.0
+
+[node name="StatusIconAnchor" parent="." index="13"]
+position = Vector2(-6, -8)
